@@ -311,7 +311,7 @@ export const jobs: Job[] = [
     department: 'Engineering',
     location: 'Remote',
     type: 'Full-time',
-    description: 'Build and maintain our LMS platform using Next.js and MongoDB.'
+    description: 'Build and maintain our LMS platform using Next.js and Sanity CMS.'
   },
   {
     id: 'job-3',

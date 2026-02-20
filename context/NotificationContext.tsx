@@ -48,7 +48,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
         setNotifications(prev => [newNotification, ...prev]);
     }, []);
 
-    // Load notifications from MongoDB
+    // Load notifications from Sanity CMS
     useEffect(() => {
         if (!user) {
             setNotifications([]);

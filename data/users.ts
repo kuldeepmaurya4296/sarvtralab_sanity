@@ -89,13 +89,6 @@ export interface HelpSupport extends User {
 }
 
 // Mock data cleared - Now using Sanity CMS
-export const mockStudents: Student[] = [];
-export const mockSchools: School[] = [];
-export const mockGovtOrgs: GovtOrg[] = [];
-export const mockSuperAdmin: SuperAdmin = {} as any;
-export const mockTeachers: Teacher[] = [];
-export const mockHelpSupport: HelpSupport[] = [];
-export const mockSupportTickets: any[] = [];
 
 export const loginCredentials = [
   { role: 'student', email: 'arjun.patel@student.sarvtralab.in', password: 'student123' },
