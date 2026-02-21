@@ -34,6 +34,10 @@ export interface Student extends User {
     state?: string;
     pincode?: string;
     profileCompleted?: boolean;
+    enrollments?: any[];
+    attendance?: any[];
+    submissions?: any[];
+    certificates?: any[];
 }
 
 export interface Teacher extends User {

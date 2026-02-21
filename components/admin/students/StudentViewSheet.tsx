@@ -16,6 +16,9 @@ import { Student } from '@/types/user';
 import { StudentProfileTab } from './tabs/StudentProfileTab';
 import { StudentPerformanceTab } from './tabs/StudentPerformanceTab';
 import { StudentCertificatesTab } from './tabs/StudentCertificatesTab';
+import { getStudentFullDetails } from '@/lib/actions/student.actions';
+import { useState, useEffect } from 'react';
+import { Loader2 } from 'lucide-react';
 
 interface StudentViewSheetProps {
     student: Student | null;
@@ -26,6 +29,27 @@ interface StudentViewSheetProps {
 }
 
 export function StudentViewSheet({ student, open, onOpenChange, onEdit, onDelete }: StudentViewSheetProps) {
+    const [fullDetails, setFullDetails] = useState<any>(null);
+    const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        const loadDetails = async () => {
+            if (!student || !open) return;
+            setLoading(true);
+            try {
+                const details = await getStudentFullDetails(student.id || student._id || '');
+                setFullDetails(details);
+            } catch (error) {
+                console.error("Error loading student details:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        if (open && student) loadDetails();
+        else if (!open) setFullDetails(null);
+    }, [open, student]);
+
     if (!student) return null;
 
     return (
@@ -67,27 +91,36 @@ export function StudentViewSheet({ student, open, onOpenChange, onEdit, onDelete
                                 </TabsList>
                             </div>
 
-                            <TabsContent value="profile" className="p-6 space-y-8 mt-0">
-                                <StudentProfileTab
-                                    student={student}
-                                    onEdit={() => {
-                                        onOpenChange(false);
-                                        onEdit(student);
-                                    }}
-                                    onDelete={() => {
-                                        onOpenChange(false);
-                                        onDelete(student);
-                                    }}
-                                />
-                            </TabsContent>
+                            {loading ? (
+                                <div className="flex flex-col items-center justify-center py-20 gap-3">
+                                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                                    <p className="text-sm text-muted-foreground italic">Fetching real-time data from database...</p>
+                                </div>
+                            ) : (
+                                <>
+                                    <TabsContent value="profile" className="p-6 space-y-8 mt-0">
+                                        <StudentProfileTab
+                                            student={fullDetails || student}
+                                            onEdit={() => {
+                                                onOpenChange(false);
+                                                onEdit(student);
+                                            }}
+                                            onDelete={() => {
+                                                onOpenChange(false);
+                                                onDelete(student);
+                                            }}
+                                        />
+                                    </TabsContent>
 
-                            <TabsContent value="performance" className="p-6 space-y-8 mt-0">
-                                <StudentPerformanceTab student={student} />
-                            </TabsContent>
+                                    <TabsContent value="performance" className="p-6 space-y-8 mt-0">
+                                        <StudentPerformanceTab student={fullDetails || student} />
+                                    </TabsContent>
 
-                            <TabsContent value="certificates" className="p-6 space-y-6 mt-0">
-                                <StudentCertificatesTab student={student} />
-                            </TabsContent>
+                                    <TabsContent value="certificates" className="p-6 space-y-6 mt-0">
+                                        <StudentCertificatesTab student={fullDetails || student} />
+                                    </TabsContent>
+                                </>
+                            )}
                         </Tabs>
                     </div>
                 </ScrollArea>

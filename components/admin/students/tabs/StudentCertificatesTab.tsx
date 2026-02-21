@@ -23,20 +23,26 @@ interface StudentCertificatesTabProps {
 
 export function StudentCertificatesTab({ student, studentId }: StudentCertificatesTabProps) {
     const id = student?.id || studentId || '';
-    const [certificates, setCertificates] = useState<any[]>([]);
-    const [loading, setLoading] = useState(true);
+    const [certificates, setCertificates] = useState<any[]>(student?.certificates || []);
+    const [loading, setLoading] = useState(!student?.certificates);
     const [isDownloading, setIsDownloading] = useState<string | null>(null);
     const [tempCert, setTempCert] = useState<any>(null);
 
     useEffect(() => {
         const fetchCerts = async () => {
-            if (!id) return;
+            if (!id || (student?.certificates && student.certificates.length > 0)) {
+                if (student?.certificates) {
+                    setCertificates(student.certificates);
+                    setLoading(false);
+                }
+                return;
+            }
             const data = await getStudentCertificates(id);
             setCertificates(data);
             setLoading(false);
         };
         fetchCerts();
-    }, [id]);
+    }, [id, student?.certificates]);
     const hiddenRef = useRef<HTMLDivElement>(null);
 
     const handleDownload = async (cert: any) => {
@@ -72,7 +78,8 @@ export function StudentCertificatesTab({ student, studentId }: StudentCertificat
 
                 pdf.addImage(imgData, 'PNG', 0, 0, width, height);
                 const showName = (student?.name || 'certificate').replace(/[^a-z0-9]/gi, '_');
-                pdf.save(`${showName}_${cert.courseTitle.replace(/[^a-z0-9]/gi, '_')}.pdf`);
+                const courseLabel = (cert.courseName || cert.courseTitle || 'course').replace(/[^a-z0-9]/gi, '_');
+                pdf.save(`${showName}_${courseLabel}.pdf`);
                 toast.success("Certificate downloaded");
             }
         } catch (e) {
@@ -99,14 +106,14 @@ export function StudentCertificatesTab({ student, studentId }: StudentCertificat
                 </div>
             ) : certificates.length > 0 ? (
                 <div className="grid grid-cols-1 gap-4">
-                    {certificates.map((cert) => (
-                        <div key={cert.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 rounded-xl border bg-card hover:shadow-md transition-shadow gap-4">
+                    {certificates.map((cert, idx) => (
+                        <div key={cert.id || cert._id || `cert-${idx}`} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 rounded-xl border bg-card hover:shadow-md transition-shadow gap-4">
                             <div className="flex items-center gap-4">
                                 <div className="h-12 w-12 rounded-full bg-yellow-100 flex items-center justify-center text-yellow-600">
                                     <Award className="h-6 w-6" />
                                 </div>
                                 <div>
-                                    <h5 className="font-bold text-sm">{cert.courseTitle}</h5>
+                                    <h5 className="font-bold text-sm">{cert.courseName || cert.courseTitle}</h5>
                                     <div className="text-xs text-muted-foreground mt-0.5 flex gap-2">
                                         <span>Issued: {cert.issueDate}</span>
                                         <span>•</span>

@@ -118,7 +118,26 @@ export function StudentProfileTab({ student, onEdit, onDelete }: StudentProfileT
                     </h4>
                 </div>
 
-                {student.enrolledCourses && student.enrolledCourses.length > 0 ? (
+                {student.enrollments && student.enrollments.length > 0 ? (
+                    <div className="grid grid-cols-1 gap-2">
+                        {student.enrollments.map((enrollment: any, idx: number) => (
+                            <div key={idx} className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors">
+                                <div className="flex items-center gap-3">
+                                    <div className="h-8 w-8 rounded bg-primary/10 flex items-center justify-center text-primary font-bold text-xs">
+                                        {enrollment.progress}%
+                                    </div>
+                                    <div>
+                                        <p className="text-sm font-medium">{enrollment.courseTitle}</p>
+                                        <p className="text-xs text-muted-foreground">{enrollment.status} • {enrollment.completedLessons || 0}/{enrollment.totalLessons || 0} Lessons</p>
+                                    </div>
+                                </div>
+                                <Badge variant={enrollment.status === 'Active' ? 'outline' : 'default'} className="text-[10px]">
+                                    {enrollment.status}
+                                </Badge>
+                            </div>
+                        ))}
+                    </div>
+                ) : student.enrolledCourses && student.enrolledCourses.length > 0 ? (
                     <div className="grid grid-cols-1 gap-2">
                         {student.enrolledCourses.map((courseId: string, idx: number) => (
                             <div key={idx} className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors">

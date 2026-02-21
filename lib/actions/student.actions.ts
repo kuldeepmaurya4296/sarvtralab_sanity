@@ -180,8 +180,12 @@ export async function getStudentDashboardStats(userId: string) {
         throw new Error("Unauthorized");
     }
     try {
+        // Fetch student doc to get both internal _id and customId
+        const student = await sanityClient.fetch(`*[_type == "user" && _id == $userId][0]`, { userId });
+        const cId = student?.customId || "";
+
         const data = await sanityClient.fetch(`{
-            "enrollments": *[_type == "enrollment" && student == $userId]{
+            "enrollments": *[_type == "enrollment" && (student == $userId || student == $cId)]{
                 progress,
                 watchTime,
                 status,
@@ -193,8 +197,8 @@ export async function getStudentDashboardStats(userId: string) {
                     curriculum
                 }
             },
-            "certificatesCount": count(*[_type == "certificate" && studentId == $userId])
-        }`, { userId });
+            "certificatesCount": count(*[_type == "certificate" && (studentId == $userId || studentId == $cId)])
+        }`, { userId, cId });
 
         const enrollments = data.enrollments || [];
         const totalEnrolled = enrollments.length;
@@ -242,8 +246,13 @@ export async function getStudentEnrolledCourses(userId: string) {
         throw new Error("Unauthorized");
     }
     try {
+        // Fetch student doc to get both internal _id and customId
+        const student = await sanityClient.fetch(`*[_type == "user" && (_id == $userId || customId == $userId)][0]`, { userId });
+        const sId = student?._id || userId;
+        const cId = student?.customId || "";
+
         const enrollments = await sanityClient.fetch(
-            `*[_type == "enrollment" && student == $userId]{
+            `*[_type == "enrollment" && (student == $sId || student == $cId)]{
                 _id,
                 progress,
                 completedLessons,
@@ -267,7 +276,7 @@ export async function getStudentEnrolledCourses(userId: string) {
                     }
                 }
             }`,
-            { userId }
+            { sId, cId }
         );
 
         return enrollments.map((e: any) => ({
@@ -511,5 +520,76 @@ export async function migrateExistingStudentIds() {
     } catch (error: any) {
         console.error("Migration Error:", error);
         return { success: false, error: error.message };
+    }
+}
+
+export async function getStudentFullDetails(userId: string) {
+    const session = await getServerSession(authOptions);
+    if (!session || (session.user.role !== 'superadmin' && session.user.role !== 'admin')) {
+        throw new Error("Unauthorized");
+    }
+
+    try {
+        const student = await sanityClient.fetch(`*[_type == "user" && (_id == $userId || customId == $userId)][0]`, { userId });
+        if (!student) return null;
+
+        const sId = student._id;
+        const cId = student.customId || "";
+
+        const data = await sanityClient.fetch(`{
+            "enrollments": *[_type == "enrollment" && (student == $sId || student == $cId)]{
+                _id,
+                progress,
+                watchTime,
+                status,
+                completedLessons,
+                enrolledAt,
+                courseRef->{
+                    _id,
+                    customId,
+                    title,
+                    curriculum
+                }
+            },
+            "attendance": *[_type == "attendance" && (studentRef._ref == $sId || studentRef._ref == $cId)]{
+                date,
+                status,
+                sessionInfo
+            },
+            "submissions": *[_type == "submission" && (studentRef._ref == $sId || studentRef._ref == $cId)]{
+                score,
+                status,
+                submittedAt,
+                assignmentRef->{
+                    title,
+                    maxScore
+                }
+            },
+            "certificates": *[_type == "certificate" && (studentId == $sId || studentId == $cId)]{
+                _id,
+                customId,
+                courseId,
+                issueDate,
+                marks,
+                "courseName": *[_type == "course" && (id == ^.courseId || customId == ^.courseId || _id == ^.courseId)][0].title
+            }
+        }`, { sId, cId });
+
+        if (!student) return null;
+
+        return {
+            ...cleanSanityDoc(student),
+            enrollments: (data.enrollments || []).map((e: any) => ({
+                ...cleanSanityDoc(e),
+                courseTitle: e.courseRef?.title,
+                totalLessons: e.courseRef?.curriculum?.reduce((acc: number, mod: any) => acc + (mod.lessons?.length || 0), 0) || 0
+            })),
+            attendance: data.attendance || [],
+            submissions: data.submissions || [],
+            certificates: data.certificates || []
+        };
+    } catch (e) {
+        console.error("Get Student Full Details Error:", e);
+        return null;
     }
 }

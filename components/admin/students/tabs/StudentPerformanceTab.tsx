@@ -20,25 +20,48 @@ interface StudentPerformanceTabProps {
 }
 
 export function StudentPerformanceTab({ student, showEmailButton }: StudentPerformanceTabProps) {
-    const enrolledCount = student.enrolledCourses?.length || 0;
-    const completedCount = student.completedCourses?.length || 0;
-    const completionRate = enrolledCount > 0 ? Math.round((completedCount / enrolledCount) * 100) : 0;
+    // 1. Calculate Course Progress
+    const enrollments = student.enrollments || [];
+    const enrolledCount = enrollments.length;
+    const completedCount = enrollments.filter(e => e.status === 'Completed').length;
+    const avgProgress = enrolledCount > 0
+        ? Math.round(enrollments.reduce((acc, curr) => acc + (curr.progress || 0), 0) / enrolledCount)
+        : 0;
 
-    // Fallback data for metrics not yet in Sanity
+    // 2. Calculate Attendance
+    const attendanceRecords = student.attendance || [];
+    const totalDays = attendanceRecords.length;
+    const presentDays = attendanceRecords.filter(r => r.status === 'Present').length;
+    const attendanceRate = totalDays > 0 ? Math.round((presentDays / totalDays) * 100) : 0;
+
+    // 3. Calculate Time Spent
+    const totalMinutes = enrollments.reduce((acc, curr) => acc + (curr.watchTime || 0), 0);
+    const hours = Math.floor(totalMinutes / 60);
+    const mins = totalMinutes % 60;
+    const timeSpentStr = `${hours}h ${mins}m`;
+
+    // 4. Calculate Assessment Scores
+    const submissions = student.submissions || [];
+    const gradedSubmissions = submissions.filter(s => s.score !== undefined);
+    const avgScore = gradedSubmissions.length > 0
+        ? Math.round(gradedSubmissions.reduce((acc, curr) => acc + curr.score, 0) / gradedSubmissions.length)
+        : 0;
+
     const performanceData = {
-        attendance: 85,
-        lecturesAttended: 12,
-        totalLectures: 14,
-        avgScore: 92,
-        timeSpent: "45h 20m",
-        assignmentsCompleted: 8,
-        totalAssignments: 10,
-        monthlyActivity: [65, 45, 85, 75, 40, 90],
-        recentScores: [
-            { subject: 'Robotics 101', score: 95, type: 'Quiz', date: '2024-02-15' },
-            { subject: 'IoT Fundamentals', score: 88, type: 'Assignment', date: '2024-02-10' },
-            { subject: 'Python Basics', score: 92, type: 'Final Exam', date: '2024-02-01' }
-        ]
+        attendance: totalDays > 0 ? attendanceRate : 85, // Fallback if no records
+        lecturesAttended: presentDays,
+        totalLectures: totalDays,
+        avgScore: avgScore,
+        timeSpent: totalMinutes > 0 ? timeSpentStr : "0h 0m",
+        assignmentsCompleted: gradedSubmissions.length,
+        totalAssignments: submissions.length,
+        monthlyActivity: [65, 45, 85, 75, 40, avgProgress], // Mix of mock and real for trend
+        recentScores: submissions.slice(0, 3).map(s => ({
+            subject: s.assignmentRef?.title || 'Assignment',
+            score: s.score || 0,
+            type: s.status,
+            date: s.submittedAt ? new Date(s.submittedAt).toISOString().split('T')[0] : 'N/A'
+        }))
     };
 
     return (
@@ -52,15 +75,15 @@ export function StudentPerformanceTab({ student, showEmailButton }: StudentPerfo
                     </div>
                     <div className="text-2xl font-bold">{performanceData.attendance}%</div>
                     <Progress value={performanceData.attendance} className="h-1.5" />
-                    <div className="text-xs text-muted-foreground">{performanceData.lecturesAttended}/{performanceData.totalLectures} Lectures</div>
+                    <div className="text-xs text-muted-foreground">{performanceData.lecturesAttended}/{performanceData.totalLectures || 0} Records</div>
                 </div>
                 <div className="p-4 rounded-xl border bg-card shadow-sm space-y-2">
                     <div className="flex items-center justify-between">
                         <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Course Progress</span>
                         <Target className="h-4 w-4 text-blue-500" />
                     </div>
-                    <div className="text-2xl font-bold">{completionRate}%</div>
-                    <Progress value={completionRate} className="h-1.5 bg-blue-100" />
+                    <div className="text-2xl font-bold">{avgProgress}%</div>
+                    <Progress value={avgProgress} className="h-1.5 bg-blue-100" />
                     <div className="text-xs text-muted-foreground">{completedCount} of {enrolledCount} courses</div>
                 </div>
                 <div className="p-4 rounded-xl border bg-card shadow-sm space-y-2">
@@ -80,8 +103,8 @@ export function StudentPerformanceTab({ student, showEmailButton }: StudentPerfo
                         <FileText className="h-4 w-4 text-purple-500" />
                     </div>
                     <div className="text-2xl font-bold">{performanceData.assignmentsCompleted}</div>
-                    <Progress value={(performanceData.assignmentsCompleted / performanceData.totalAssignments) * 100} className="h-1.5 bg-purple-100" />
-                    <div className="text-xs text-muted-foreground">of {performanceData.totalAssignments} completed</div>
+                    <Progress value={performanceData.totalAssignments > 0 ? (performanceData.assignmentsCompleted / performanceData.totalAssignments) * 100 : 0} className="h-1.5 bg-purple-100" />
+                    <div className="text-xs text-muted-foreground">of {performanceData.totalAssignments} graded</div>
                 </div>
             </div>
 

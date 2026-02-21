@@ -25,11 +25,27 @@ export async function getAllCertificates() {
 
 export async function getStudentCertificates(studentId: string) {
     try {
+        const student = await sanityClient.fetch(`*[_type == "user" && (_id == $studentId || customId == $studentId)][0]`, { studentId });
+        const sId = student?._id || studentId;
+        const cId = student?.customId || "";
+
         const certs = await sanityClient.fetch(
-            `*[_type == "certificate" && studentId == $studentId] | order(issuedAt desc)`,
-            { studentId }
+            `*[_type == "certificate" && (studentId == $sId || studentId == $cId)] | order(issuedAt desc){
+                ...,
+                "courseName": *[_type == "course" && (id == ^.courseId || customId == ^.courseId || _id == ^.courseId)][0].title
+            }`,
+            { sId, cId }
         );
-        return cleanSanityDoc(certs);
+
+        // Client-side deduplication to ensure one certificate per course
+        const uniqueCertsMap = new Map();
+        certs.forEach((cert: any) => {
+            if (!uniqueCertsMap.has(cert.courseId)) {
+                uniqueCertsMap.set(cert.courseId, cert);
+            }
+        });
+
+        return cleanSanityDoc(Array.from(uniqueCertsMap.values()));
     } catch (e) {
         console.error("Get Student Certificates Error:", e);
         return [];
@@ -38,9 +54,13 @@ export async function getStudentCertificates(studentId: string) {
 
 export async function getStudentCertificateCount(studentId: string) {
     try {
+        const student = await sanityClient.fetch(`*[_type == "user" && (_id == $studentId || customId == $studentId)][0]`, { studentId });
+        const sId = student?._id || studentId;
+        const cId = student?.customId || "";
+
         return await sanityClient.fetch(
-            `count(*[_type == "certificate" && studentId == $studentId])`,
-            { studentId }
+            `count(*[_type == "certificate" && (studentId == $sId || studentId == $cId)])`,
+            { sId, cId }
         );
     } catch (e) {
         console.error("Get Student Certificate Count Error:", e);
@@ -53,13 +73,18 @@ export async function issueCertificate(data: any, enrollmentId?: string) {
     if (!session) throw new Error("Unauthorized");
 
     try {
+        // Fetch student doc to get both internal _id and customId
+        const student = await sanityClient.fetch(`*[_type == "user" && (_id == $userId || customId == $userId)][0]`, { userId: data.studentId });
+        const sId = student?._id || data.studentId;
+        const cId = student?.customId || "";
+
         // Check if certificate already exists for this student and course
         const existingCert = await sanityClient.fetch(
-            `*[_type == "certificate" && studentId == $studentId && courseId == $courseId][0]`,
-            { studentId: data.studentId, courseId: data.courseId }
+            `*[_type == "certificate" && (studentId == $sId || studentId == $cId) && courseId == $courseId][0]`,
+            { sId, cId, courseId: data.courseId }
         );
         if (existingCert) {
-            throw new Error("Certificate already issued for this course to this student.");
+            throw new Error("A certificate for this course has already been issued to this student.");
         }
 
         // Generate ID in format: studentId/01, studentId/02...
