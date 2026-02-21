@@ -16,6 +16,7 @@ export default defineType({
             name: 'status', title: 'Status', type: 'string',
             options: { list: ['issued', 'revoked'] }, initialValue: 'issued'
         }),
+        defineField({ name: 'marks', title: 'Marks (%)', type: 'number' }),
     ],
     preview: { select: { title: 'studentId', subtitle: 'courseId' } }
 });

@@ -6,12 +6,13 @@ interface CertificateProps {
     courseName: string;
     date: string;
     certificateId: string;
+    marks?: number;
     instructorName?: string;
     instructorTitle?: string;
 }
 
 export const CertificateTemplate = forwardRef<HTMLDivElement, CertificateProps>(
-    ({ studentName, courseName, date, certificateId, instructorName = "Dr. Anil Mehta", instructorTitle = "Lead Instructor" }, ref) => {
+    ({ studentName, courseName, date, certificateId, marks = 0, instructorName = "Dr. Anil Mehta", instructorTitle = "Lead Instructor" }, ref) => {
         return (
             <div ref={ref} className="certificate-container" style={{ position: 'relative', width: '1123px', height: '794px', margin: '0 auto' }}>
                 {/* CSS Reset for html2canvas to avoid 'lab' color issues from global styles */}
@@ -121,9 +122,14 @@ export const CertificateTemplate = forwardRef<HTMLDivElement, CertificateProps>(
 
                             <p style={{ fontSize: '20px', fontStyle: 'italic', color: '#64748b', fontFamily: 'serif', marginBottom: '16px' }}>In recognition of outstanding completion of</p>
 
-                            <h4 style={{ fontSize: '36px', fontWeight: 'bold', color: '#1e293b', marginBottom: '16px', maxWidth: '896px', lineHeight: '1.25', textTransform: 'uppercase', letterSpacing: '0.025em', padding: '0 32px' }}>
+                            <h4 style={{ fontSize: '36px', fontWeight: 'bold', color: '#1e293b', marginBottom: '8px', maxWidth: '896px', lineHeight: '1.25', textTransform: 'uppercase', letterSpacing: '0.025em', padding: '0 32px' }}>
                                 {courseName}
                             </h4>
+
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
+                                <span style={{ fontSize: '18px', color: '#64748b', fontStyle: 'italic' }}>Grade:</span>
+                                <span style={{ fontSize: '24px', fontWeight: 'bold', color: '#0f172a' }}>{marks}% Success</span>
+                            </div>
 
                             <p style={{ fontSize: '16px', color: '#475569', maxWidth: '672px', lineHeight: '1.625', fontFamily: 'serif' }}>
                                 For demonstrating exceptional technical proficiency, dedication to learning, and successful fulfillment of all curriculum requirements.

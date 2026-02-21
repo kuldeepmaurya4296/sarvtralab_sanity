@@ -2,6 +2,7 @@
 
 import { sanityWriteClient } from '@/lib/sanity';
 import bcrypt from 'bcryptjs';
+import { getNextStudentId } from './student.actions';
 
 export async function registerUser(data: any) {
     try {
@@ -76,7 +77,8 @@ export async function registerUser(data: any) {
         }
 
         const hashedPassword = await bcrypt.hash(data.password, 10);
-        const userCustomId = `usr-${Date.now()}`;
+        const role = data.role || 'student';
+        const userCustomId = role === 'student' ? await getNextStudentId() : `usr-${Date.now()}`;
 
         const newUser = await sanityWriteClient.create({
             _type: 'user',

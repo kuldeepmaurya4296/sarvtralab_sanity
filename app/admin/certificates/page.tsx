@@ -13,7 +13,8 @@ import {
     Phone,
     Printer,
     Loader2,
-    RefreshCw
+    RefreshCw,
+    Trash2
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
@@ -70,8 +71,14 @@ import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
 
 // Actions
-import { getAllCertificates, issueCertificate } from '@/lib/actions/certificate.actions';
-import { getAllStudents } from '@/lib/actions/student.actions';
+import {
+    getAllCertificates,
+    issueCertificate,
+    getPendingCertificateRequests,
+    rejectCertificateRequest,
+    deleteCertificate
+} from '@/lib/actions/certificate.actions';
+import { getAllStudents, updateStudent } from '@/lib/actions/student.actions';
 import { getAllCourses } from '@/lib/actions/course.actions';
 import { getAllSchools } from '@/lib/actions/school.actions';
 import { Student, School, SuperAdmin } from '@/types/user';
@@ -124,36 +131,29 @@ export default function AdminCertificatesPage() {
         const loadData = async () => {
             if (user?.role === 'superadmin') {
                 try {
-                    const [certsData, studentsData, coursesData, schoolsData] = await Promise.all([
+                    const [certsData, studentsData, coursesData, schoolsData, pendingRequests] = await Promise.all([
                         getAllCertificates(),
                         getAllStudents(),
                         getAllCourses(),
-                        getAllSchools()
+                        getAllSchools(),
+                        getPendingCertificateRequests()
                     ]);
 
                     setCertificates(certsData);
                     setStudents(studentsData);
                     setCourses(coursesData);
                     setSchools(schoolsData);
-
-                    // Derive requests logic
-                    const pending: any[] = [];
-                    studentsData.forEach((s: Student) => {
-                        s.completedCourses?.forEach((cId: string) => {
-                            const hasCert = certsData.some((cert: Certificate) => cert.studentId === s.id && cert.courseId === cId);
-                            if (!hasCert) {
-                                pending.push({
-                                    id: `req-${s.id}-${cId}`,
-                                    studentId: s.id,
-                                    courseId: cId,
-                                    requestDate: new Date().toISOString(),
-                                    progress: 100,
-                                    status: 'pending'
-                                });
-                            }
-                        });
-                    });
-                    setRequests(pending);
+                    setRequests(pendingRequests.map((r: any) => ({
+                        id: r._id,
+                        studentId: r.studentDetails?.customId || r.student,
+                        studentName: r.studentDetails?.name || 'Unknown',
+                        studentEmail: r.studentDetails?.email || '',
+                        courseId: r.courseRef?.customId || r.courseRef?._id,
+                        courseTitle: r.courseRef?.title || 'Unknown Course',
+                        requestDate: r.requestDate,
+                        progress: r.progress,
+                        status: 'pending'
+                    })));
 
                 } catch (error) {
                     console.error("Failed to load data", error);
@@ -177,8 +177,8 @@ export default function AdminCertificatesPage() {
 
     // Filters
     const filteredRequests = requests.filter(req => {
-        const student = getStudent(req.studentId);
-        const searchMatch = student?.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        const searchMatch = (req.studentName || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+            (req.studentEmail || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
             req.id.toLowerCase().includes(searchQuery.toLowerCase());
         return searchMatch && req.status === 'pending';
     });
@@ -200,25 +200,34 @@ export default function AdminCertificatesPage() {
         if (!req) return;
 
         try {
+            // Issue the certificate and update enrollment status via server action
             const newCert = await issueCertificate({
                 studentId: req.studentId,
                 courseId: req.courseId,
                 issueDate: new Date().toISOString().split('T')[0]
-            });
+            }, reqId);
 
             if (newCert) {
                 setCertificates(prev => [newCert, ...prev]);
                 setRequests(prev => prev.filter(r => r.id !== reqId));
-                toast.success(`Certificate issued for ${getStudent(req.studentId)?.name}`);
+                toast.success(`Certificate issued for ${req.studentName}`);
             }
         } catch (error) {
+            console.error("Approve Error:", error);
             toast.error("Failed to issue certificate");
         }
     };
 
-    const handleReject = (reqId: string) => {
-        setRequests(prev => prev.filter(r => r.id !== reqId));
-        toast.info("Certificate request rejected");
+    const handleReject = async (reqId: string) => {
+        try {
+            const res = await rejectCertificateRequest(reqId);
+            if (res.success) {
+                setRequests(prev => prev.filter(r => r.id !== reqId));
+                toast.info("Certificate request rejected and reset");
+            }
+        } catch (error) {
+            toast.error("Failed to reject request");
+        }
     };
 
     const handleBulkApprove = async () => {
@@ -235,6 +244,21 @@ export default function AdminCertificatesPage() {
         setSelectedRequests([]);
         toast.dismiss();
         toast.success(`Processed requests`);
+    };
+
+    const handleDeleteCertificate = async (id: string, e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (!window.confirm("Are you sure you want to delete this certificate?")) return;
+
+        try {
+            const res = await deleteCertificate(id);
+            if (res.success) {
+                setCertificates(prev => prev.filter(c => c._id !== id && c.id !== id));
+                toast.success("Certificate deleted successfully");
+            }
+        } catch (error) {
+            toast.error("Failed to delete certificate");
+        }
     };
 
     const toggleSelect = (id: string) => {
@@ -484,17 +508,17 @@ export default function AdminCertificatesPage() {
                                                                 onClick={() => openStudentDetails(req.studentId)}
                                                             >
                                                                 <Avatar className="h-8 w-8">
-                                                                    <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${student?.name}`} />
+                                                                    <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${req.studentName}`} />
                                                                     <AvatarFallback>ST</AvatarFallback>
                                                                 </Avatar>
                                                                 <div className="flex flex-col">
-                                                                    <span className="font-medium underline decoration-dotted underline-offset-2">{student?.name}</span>
-                                                                    <span className="text-xs text-muted-foreground">{student?.email}</span>
+                                                                    <span className="font-medium underline decoration-dotted underline-offset-2">{req.studentName}</span>
+                                                                    <span className="text-xs text-muted-foreground">{req.studentEmail}</span>
                                                                 </div>
                                                             </div>
                                                         </TableCell>
                                                         <TableCell className="font-medium text-sm">
-                                                            {course?.title || 'Unknown Course'}
+                                                            {req.courseTitle}
                                                         </TableCell>
                                                         <TableCell>
                                                             <div className="flex items-center gap-2">
@@ -593,9 +617,12 @@ export default function AdminCertificatesPage() {
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
-                                        {filteredIssued.map((cert) => {
+                                        {filteredIssued.map((cert: any) => {
                                             const student = getStudent(cert.studentId);
                                             const course = getCourse(cert.courseId);
+                                            const studentName = cert.studentName || student?.name || 'Unknown Student';
+                                            const courseTitle = cert.courseName || course?.title || 'Unknown Course';
+
                                             return (
                                                 <TableRow
                                                     key={cert.id}
@@ -605,18 +632,18 @@ export default function AdminCertificatesPage() {
                                                         if (cert.studentId) openStudentDetails(cert.studentId);
                                                     }}
                                                 >
-                                                    <TableCell className="font-mono text-xs">{cert.id}</TableCell>
+                                                    <TableCell className="font-mono text-xs">{cert.customId || cert.id}</TableCell>
                                                     <TableCell>
                                                         <div className="flex items-center gap-2">
                                                             <Avatar className="h-6 w-6">
-                                                                <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${student?.name}`} />
+                                                                <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${studentName}`} />
                                                                 <AvatarFallback>ST</AvatarFallback>
                                                             </Avatar>
-                                                            <span className="font-medium text-sm underline decoration-dotted underline-offset-2">{student?.name}</span>
+                                                            <span className="font-medium text-sm underline decoration-dotted underline-offset-2">{studentName}</span>
                                                         </div>
                                                     </TableCell>
-                                                    <TableCell className="text-sm max-w-[200px] truncate" title={course?.title}>{course?.title}</TableCell>
-                                                    <TableCell className="text-sm">{new Date(cert.issueDate).toISOString().split('T')[0]}</TableCell>
+                                                    <TableCell className="text-sm max-w-[200px] truncate" title={courseTitle}>{courseTitle}</TableCell>
+                                                    <TableCell className="text-sm">{new Date(cert.issueDate || cert.issuedAt).toISOString().split('T')[0]}</TableCell>
                                                     <TableCell className="text-right">
                                                         <div className="flex justify-end gap-2">
                                                             <Button size="icon" variant="ghost" className="h-8 w-8" onClick={(e) => {
@@ -630,6 +657,9 @@ export default function AdminCertificatesPage() {
                                                                 handleDownloadCertificate(cert);
                                                             }} disabled={isGeneratingZip || isDownloadingSingle}>
                                                                 {isDownloadingSingle ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+                                                            </Button>
+                                                            <Button size="icon" variant="ghost" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={(e) => handleDeleteCertificate(cert._id || cert.id, e)}>
+                                                                <Trash2 className="h-4 w-4" />
                                                             </Button>
                                                         </div>
                                                     </TableCell>
@@ -737,7 +767,8 @@ export default function AdminCertificatesPage() {
                             studentName={getStudent(currentGeneratingCert.studentId)?.name || ''}
                             courseName={getCourse(currentGeneratingCert.courseId)?.title || ''}
                             date={format(new Date(currentGeneratingCert.issueDate), 'MMMM d, yyyy')}
-                            certificateId={currentGeneratingCert.id}
+                            certificateId={currentGeneratingCert.customId || currentGeneratingCert.id}
+                            marks={currentGeneratingCert.marks}
                         />
                     </div>
                 )}
@@ -754,7 +785,8 @@ export default function AdminCertificatesPage() {
                                 studentName={previewCertificate ? getStudent(previewCertificate.studentId)?.name || '' : ''}
                                 courseName={previewCertificate ? getCourse(previewCertificate.courseId)?.title || '' : ''}
                                 date={previewCertificate ? format(new Date(previewCertificate.issueDate), 'MMMM d, yyyy') : ''}
-                                certificateId={previewCertificate ? previewCertificate.id : ''}
+                                certificateId={previewCertificate ? (previewCertificate.customId || previewCertificate.id) : ''}
+                                marks={previewCertificate?.marks}
                             />
                         </div>
                         <div className="absolute -bottom-16 left-0 right-0 flex justify-center gap-4">

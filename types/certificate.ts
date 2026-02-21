@@ -8,4 +8,5 @@ export interface Certificate {
     hash?: string;
     downloadUrl?: string;
     status?: 'issued' | 'revoked';
+    marks?: number;
 }

@@ -17,6 +17,14 @@ export default defineType({
         defineField({ name: 'progress', title: 'Progress (%)', type: 'number', initialValue: 0 }),
         defineField({ name: 'watchTime', title: 'Watch Time (minutes)', type: 'number', initialValue: 0 }),
         defineField({ name: 'currentLesson', title: 'Current Lesson', type: 'string' }),
+        defineField({ name: 'completedLessons', title: 'Completed Lessons', type: 'array', of: [{ type: 'string' }] }),
+        defineField({
+            name: 'certificateStatus',
+            title: 'Certificate Status',
+            type: 'string',
+            options: { list: ['none', 'applied', 'issued'] },
+            initialValue: 'none'
+        }),
         defineField({ name: 'grade', title: 'Grade', type: 'string' }),
         defineField({ name: 'completionDate', title: 'Completion Date', type: 'datetime' }),
     ],

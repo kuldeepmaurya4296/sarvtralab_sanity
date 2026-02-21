@@ -14,6 +14,28 @@ const scrubStudent = (doc: any) => {
     return obj;
 }
 
+export async function getNextStudentId() {
+    try {
+        // Find the student with the highest numerical ID starting with SRV-
+        const lastStudent = await sanityClient.fetch(
+            `*[_type == "user" && role == "student" && customId match "SRV-*"] | order(customId desc)[0]`
+        );
+
+        let nextNum = 1;
+        if (lastStudent?.customId) {
+            const currentNum = parseInt(lastStudent.customId.split('-')[1]);
+            if (!isNaN(currentNum)) {
+                nextNum = currentNum + 1;
+            }
+        }
+
+        return `SRV-${nextNum.toString().padStart(4, '0')}`;
+    } catch (error) {
+        console.error("Error generating student ID:", error);
+        return `SRV-${Date.now().toString().slice(-4)}`; // Fallback
+    }
+}
+
 export async function getAllStudents() {
     const session = await getServerSession(authOptions);
     if (!session || (session.user.role !== 'superadmin' && session.user.role !== 'admin' && session.user.role !== 'school')) {
@@ -56,7 +78,7 @@ export async function createStudent(data: any) {
         }
 
         const hashedPassword = await bcrypt.hash(data.password || 'student123', 10);
-        const customId = `usr-${Date.now()}`;
+        const customId = await getNextStudentId();
 
         // Find school reference if schoolId provided
         let schoolRef = undefined;
@@ -163,6 +185,7 @@ export async function getStudentDashboardStats(userId: string) {
                 progress,
                 watchTime,
                 status,
+                completedLessons,
                 courseRef->{
                     customId,
                     title,
@@ -204,7 +227,7 @@ export async function getStudentDashboardStats(userId: string) {
                 progress: e.progress || 0,
                 thumbnail: e.courseRef?.thumbnail,
                 totalLessons: e.courseRef?.curriculum?.reduce((acc: number, mod: any) => acc + (mod.lessons?.length || 0), 0) || 0,
-                completedLessons: e.completedLessons || 0
+                completedLessons: Array.isArray(e.completedLessons) ? e.completedLessons.length : 0
             }))
         };
     } catch (e) {
@@ -225,6 +248,7 @@ export async function getStudentEnrolledCourses(userId: string) {
                 progress,
                 completedLessons,
                 status,
+                certificateStatus,
                 enrolledAt,
                 courseRef->{
                     _id,
@@ -251,8 +275,9 @@ export async function getStudentEnrolledCourses(userId: string) {
             enrollmentId: e._id,
             isUnavailable: !e.courseRef,
             progress: e.progress || 0,
-            completedLessons: e.completedLessons || 0,
+            completedLessons: Array.isArray(e.completedLessons) ? e.completedLessons.length : 0,
             status: e.status,
+            certificateStatus: e.certificateStatus || 'none',
             enrolledAt: e.enrolledAt
         }));
     } catch (e) {
@@ -267,7 +292,10 @@ export async function removeEnrollment(enrollmentId: string) {
 
     try {
         const enrollment = await sanityClient.fetch(
-            `*[_type == "enrollment" && _id == $enrollmentId][0]`,
+            `*[_type == "enrollment" && _id == $enrollmentId][0]{
+                ...,
+                "courseExists": defined(courseRef->)
+            }`,
             { enrollmentId }
         );
         if (!enrollment) throw new Error("Enrollment not found");
@@ -275,6 +303,11 @@ export async function removeEnrollment(enrollmentId: string) {
         // Only allow student to delete their own, or admin
         if (enrollment.student !== session.user.id && session.user.role !== 'superadmin' && session.user.role !== 'admin') {
             throw new Error("Unauthorized");
+        }
+
+        // Restriction: Student cannot delete courses if course is available in DB
+        if (session.user.role === 'student' && enrollment.courseExists) {
+            throw new Error("This course is active and cannot be removed from your dashboard.");
         }
 
         await sanityWriteClient.delete(enrollmentId);
@@ -378,6 +411,105 @@ export async function completeStudentProfile(userId: string, data: any) {
         return { success: true, user: scrubStudent(updated) };
     } catch (error: any) {
         console.error("Complete Profile Error:", error);
+        return { success: false, error: error.message };
+    }
+}
+
+export async function markLessonComplete(enrollmentId: string, lessonId: string) {
+    try {
+        const enrollment = await sanityClient.fetch(
+            `*[_type == "enrollment" && _id == $enrollmentId][0]{
+                ...,
+                "totalLessons": courseRef->curriculum[].lessons[].id
+            }`,
+            { enrollmentId }
+        );
+        if (!enrollment) throw new Error("Enrollment not found");
+
+        const completedLessons = enrollment.completedLessons || [];
+        if (!completedLessons.includes(lessonId)) {
+            completedLessons.push(lessonId);
+        } else {
+            return { success: true, alreadyCompleted: true };
+        }
+
+        // Calculate progress
+        const totalLessonsCount = Array.isArray(enrollment.totalLessons) ? enrollment.totalLessons.length : 0;
+        const progress = totalLessonsCount > 0 ? Math.round((completedLessons.length / totalLessonsCount) * 100) : 0;
+
+        const updated = await sanityWriteClient
+            .patch(enrollmentId)
+            .set({
+                completedLessons,
+                progress,
+                status: progress === 100 ? 'Completed' : enrollment.status,
+                completionDate: progress === 100 ? new Date().toISOString() : enrollment.completionDate
+            })
+            .commit();
+
+        return { success: true, progress: updated.progress };
+    } catch (error: any) {
+        console.error("Mark Lesson Complete Error:", error);
+        return { success: false, error: error.message };
+    }
+}
+
+export async function getEnrollmentData(userId: string, courseId: string) {
+    try {
+        const enrollment = await sanityClient.fetch(
+            `*[_type == "enrollment" && student == $userId && (courseRef->customId == $courseId || courseRef._ref == $courseId)][0]{
+                _id,
+                completedLessons,
+                progress,
+                status
+            }`,
+            { userId, courseId }
+        );
+        return enrollment;
+    } catch (error) {
+        console.error("Get Enrollment Data Error:", error);
+        return null;
+    }
+}
+
+export async function applyForCertificate(enrollmentId: string) {
+    try {
+        const enrollment = await sanityClient.fetch(`*[_type == "enrollment" && _id == $enrollmentId][0]`, { enrollmentId });
+        if (!enrollment) throw new Error("Enrollment not found");
+
+        if ((enrollment.progress || 0) < 75) {
+            throw new Error("You need at least 75% progress to apply for a certificate.");
+        }
+
+        await sanityWriteClient
+            .patch(enrollmentId)
+            .set({ certificateStatus: 'applied' })
+            .commit();
+
+        return { success: true };
+    } catch (error: any) {
+        console.error("Apply Certificate Error:", error);
+        return { success: false, error: error.message };
+    }
+}
+
+export async function migrateExistingStudentIds() {
+    try {
+        const students = await sanityClient.fetch(`*[_type == "user" && role == "student" && !(customId match "SRV-*")] | order(createdAt asc)`);
+
+        let count = 0;
+        for (const student of students) {
+            const nextId = await getNextStudentId();
+            await sanityWriteClient
+                .patch(student._id)
+                .set({ customId: nextId })
+                .commit();
+            count++;
+        }
+
+        return { success: true, migratedCount: count };
+    } catch (error: any) {
+        console.error("Migration Error:", error);
         return { success: false, error: error.message };
     }
 }

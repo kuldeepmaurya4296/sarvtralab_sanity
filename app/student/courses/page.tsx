@@ -9,9 +9,10 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
-import { getStudentEnrolledCourses, removeEnrollment } from '@/lib/actions/student.actions';
+import { getStudentEnrolledCourses, removeEnrollment, applyForCertificate } from '@/lib/actions/student.actions';
 import { getCoursesByIds, getAllCourses } from '@/lib/actions/course.actions';
 import { toast } from 'sonner';
+import { Loader2 } from 'lucide-react';
 
 export default function StudentCoursesPage() {
     const { user, isLoading: isAuthLoading } = useAuth();
@@ -20,6 +21,7 @@ export default function StudentCoursesPage() {
     const [completedCourses, setCompletedCourses] = useState<any[]>([]);
     const [recommendedCourses, setRecommendedCourses] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [isApplying, setIsApplying] = useState<string | null>(null);
 
     useEffect(() => {
         if (!isAuthLoading && (!user || user.role !== 'student')) {
@@ -93,6 +95,25 @@ export default function StudentCoursesPage() {
             }
         } catch (error) {
             toast.error("An error occurred while removing the course");
+        }
+    };
+
+    const handleApplyCertificate = async (enrollmentId: string) => {
+        setIsApplying(enrollmentId);
+        try {
+            const res = await applyForCertificate(enrollmentId);
+            if (res.success) {
+                toast.success("Certificate application submitted!");
+                setEnrolledCourses(prev => prev.map(c =>
+                    c.enrollmentId === enrollmentId ? { ...c, certificateStatus: 'applied' } : c
+                ));
+            } else {
+                toast.error(res.error || "Failed to apply for certificate");
+            }
+        } catch (error) {
+            toast.error("An error occurred");
+        } finally {
+            setIsApplying(null);
         }
     };
 
@@ -176,21 +197,55 @@ export default function StudentCoursesPage() {
                                                     </p>
                                                 </div>
 
-                                                <div className="flex gap-2">
-                                                    <Link href={`/student/courses/${course.id || course._id}`} className="flex-1">
-                                                        <Button className="w-full">
-                                                            Continue Learning
-                                                        </Button>
-                                                    </Link>
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="icon"
-                                                        className="text-muted-foreground hover:text-destructive shrink-0"
-                                                        title="Remove from Dashboard"
-                                                        onClick={() => handleDeleteEnrollment(course.enrollmentId)}
-                                                    >
-                                                        <Trash2 className="w-4 h-4" />
-                                                    </Button>
+                                                <div className="flex flex-col gap-2">
+                                                    <div className="flex gap-2">
+                                                        <Link href={`/student/courses/${course.id || course._id}`} className="flex-1">
+                                                            <Button className="w-full">
+                                                                Continue Learning
+                                                            </Button>
+                                                        </Link>
+                                                    </div>
+
+                                                    {/* Certificate Logic */}
+                                                    {course.progress >= 75 && (
+                                                        <div className="pt-2 border-t mt-2">
+                                                            {course.certificateStatus === 'none' && (
+                                                                <Button
+                                                                    variant="outline"
+                                                                    className="w-full gap-2 border-primary/20 hover:bg-primary/5"
+                                                                    onClick={() => handleApplyCertificate(course.enrollmentId)}
+                                                                    disabled={isApplying === course.enrollmentId}
+                                                                >
+                                                                    {isApplying === course.enrollmentId ? (
+                                                                        <Loader2 className="w-4 h-4 animate-spin" />
+                                                                    ) : (
+                                                                        <Award className="w-4 h-4" />
+                                                                    )}
+                                                                    Apply for Certificate
+                                                                </Button>
+                                                            )}
+                                                            {course.certificateStatus === 'applied' && (
+                                                                <Button
+                                                                    variant="ghost"
+                                                                    disabled
+                                                                    className="w-full gap-2 bg-muted/50"
+                                                                >
+                                                                    <Clock className="w-4 h-4" />
+                                                                    Certificate Applied
+                                                                </Button>
+                                                            )}
+                                                            {course.certificateStatus === 'issued' && (
+                                                                <Button
+                                                                    variant="default"
+                                                                    className="w-full gap-2 bg-green-600 hover:bg-green-700"
+                                                                    onClick={() => router.push('/student/certificates')}
+                                                                >
+                                                                    <Award className="w-4 h-4" />
+                                                                    View Certificate
+                                                                </Button>
+                                                            )}
+                                                        </div>
+                                                    )}
                                                 </div>
                                             </div>
                                         </>

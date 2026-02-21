@@ -12,8 +12,10 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { useAuth } from '@/context/AuthContext';
 import { getCourseById } from '@/lib/actions/course.actions';
+import { getEnrollmentData, markLessonComplete } from '@/lib/actions/student.actions';
 import { Course, Lesson } from '@/types/course';
 import { Student } from '@/types/user';
+import { toast } from 'sonner';
 
 export default function CoursePlayerPage() {
     const params = useParams();
@@ -23,10 +25,13 @@ export default function CoursePlayerPage() {
 
     const [course, setCourse] = useState<Course | null>(null);
     const [activeLesson, setActiveLesson] = useState<Lesson | null>(null);
+    const [enrollmentId, setEnrollmentId] = useState<string | null>(null);
+    const [completedLessonIds, setCompletedLessonIds] = useState<string[]>([]);
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const [cinemaMode, setCinemaMode] = useState(false);
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [isLoadingCourse, setIsLoadingCourse] = useState(true);
+    const [isMarkingComplete, setIsMarkingComplete] = useState(false);
     const playerRef = useRef<HTMLDivElement>(null);
 
     // Handle Native Fullscreen
@@ -57,25 +62,34 @@ export default function CoursePlayerPage() {
     }, [user, isAuthLoading, router]);
 
     useEffect(() => {
-        const fetchCourse = async () => {
-            if (courseId) {
+        const fetchCourseAndEnrollment = async () => {
+            if (courseId && user) {
                 try {
-                    const fetchedCourse = await getCourseById(courseId);
+                    const [fetchedCourse, enrollment] = await Promise.all([
+                        getCourseById(courseId),
+                        getEnrollmentData(user.id, courseId)
+                    ]);
+
                     if (fetchedCourse) {
                         setCourse(fetchedCourse);
                         if (fetchedCourse.curriculum.length > 0 && fetchedCourse.curriculum[0].lessons.length > 0) {
                             setActiveLesson(fetchedCourse.curriculum[0].lessons[0]);
                         }
                     }
+
+                    if (enrollment) {
+                        setEnrollmentId(enrollment._id);
+                        setCompletedLessonIds(enrollment.completedLessons || []);
+                    }
                 } catch (error) {
-                    console.error("Failed to load course", error);
+                    console.error("Failed to load course/enrollment", error);
                 } finally {
                     setIsLoadingCourse(false);
                 }
             }
         };
-        fetchCourse();
-    }, [courseId]);
+        fetchCourseAndEnrollment();
+    }, [courseId, user]);
 
     if (isAuthLoading || isLoadingCourse) return <div className="p-8 text-center text-white">Loading course...</div>;
     if (!user) return null;
@@ -102,6 +116,28 @@ export default function CoursePlayerPage() {
                     foundCurrent = true;
                 }
             }
+        }
+    };
+
+    const handleMarkComplete = async () => {
+        if (!enrollmentId || !activeLesson || isMarkingComplete) return;
+
+        setIsMarkingComplete(true);
+        try {
+            const res = await markLessonComplete(enrollmentId, activeLesson.id);
+            if (res.success) {
+                if (!completedLessonIds.includes(activeLesson.id)) {
+                    setCompletedLessonIds(prev => [...prev, activeLesson.id]);
+                }
+                toast.success("Lesson marked as complete!");
+                nextLesson();
+            } else {
+                toast.error(res.error || "Failed to mark lesson complete");
+            }
+        } catch (error) {
+            toast.error("An error occurred");
+        } finally {
+            setIsMarkingComplete(false);
         }
     };
 
@@ -143,8 +179,8 @@ export default function CoursePlayerPage() {
                                             ${activeLesson?.id === lesson.id ? 'bg-primary/10 text-primary font-medium' : 'hover:bg-muted text-muted-foreground'}
                                         `}
                                         >
-                                            {lesson.isCompleted ? (
-                                                <CheckCircle className="w-4 h-4 text-green-500 shrink-0" />
+                                            {completedLessonIds.includes(lesson.id) ? (
+                                                <CheckCircle className="w-4 h-4 text-green-500 shrink-0 fill-green-500/10" />
                                             ) : (
                                                 lesson.type === 'video' ? <Play className="w-4 h-4 shrink-0" /> : <FileText className="w-4 h-4 shrink-0" />
                                             )}
@@ -270,12 +306,24 @@ export default function CoursePlayerPage() {
                         </div>
 
                         {!isFullscreen && (
-                            <div className="p-3 sm:p-4 border-t flex justify-between items-center bg-background">
+                            <div className="p-3 sm:p-4 border-t flex flex-wrap gap-3 justify-between items-center bg-background">
                                 <Button variant="outline" size="sm" onClick={prevLesson} disabled={!activeLesson}>Previous</Button>
-                                <div className="hidden sm:flex items-center gap-2 text-xs text-muted-foreground">
-                                    <span className="font-medium text-foreground">{activeLesson?.title}</span>
+
+                                <div className="flex items-center gap-3">
+                                    <Button
+                                        onClick={handleMarkComplete}
+                                        disabled={isMarkingComplete || completedLessonIds.includes(activeLesson?.id || '')}
+                                        variant={completedLessonIds.includes(activeLesson?.id || '') ? "outline" : "default"}
+                                        size="sm"
+                                        className="gap-2"
+                                    >
+                                        <CheckCircle className={`w-4 h-4 ${completedLessonIds.includes(activeLesson?.id || '') ? 'text-green-500' : ''}`} />
+                                        {completedLessonIds.includes(activeLesson?.id || '') ? 'Completed' : 'Mark as Complete'}
+                                    </Button>
+                                    <Button size="sm" onClick={nextLesson} variant="ghost" className="gap-2">
+                                        Next <ChevronRight className="w-4 h-4" />
+                                    </Button>
                                 </div>
-                                <Button size="sm" onClick={nextLesson}>Next Lesson <ChevronRight className="w-4 h-4 ml-1" /></Button>
                             </div>
                         )}
                     </div>

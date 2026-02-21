@@ -103,11 +103,11 @@ export default function StudentDashboardPage() {
     // Mock progress calculation based on fetched course
     const progressData = currentCourse ? {
         courseName: currentCourse.title,
-        progress: 0, // Default to 0 until real progress tracking is implemented
-        totalLessons: currentCourse.curriculum?.reduce((acc: number, mod: any) => acc + (mod.lessons?.length || 0), 0) || 0,
-        completedLessons: 0,
-        timeSpent: 0,
-        lastAccessed: 'Never'
+        progress: currentCourse.progress || 0,
+        totalLessons: currentCourse.totalLessons || 0,
+        completedLessons: currentCourse.completedLessons || 0,
+        timeSpent: currentCourse.watchTime || 0,
+        lastAccessed: 'Recently'
     } : null;
 
     const handleDownload = (item: string) => {
