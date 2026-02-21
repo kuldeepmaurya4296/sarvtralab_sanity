@@ -1,7 +1,7 @@
+
 'use client';
 import { motion } from 'framer-motion';
 import { Users, School, MapPin, Trophy } from 'lucide-react';
-import { stats } from '@/data/content';
 
 const iconMap: { [key: string]: React.ComponentType<{ className?: string }> } = {
   Users,
@@ -10,13 +10,28 @@ const iconMap: { [key: string]: React.ComponentType<{ className?: string }> } = 
   Trophy
 };
 
-const StatsSection = () => {
+interface StatItem {
+  label: string;
+  value: string;
+  iconName: string;
+}
+
+export default function StatsSection({ stats: propStats }: { stats?: StatItem[] }) {
+  const defaultStats: StatItem[] = [
+    { label: 'Students Trained', value: '15,000+', iconName: 'Users' },
+    { label: 'Partner Schools', value: '120+', iconName: 'School' },
+    { label: 'States Covered', value: '18', iconName: 'MapPin' },
+    { label: 'Competition Winners', value: '250+', iconName: 'Trophy' }
+  ];
+
+  const stats = propStats && propStats.length > 0 ? propStats : defaultStats;
+
   return (
     <section className="py-16 md:py-20 bg-gradient-to-r from-primary to-primary/80">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
           {stats.map((stat, index) => {
-            const IconComponent = iconMap[stat.icon];
+            const IconComponent = iconMap[stat.iconName];
             return (
               <motion.div
                 key={stat.label}
@@ -42,8 +57,4 @@ const StatsSection = () => {
       </div>
     </section>
   );
-};
-
-export default StatsSection;
-
-
+}

@@ -1,7 +1,7 @@
+
 'use client';
 import { motion } from 'framer-motion';
 import { Star, Quote } from 'lucide-react';
-import { testimonials } from '@/data/content';
 import Image from 'next/image';
 import {
   Carousel,
@@ -11,7 +11,24 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 
-const TestimonialsSection = () => {
+interface TestimonialItem {
+  id: string;
+  name: string;
+  role: string;
+  school: string;
+  content: string;
+  rating: number;
+  avatar: string;
+}
+
+const TestimonialsSection = ({ testimonials: propTestimonials }: { testimonials?: TestimonialItem[] }) => {
+  const defaultTestimonials: TestimonialItem[] = [
+    { id: 'test-001', name: 'Priya Sharma', role: 'Student, Class 8', school: 'Delhi Public School, Noida', content: 'Sarvtra Labs made robotics so fun and easy to understand!', rating: 5, avatar: '/placeholder.svg' },
+    { id: 'test-002', name: 'Dr. Meera Gupta', role: 'Principal', school: 'Delhi Public School, Noida', content: 'Implementing Sarvtra Labs has transformed how students approach STEM education.', rating: 5, avatar: '/placeholder.svg' },
+    { id: 'test-003', name: 'Rajesh Patel', role: 'Parent', school: 'Ryan International School', content: 'My son has developed such a passion for coding and robotics.', rating: 5, avatar: '/placeholder.svg' }
+  ];
+  const displayTestimonials = propTestimonials && propTestimonials.length > 0 ? propTestimonials : defaultTestimonials;
+
   return (
     <section className="py-20 md:py-28 bg-muted/50">
       <div className="container mx-auto px-4">
@@ -47,8 +64,8 @@ const TestimonialsSection = () => {
             className="w-full"
           >
             <CarouselContent>
-              {testimonials.map((testimonial, index) => (
-                <CarouselItem key={testimonial.id} className="md:basis-1/2 lg:basis-1/3 pl-4">
+              {displayTestimonials.map((testimonial, index) => (
+                <CarouselItem key={testimonial.id || (testimonial as any)._id || index} className="md:basis-1/2 lg:basis-1/3 pl-4">
                   <div className="h-full">
                     <motion.div
                       initial={{ opacity: 0, y: 20 }}
@@ -100,8 +117,6 @@ const TestimonialsSection = () => {
             <CarouselNext className="hidden md:flex -right-4 lg:-right-12" />
           </Carousel>
         </div>
-
-
       </div>
     </section>
   );

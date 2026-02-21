@@ -1,12 +1,12 @@
+
 'use client';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { ArrowRight, Phone } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import Image from 'next/image';
-import { organizationDetails } from '@/data/organization';
 
-const CTASection = () => {
+const CTASection = ({ organization }: { organization?: any }) => {
+  const phone = organization?.phone || '+91-8085613350';
   return (
     <section className="py-20 md:py-28 relative overflow-hidden">
       {/* Background */}
@@ -57,9 +57,9 @@ const CTASection = () => {
                 <ArrowRight className="w-5 h-5" />
               </button>
             </Link>
-            <a href={`tel:${organizationDetails.contact.phone.replace(/[^0-9+]/g, '')}`} className="inline-flex items-center gap-2 text-primary-foreground hover:underline">
+            <a href={`tel:${phone.replace(/[^0-9+]/g, '')}`} className="inline-flex items-center gap-2 text-primary-foreground hover:underline">
               <Phone className="w-5 h-5" />
-              <span className="font-medium">{organizationDetails.contact.phone}</span>
+              <span className="font-medium">{phone}</span>
             </a>
           </motion.div>
         </div>

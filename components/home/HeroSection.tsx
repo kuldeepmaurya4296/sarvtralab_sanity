@@ -12,7 +12,7 @@ const HeroSection = () => {
       {/* Background */}
       <div className="absolute inset-0 z-0">
         <Image
-          src="/hero-robotics.jpg"
+          src={`${heroImage || '/hero-robotics.jpg'}`}
           alt="Students learning robotics with Sarvtra Labs"
           fill
           priority

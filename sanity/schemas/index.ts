@@ -16,6 +16,19 @@ import supportTicket from './supportTicket';
 import lead from './lead';
 import notification from './notification';
 import { libraryFolder, libraryContent } from './library';
+import organization from './organization';
+import faq from './faq';
+import testimonial from './testimonial';
+import teamMember from './teamMember';
+import feature from './feature';
+import job from './job';
+import blogPost from './blogPost';
+import pressRelease from './pressRelease';
+import video from './video';
+import supportCategory from './supportCategory';
+import supportArticle from './supportArticle';
+import navLink from './navLink';
+import footerSection from './footerLink';
 
 export const schemaTypes = [
     user,
@@ -36,4 +49,17 @@ export const schemaTypes = [
     notification,
     libraryFolder,
     libraryContent,
+    organization,
+    faq,
+    testimonial,
+    teamMember,
+    feature,
+    job,
+    blogPost,
+    pressRelease,
+    video,
+    supportCategory,
+    supportArticle,
+    navLink,
+    footerSection,
 ];

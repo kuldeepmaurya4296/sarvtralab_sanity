@@ -282,7 +282,7 @@ export default function CRMPage() {
                                         <Loader2 className="w-6 h-6 animate-spin mx-auto" />
                                     </TableCell>
                                 </TableRow>
-                            ) : leads.length === 0 ? (
+                            ) : (!leads || leads.length === 0) ? (
                                 <TableRow>
                                     <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
                                         No leads found

@@ -1,10 +1,75 @@
 import Link from 'next/link';
 import { Facebook, Twitter, Instagram, Linkedin, Youtube, Mail, Phone, MapPin } from 'lucide-react';
 import Image from 'next/image';
-import { footerLinks } from '@/data/content';
-import { organizationDetails } from '@/data/organization';
 
-const Footer = () => {
+export interface FooterLink {
+  label: string;
+  href: string;
+}
+
+export interface FooterSectionData {
+  category: string;
+  title: string;
+  links: FooterLink[];
+}
+
+export interface OrgData {
+  name?: string;
+  email?: string;
+  phone?: string;
+  address?: string;
+  hours?: string;
+  socials?: { platform: string; url: string }[];
+}
+
+interface FooterProps {
+  footerSections?: FooterSectionData[];
+  organization?: OrgData;
+}
+
+const defaultFooterLinks = {
+  courses: [
+    { label: 'Foundation Track (4-6)', href: '/courses?category=foundation' },
+    { label: 'Intermediate Track (7-10)', href: '/courses?category=intermediate' },
+    { label: 'Advanced Track (11-12)', href: '/courses?category=advanced' },
+    { label: 'School Programs', href: '/schools' }
+  ],
+  company: [
+    { label: 'About Us', href: '/about' },
+    { label: 'Careers', href: '/careers' },
+    { label: 'Blog', href: '/blog' },
+    { label: 'Press Kit', href: '/press' }
+  ],
+  support: [
+    { label: 'Help Center', href: '/help' },
+    { label: 'Contact Us', href: '/contact' },
+    { label: 'FAQs', href: '/#faqs' },
+    { label: 'Privacy Policy', href: '/privacy' }
+  ],
+  dashboards: [
+    { label: 'Student Dashboard', href: '/student/dashboard' },
+    { label: 'School Dashboard', href: '/school/dashboard' },
+    { label: 'Govt Portal', href: '/govt/dashboard' },
+    { label: 'Super Admin', href: '/admin/dashboard' }
+  ]
+};
+
+const Footer = ({ footerSections, organization }: FooterProps) => {
+  // Build footer links object from sections or use defaults
+  const footerLinks = footerSections?.length ? {
+    courses: footerSections.find(s => s.category === 'courses')?.links || defaultFooterLinks.courses,
+    company: footerSections.find(s => s.category === 'company')?.links || defaultFooterLinks.company,
+    support: footerSections.find(s => s.category === 'support')?.links || defaultFooterLinks.support,
+    dashboards: footerSections.find(s => s.category === 'dashboards')?.links || defaultFooterLinks.dashboards,
+  } : defaultFooterLinks;
+
+  const org = organization || {
+    email: 'connect@pushpako2.com',
+    phone: '+91-8085613350',
+    address: 'Bhopal, Madhya Pradesh',
+    hours: 'Mon - Sat: 9:00 AM - 6:00 PM',
+    socials: []
+  };
   return (
     <footer className="bg-zinc-950 text-zinc-200 pt-20 pb-10 border-t border-zinc-800 font-sans">
       <div className="container mx-auto px-4">
@@ -34,11 +99,11 @@ const Footer = () => {
             </p>
             <div className="flex gap-3 pt-2">
               {[
-                { Icon: Facebook, label: "Facebook", href: organizationDetails.socials.find(s => s.platform === 'Facebook')?.url || '#' },
-                { Icon: Twitter, label: "Twitter", href: organizationDetails.socials.find(s => s.platform === 'Twitter')?.url || '#' },
-                { Icon: Instagram, label: "Instagram", href: organizationDetails.socials.find(s => s.platform === 'Instagram')?.url || '#' },
-                { Icon: Linkedin, label: "LinkedIn", href: organizationDetails.socials.find(s => s.platform === 'LinkedIn')?.url || '#' },
-                { Icon: Youtube, label: "YouTube", href: organizationDetails.socials.find(s => s.platform === 'YouTube')?.url || '#' },
+                { Icon: Facebook, label: "Facebook", href: org.socials?.find((s: any) => s.platform === 'Facebook')?.url || '#' },
+                { Icon: Twitter, label: "Twitter", href: org.socials?.find((s: any) => s.platform === 'Twitter')?.url || '#' },
+                { Icon: Instagram, label: "Instagram", href: org.socials?.find((s: any) => s.platform === 'Instagram')?.url || '#' },
+                { Icon: Linkedin, label: "LinkedIn", href: org.socials?.find((s: any) => s.platform === 'LinkedIn')?.url || '#' },
+                { Icon: Youtube, label: "YouTube", href: org.socials?.find((s: any) => s.platform === 'YouTube')?.url || '#' },
               ].map(({ Icon, label, href }, index) => (
                 <a
                   key={index}
@@ -116,8 +181,8 @@ const Footer = () => {
             </div>
             <div>
               <h5 className="font-bold text-white mb-1">Email Us</h5>
-              <a href={`mailto:${organizationDetails.contact.email}`} className="text-zinc-400 hover:text-white transition-colors block">
-                {organizationDetails.contact.email}
+              <a href={`mailto:${org.email}`} className="text-zinc-400 hover:text-white transition-colors block">
+                {org.email}
               </a>
               <span className="text-xs text-zinc-500 mt-1 block">We reply within 24 hours</span>
             </div>
@@ -129,10 +194,10 @@ const Footer = () => {
             </div>
             <div>
               <h5 className="font-bold text-white mb-1">Call Us</h5>
-              <a href={`tel:${organizationDetails.contact.phone.replace(/[^0-9+]/g, '')}`} className="text-zinc-400 hover:text-white transition-colors block">
-                {organizationDetails.contact.phone}
+              <a href={`tel:${org.phone?.replace(/[^0-9+]/g, '') || ''}`} className="text-zinc-400 hover:text-white transition-colors block">
+                {org.phone}
               </a>
-              <span className="text-xs text-zinc-500 mt-1 block">{organizationDetails.contact.hours}</span>
+              <span className="text-xs text-zinc-500 mt-1 block">{org.hours}</span>
             </div>
           </div>
 
@@ -143,7 +208,7 @@ const Footer = () => {
             <div>
               <h5 className="font-bold text-white mb-1">Visit Sarvtra Labs</h5>
               <p className="text-zinc-400 text-sm leading-relaxed max-w-xs">
-                {organizationDetails.contact.address}
+                {org.address}
               </p>
             </div>
           </div>

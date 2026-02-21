@@ -2,14 +2,35 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Play, Eye } from 'lucide-react';
-import { showcaseVideos, Video } from '@/data/content';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import Image from 'next/image';
 
-const VideosSection = () => {
+export interface Video {
+  id: string;
+  title: string;
+  description: string;
+  thumbnail: string;
+  duration: string;
+  views: number;
+  category: string;
+  videoUrl: string;
+}
+
+interface VideosSectionProps {
+  videos?: Video[];
+}
+
+const defaultVideos: Video[] = [
+  { id: 'vid-001', title: 'Introduction to Robotics for Kids', description: 'Learn the basics of robotics', thumbnail: '/placeholder.svg', duration: '5:32', views: 125000, category: 'Foundation', videoUrl: 'https://www.youtube.com/embed/81rczD64n9I' },
+  { id: 'vid-002', title: 'Building Your First Robot', description: 'Step-by-step guide', thumbnail: '/placeholder.svg', duration: '8:15', views: 98000, category: 'Foundation', videoUrl: 'https://www.youtube.com/embed/0H5g9Vs0ENM' },
+  { id: 'vid-003', title: 'Python Programming for Robotics', description: 'Master Python', thumbnail: '/placeholder.svg', duration: '12:45', views: 75000, category: 'Intermediate', videoUrl: 'https://www.youtube.com/embed/rfscVS0vtbw' }
+];
+
+const VideosSection = ({ videos }: VideosSectionProps) => {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [activeVideo, setActiveVideo] = useState<Video | null>(null);
 
+  const showcaseVideos = videos && videos.length > 0 ? videos : defaultVideos;
   const categories = ['all', 'Foundation', 'Intermediate', 'Advanced', 'Testimonial'];
 
   const filteredVideos = selectedCategory === 'all'

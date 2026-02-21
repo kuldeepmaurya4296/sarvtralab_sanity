@@ -1,7 +1,7 @@
+
 'use client';
 import { motion } from 'framer-motion';
 import { GraduationCap, Wrench, Users, Trophy, BarChart3, Award } from 'lucide-react';
-import { features } from '@/data/content';
 
 const iconMap: { [key: string]: React.ComponentType<{ className?: string }> } = {
   GraduationCap,
@@ -12,7 +12,24 @@ const iconMap: { [key: string]: React.ComponentType<{ className?: string }> } = 
   Award
 };
 
-const FeaturesSection = () => {
+interface FeatureItem {
+  id: string;
+  title: string;
+  description: string;
+  icon: string;
+}
+
+const FeaturesSection = ({ features: propFeatures }: { features?: FeatureItem[] }) => {
+  const defaultFeatures: FeatureItem[] = [
+    { id: 'feat-001', title: 'CBSE Aligned Curriculum', description: 'Our courses are designed in accordance with NCF 2023, NEP 2020, and CBSE Skill Education Framework.', icon: 'GraduationCap' },
+    { id: 'feat-002', title: 'Hands-on Learning', description: 'Project-based learning with real robotics kits delivered to your doorstep.', icon: 'Wrench' },
+    { id: 'feat-003', title: 'Expert Instructors', description: 'Learn from IIT/NIT alumni and industry professionals with years of experience.', icon: 'Users' },
+    { id: 'feat-004', title: 'Competition Ready', description: 'Prepare for national and international robotics competitions like ATL, WRO, and more.', icon: 'Trophy' },
+    { id: 'feat-005', title: 'Progress Tracking', description: 'Real-time progress reports for students, parents, and schools.', icon: 'BarChart3' },
+    { id: 'feat-006', title: 'Certification', description: 'Industry-recognized certificates on course completion.', icon: 'Award' }
+  ];
+  const displayFeatures = propFeatures && propFeatures.length > 0 ? propFeatures : defaultFeatures;
+
   return (
     <section className="py-20 md:py-28 bg-background">
       <div className="container mx-auto px-4">
@@ -50,11 +67,11 @@ const FeaturesSection = () => {
 
         {/* Features Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-          {features.map((feature, index) => {
+          {displayFeatures.map((feature, index) => {
             const IconComponent = iconMap[feature.icon];
             return (
               <motion.div
-                key={feature.id}
+                key={feature.id || (feature as any)._id || index}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}

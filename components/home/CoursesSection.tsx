@@ -2,13 +2,41 @@
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Clock, Users, Star, ArrowRight, IndianRupee } from 'lucide-react';
-import { courses, courseCategories } from '@/data/courses';
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
-const roboticsIllustration = '/robotics-illustration.jpg';
+import { getAllCourses } from '@/lib/actions/course.actions';
 
-const CoursesSection = () => {
-  const featuredCourses = courses.slice(0, 3);
+const courseCategories = [
+  { id: 'foundation', name: 'Foundation Maker', grades: 'Class 4-6', color: 'primary' },
+  { id: 'intermediate', name: 'Intermediate Robotics', grades: 'Class 7-10', color: 'secondary' },
+  { id: 'advanced', name: 'Advanced Pre-Engineering', grades: 'Class 11-12', color: 'accent' }
+];
+
+interface CourseData {
+  id: string;
+  customId?: string;
+  _id?: string;
+  title: string;
+  description: string;
+  grade: string;
+  category: string;
+  price: number;
+  originalPrice: number;
+  emiAvailable: boolean;
+  emiAmount?: number;
+  totalHours: number;
+  studentsEnrolled: number;
+  rating: number;
+}
+
+interface CoursesSectionProps {
+  courses?: CourseData[];
+}
+
+const defaultCourses: CourseData[] = [];
+
+const CoursesSection = ({ courses }: CoursesSectionProps) => {
+  const featuredCourses = (courses && courses.length > 0 ? courses : defaultCourses).slice(0, 3);
 
   return (
     <section className="py-20 md:py-28 bg-muted/50">

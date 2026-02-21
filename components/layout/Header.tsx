@@ -5,11 +5,28 @@ import { useState } from 'react';
 import { Menu, X, GraduationCap, ChevronDown, LayoutDashboard } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { navLinks } from '@/data/content';
 import Image from 'next/image';
 import { useSession } from 'next-auth/react';
 
-const Header = () => {
+export interface NavLink {
+  label: string;
+  href: string;
+}
+
+interface HeaderProps {
+  navLinks?: NavLink[];
+}
+
+const defaultNavLinks: NavLink[] = [
+  { label: 'Home', href: '/' },
+  { label: 'Courses', href: '/courses' },
+  { label: 'For Schools', href: '/schools' },
+  { label: 'About Us', href: '/about' },
+  { label: 'Contact', href: '/contact' }
+];
+
+const Header = ({ navLinks: propNavLinks }: HeaderProps) => {
+  const navLinks = propNavLinks && propNavLinks.length > 0 ? propNavLinks : defaultNavLinks;
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const pathname = usePathname();
   const { data: session } = useSession();

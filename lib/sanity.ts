@@ -34,6 +34,7 @@ export function cleanSanityDoc(doc: any): any {
         // Keep _id but rename to id-compatible field, skip _rev, _type internals
         if (key === '_id') {
             cleaned._id = value;
+            cleaned.id = value;
         } else if (key === '_createdAt') {
             cleaned.createdAt = value;
         } else if (key === '_updatedAt') {

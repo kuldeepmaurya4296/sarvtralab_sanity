@@ -14,7 +14,7 @@ export async function getAllLeads(filters: any = {}) {
         let groq = `*[_type == "lead"]`;
         const params: any = {};
 
-        if (filters.status) {
+        if (filters.status && filters.status !== 'All') {
             groq += ` && status == $status`;
             params.status = filters.status;
         }
@@ -24,7 +24,7 @@ export async function getAllLeads(filters: any = {}) {
         }
 
         const leads = await sanityClient.fetch(groq + ` | order(createdAt desc)`, params);
-        return cleanSanityDoc(leads);
+        return cleanSanityDoc(leads) || [];
     } catch (e) {
         console.error("Get All Leads Error:", e);
         return [];
