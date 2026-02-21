@@ -18,7 +18,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { School } from '@/data/users';
+import { School } from '@/types/user';
 
 interface SchoolFormSheetProps {
     open: boolean;

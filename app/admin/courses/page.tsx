@@ -7,9 +7,9 @@ import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
-import { Course } from '@/data/courses';
+import { Course } from '@/types/course';
 import { useAuth } from '@/context/AuthContext';
-import { SuperAdmin } from '@/data/users';
+import { SuperAdmin } from '@/types/user';
 
 // Actions
 import { getAllCourses, createCourse, updateCourse, deleteCourse } from '@/lib/actions/course.actions';

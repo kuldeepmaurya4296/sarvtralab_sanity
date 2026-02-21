@@ -22,7 +22,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Course } from '@/data/courses';
+import { Course } from '@/types/course';
 
 interface CourseViewSheetProps {
     course: Course | null;

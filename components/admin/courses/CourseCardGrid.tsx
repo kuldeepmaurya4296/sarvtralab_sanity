@@ -28,7 +28,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Course } from '@/data/courses';
+import { Course } from '@/types/course';
 
 interface CourseCardGridProps {
     courses: Course[];
@@ -48,9 +48,9 @@ export function CourseCardGrid({ courses, onView, onEdit, onDelete }: CourseCard
 
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {courses.map(course => (
+            {courses.map((course, index) => (
                 <Card
-                    key={course.id || (course as any).customId || (course as any)._id}
+                    key={(course as any)._id || course.id || (course as any).customId || index}
                     className="flex flex-col h-full hover:shadow-md transition-shadow cursor-pointer group"
                     onClick={(e) => {
                         if ((e.target as any).closest('.action-btn')) return;
@@ -112,7 +112,7 @@ export function CourseCardGrid({ courses, onView, onEdit, onDelete }: CourseCard
                             </div>
                         </div>
                         <div className="flex flex-wrap gap-1 mt-2">
-                            {course.tags.slice(0, 3).map(tag => (
+                            {course.tags?.slice(0, 3).map(tag => (
                                 <span key={tag} className="text-[10px] bg-secondary/50 px-2 py-1 rounded-full text-secondary-foreground">
                                     {tag}
                                 </span>

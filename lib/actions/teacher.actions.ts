@@ -1,7 +1,7 @@
 'use server';
 
 import { sanityClient, sanityWriteClient, cleanSanityDoc } from '@/lib/sanity';
-import { Teacher } from '@/data/users';
+import { Teacher } from '@/types/user';
 import bcrypt from 'bcryptjs';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth';

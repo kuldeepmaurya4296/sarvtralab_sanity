@@ -65,7 +65,7 @@ const TestimonialsSection = ({ testimonials: propTestimonials }: { testimonials?
           >
             <CarouselContent>
               {displayTestimonials.map((testimonial, index) => (
-                <CarouselItem key={testimonial.id || (testimonial as any)._id || index} className="md:basis-1/2 lg:basis-1/3 pl-4">
+                <CarouselItem key={(testimonial as any)._id || testimonial.id || index} className="md:basis-1/2 lg:basis-1/3 pl-4">
                   <div className="h-full">
                     <motion.div
                       initial={{ opacity: 0, y: 20 }}

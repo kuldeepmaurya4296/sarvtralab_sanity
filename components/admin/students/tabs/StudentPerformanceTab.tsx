@@ -12,7 +12,7 @@ import {
 import { Progress } from "@/components/ui/progress";
 import { Button } from '@/components/ui/button';
 
-import { Student } from '@/data/users';
+import { Student } from '@/types/user';
 
 interface StudentPerformanceTabProps {
     student: Student;

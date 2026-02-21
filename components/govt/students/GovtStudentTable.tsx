@@ -14,7 +14,7 @@ import {
     DropdownMenu, DropdownMenuContent, DropdownMenuItem,
     DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Student } from '@/data/users';
+import { Student } from '@/types/user';
 
 interface GovtStudentTableProps {
     students: Student[];
@@ -44,13 +44,13 @@ export function GovtStudentTable({ students, onView, onContact }: GovtStudentTab
                             </TableCell>
                         </TableRow>
                     ) : (
-                        students.map((student) => (
-                            <TableRow key={student.id}>
+                        students.map((student, index) => (
+                            <TableRow key={student._id || student.id || index}>
                                 <TableCell>
                                     <div className="flex items-center gap-3">
                                         <Avatar className="h-9 w-9">
                                             <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${student.name}`} alt={student.name} />
-                                            <AvatarFallback>{student.name.substring(0, 2).toUpperCase()}</AvatarFallback>
+                                            <AvatarFallback>{(student.name || 'ST').substring(0, 2).toUpperCase()}</AvatarFallback>
                                         </Avatar>
                                         <div className="flex flex-col">
                                             <span className="font-medium text-foreground">{student.name}</span>
@@ -79,11 +79,11 @@ export function GovtStudentTable({ students, onView, onContact }: GovtStudentTab
                                 <TableCell>
                                     <div className="flex flex-col gap-1">
                                         <Badge variant="secondary" className="w-fit">
-                                            {student.enrolledCourses.length} Active Courses
+                                            {student.enrolledCourses?.length || 0} Active Courses
                                         </Badge>
                                         <span className="text-xs text-muted-foreground flex items-center gap-1">
                                             <BookOpen className="h-3 w-3" />
-                                            {student.completedCourses.length} Completed
+                                            {student.completedCourses?.length || 0} Completed
                                         </span>
                                     </div>
                                 </TableCell>

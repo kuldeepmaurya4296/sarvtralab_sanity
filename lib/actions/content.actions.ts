@@ -214,11 +214,11 @@ export async function getHomePageData() {
 
         return {
             organization: org,
-            features: cleanSanityDoc(features) || [],
+            features: features || [],
             stats: cleanSanityDoc(stats) || [],
-            testimonials: cleanSanityDoc(testimonials) || [],
-            videos: cleanSanityDoc(videos) || [],
-            faqs: cleanSanityDoc(faqs) || []
+            testimonials: testimonials || [],
+            videos: videos || [],
+            faqs: faqs || []
         };
     } catch (e) {
         console.error("Get Home Page Data Error:", e);

@@ -28,7 +28,7 @@ import {
     CardContent,
 } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { School } from '@/data/users';
+import { School } from '@/types/user';
 import { format } from 'date-fns';
 
 interface SchoolDetailsSheetProps {
@@ -192,13 +192,13 @@ export function SchoolDetailsSheet({ school, open, onOpenChange, onEdit, onAcces
                             </div>
                             <div>
                                 <span className="text-muted-foreground block text-xs">Status</span>
-                                <span className={`font-medium mt-1 inline-flex items-center gap-1 ${getStatusColor(school.subscriptionExpiry) === 'destructive' ? 'text-red-600' :
-                                    getStatusColor(school.subscriptionExpiry) === 'warning' ? 'text-amber-600' : 'text-green-600'
+                                <span className={`font-medium mt-1 inline-flex items-center gap-1 ${getStatusColor(school.subscriptionExpiry || new Date().toISOString()) === 'destructive' ? 'text-red-600' :
+                                    getStatusColor(school.subscriptionExpiry || new Date().toISOString()) === 'warning' ? 'text-amber-600' : 'text-green-600'
                                     }`}>
-                                    <span className={`h-2 w-2 rounded-full ${getStatusColor(school.subscriptionExpiry) === 'destructive' ? 'bg-red-600' :
-                                        getStatusColor(school.subscriptionExpiry) === 'warning' ? 'bg-amber-600' : 'bg-green-600'
+                                    <span className={`h-2 w-2 rounded-full ${getStatusColor(school.subscriptionExpiry || new Date().toISOString()) === 'destructive' ? 'bg-red-600' :
+                                        getStatusColor(school.subscriptionExpiry || new Date().toISOString()) === 'warning' ? 'bg-amber-600' : 'bg-green-600'
                                         }`}></span>
-                                    {getStatusLabel(school.subscriptionExpiry)}
+                                    {getStatusLabel(school.subscriptionExpiry || new Date().toISOString())}
                                 </span>
                             </div>
                             <div>

@@ -19,7 +19,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Separator } from '@/components/ui/separator';
-import { GovtOrg } from '@/data/users';
+import { GovtOrg } from '@/types/user';
 
 interface GovtViewSheetProps {
     org: GovtOrg | null;

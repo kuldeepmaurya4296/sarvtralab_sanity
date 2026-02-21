@@ -8,8 +8,6 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { schoolBenefits } from '@/data/products';
-import { organizationDetails } from '@/data/organization';
 import * as Icons from 'lucide-react';
 
 const IconComponent = ({ name, className }: { name: string; className?: string }) => {
@@ -20,9 +18,14 @@ const IconComponent = ({ name, className }: { name: string; className?: string }
 
 interface SchoolsClientProps {
     plans: any[];
+    organization: any;
+    benefits: any[];
 }
 
-export default function SchoolsClient({ plans }: SchoolsClientProps) {
+export default function SchoolsClient({ plans, organization, benefits }: SchoolsClientProps) {
+    const phone = organization?.phone || '+91-8085613350';
+    const partnerStudentsStat = organization?.stats?.find((s: any) => s.label.includes('Partner'))?.value || '120+';
+
     return (
         <>
             {/* Hero Section */}
@@ -44,7 +47,7 @@ export default function SchoolsClient({ plans }: SchoolsClientProps) {
                         </h1>
                         <p className="text-lg text-gray-300 mb-8">
                             Transform your school's STEM program with our comprehensive robotics curriculum,
-                            training, and support. Join {organizationDetails.stats.find(s => s.label.includes('Partner'))?.value || '120+'} partner schools across India.
+                            training, and support. Join {partnerStudentsStat} partner schools across India.
                         </p>
                         <div className="flex flex-col sm:flex-row gap-4">
                             <Button size="lg" className="w-full sm:w-auto h-12 text-lg font-semibold bg-primary hover:bg-primary/90" asChild>
@@ -54,9 +57,9 @@ export default function SchoolsClient({ plans }: SchoolsClientProps) {
                                 </Link>
                             </Button>
                             <Button size="lg" variant="outline" className="w-full sm:w-auto h-12 text-lg text-white border-white/20 cursor-pointer bg-white/10" asChild>
-                                <a href={`tel:${organizationDetails.contact.phone.replace(/\s+/g, '')}`}>
+                                <a href={`tel:${phone.replace(/\s+/g, '')}`}>
                                     <Phone className="w-5 h-5 mr-2" />
-                                    {organizationDetails.contact.phone}
+                                    {phone}
                                 </a>
                             </Button>
                         </div>
@@ -68,7 +71,7 @@ export default function SchoolsClient({ plans }: SchoolsClientProps) {
             <section className="py-12 bg-primary">
                 <div className="container mx-auto px-4">
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-                        {organizationDetails.stats.map((stat, index) => (
+                        {organization?.stats?.map((stat: any, index: number) => (
                             <motion.div
                                 key={stat.label}
                                 initial={{ opacity: 0, y: 20 }}
@@ -96,7 +99,7 @@ export default function SchoolsClient({ plans }: SchoolsClientProps) {
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                        {schoolBenefits.map((benefit, index) => (
+                        {benefits && benefits.length > 0 ? benefits.slice(0, 4).map((benefit: any, index: number) => (
                             <motion.div
                                 key={benefit.title}
                                 initial={{ opacity: 0, y: 20 }}
@@ -106,12 +109,16 @@ export default function SchoolsClient({ plans }: SchoolsClientProps) {
                                 className="p-6 rounded-2xl bg-muted/50 hover:bg-muted transition-colors"
                             >
                                 <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
-                                    <IconComponent name={benefit.iconName} className="w-7 h-7 text-primary" />
+                                    <IconComponent name={benefit.icon || 'GraduationCap'} className="w-7 h-7 text-primary" />
                                 </div>
                                 <h3 className="text-lg font-semibold mb-2">{benefit.title}</h3>
                                 <p className="text-muted-foreground">{benefit.description}</p>
                             </motion.div>
-                        ))}
+                        )) : (
+                            <div className="col-span-full py-20 text-center text-muted-foreground">
+                                Loading benefits...
+                            </div>
+                        )}
                     </div>
                 </div>
             </section>
@@ -129,7 +136,7 @@ export default function SchoolsClient({ plans }: SchoolsClientProps) {
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
                         {plans && plans.length > 0 ? plans.map((plan, index) => (
                             <motion.div
-                                key={plan.id || plan.customId || plan._id}
+                                key={plan._id || plan.id || plan.customId || index}
                                 initial={{ opacity: 0, y: 20 }}
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}

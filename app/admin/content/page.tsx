@@ -28,7 +28,8 @@ import {
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
-import { courses } from '@/data/courses'; // Import courses for dropdown
+import { getAllCourses } from '@/lib/actions/course.actions';
+import { Course } from '@/types/course';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -102,6 +103,7 @@ export default function AdminContentPage() {
     const [folderContents, setFolderContents] = useState<{ folders: any[], files: any[], breadcrumbs: any[] }>({ folders: [], files: [], breadcrumbs: [] });
     const [isLoading, setIsLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
+    const [courses, setCourses] = useState<Course[]>([]);
 
     // Action States
     const [isNewFolderOpen, setIsNewFolderOpen] = useState(false);
@@ -144,6 +146,11 @@ export default function AdminContentPage() {
 
     useEffect(() => {
         fetchContent();
+        const loadCourses = async () => {
+            const data = await getAllCourses();
+            setCourses(data);
+        };
+        loadCourses();
     }, [currentFolderId]);
 
     // Handlers

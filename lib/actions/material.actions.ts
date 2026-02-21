@@ -1,7 +1,7 @@
 'use server';
 
 import { sanityClient, cleanSanityDoc } from '@/lib/sanity';
-import { Material as MaterialType } from '@/data/materials';
+import { Material as MaterialType } from '@/types/material';
 
 export async function getCourseMaterials(courseId: string): Promise<MaterialType[]> {
     try {

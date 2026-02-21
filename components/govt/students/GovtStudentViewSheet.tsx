@@ -5,7 +5,7 @@ import {
     Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle,
 } from "@/components/ui/sheet";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Student } from '@/data/users';
+import { Student } from '@/types/user';
 
 interface GovtStudentViewSheetProps {
     student: Student | null;
@@ -47,11 +47,11 @@ export function GovtStudentViewSheet({ student, open, onOpenChange }: GovtStuden
                             </div>
                             <div className="space-y-1">
                                 <label className="text-xs font-medium text-muted-foreground">Enrolled Courses</label>
-                                <p className="text-sm font-medium">{student.enrolledCourses.length}</p>
+                                <p className="text-sm font-medium">{student.enrolledCourses?.length || 0}</p>
                             </div>
                             <div className="space-y-1">
                                 <label className="text-xs font-medium text-muted-foreground">Completed</label>
-                                <p className="text-sm font-medium">{student.completedCourses.length}</p>
+                                <p className="text-sm font-medium">{student.completedCourses?.length || 0}</p>
                             </div>
                         </div>
 

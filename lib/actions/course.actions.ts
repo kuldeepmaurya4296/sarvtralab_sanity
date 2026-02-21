@@ -1,7 +1,7 @@
 'use server';
 
 import { sanityClient, sanityWriteClient, cleanSanityDoc } from '@/lib/sanity';
-import { Course as CourseType } from '@/data/courses';
+import { Course as CourseType } from '@/types/course';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth';
 import { logActivity } from './activity.actions';

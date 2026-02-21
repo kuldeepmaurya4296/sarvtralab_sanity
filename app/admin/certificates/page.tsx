@@ -74,9 +74,9 @@ import { getAllCertificates, issueCertificate } from '@/lib/actions/certificate.
 import { getAllStudents } from '@/lib/actions/student.actions';
 import { getAllCourses } from '@/lib/actions/course.actions';
 import { getAllSchools } from '@/lib/actions/school.actions';
-import { Student, School, SuperAdmin } from '@/data/users';
-import { Course } from '@/data/courses';
-import { Certificate } from '@/data/certificates';
+import { Student, School, SuperAdmin } from '@/types/user';
+import { Course } from '@/types/course';
+import { Certificate } from '@/types/certificate';
 
 export default function AdminCertificatesPage() {
     const { user, isLoading: isAuthLoading } = useAuth();

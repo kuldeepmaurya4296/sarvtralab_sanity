@@ -12,7 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from '@/components/ui/badge';
 import { Mail } from 'lucide-react';
-import { Student } from '@/data/users';
+import { Student } from '@/types/user';
 import { StudentProfileTab } from './tabs/StudentProfileTab';
 import { StudentPerformanceTab } from './tabs/StudentPerformanceTab';
 import { StudentCertificatesTab } from './tabs/StudentCertificatesTab';

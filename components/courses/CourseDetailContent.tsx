@@ -6,11 +6,11 @@ import {
     Clock, Star, ArrowLeft, IndianRupee, Play,
     FileText, Calendar
 } from 'lucide-react';
-import PublicLayout from '@/components/layout/PublicLayout';
+
 import { Button } from '@/components/ui/button';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import Image from 'next/image';
-import { Course, CurriculumModule, Lesson } from '@/data/courses';
+import { Course, CurriculumModule, Lesson } from '@/types/course';
 
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
@@ -42,7 +42,7 @@ export default function CourseDetailContent({ course }: CourseDetailContentProps
     }, [user, course.id]);
 
     return (
-        <PublicLayout>
+        <>
             {/* Breadcrumb */}
             <section className="pt-24 pb-4 bg-muted/50">
                 <div className="container mx-auto px-4">
@@ -235,6 +235,6 @@ export default function CourseDetailContent({ course }: CourseDetailContentProps
                     </div>
                 </div>
             </section>
-        </PublicLayout>
+        </>
     );
 }

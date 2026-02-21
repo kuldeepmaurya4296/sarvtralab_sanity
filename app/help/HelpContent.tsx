@@ -3,26 +3,33 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Search, ChevronRight } from 'lucide-react';
+import { Search, ChevronRight, HelpCircle } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { supportCategories, supportArticles } from '@/data/support';
 import * as Icons from 'lucide-react';
 
 const IconComponent = ({ name, className }: { name: string; className?: string }) => {
     const Icon = (Icons as any)[name];
-    if (!Icon) return null;
+    if (!Icon) return <HelpCircle className={className} />;
     return <Icon className={className} />;
 };
 
-export default function HelpContent() {
+interface HelpContentProps {
+    categories: any[];
+    articles: any[];
+}
+
+export default function HelpContent({ categories, articles }: HelpContentProps) {
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
-    const filteredArticles = supportArticles.filter(article => {
+    const displayCategories = categories && categories.length > 0 ? categories : [];
+    const displayArticles = articles && articles.length > 0 ? articles : [];
+
+    const filteredArticles = displayArticles.filter(article => {
         const matchesCategory = selectedCategory ? article.categoryId === selectedCategory : true;
         const matchesSearch = article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            article.summary.toLowerCase().includes(searchQuery.toLowerCase());
+            (article.summary || '').toLowerCase().includes(searchQuery.toLowerCase());
         return matchesCategory && matchesSearch;
     });
 
@@ -54,27 +61,27 @@ export default function HelpContent() {
             <section className="py-16">
                 <div className="container mx-auto px-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
-                        {supportCategories.map((category, index) => (
+                        {displayCategories.map((category, index) => (
                             <motion.button
-                                key={category.id}
-                                onClick={() => setSelectedCategory(selectedCategory === category.id ? null : category.id)}
+                                key={category.id || category._id}
+                                onClick={() => setSelectedCategory(selectedCategory === (category.id || category._id) ? null : (category.id || category._id))}
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: index * 0.1 }}
-                                className={`text-left p-6 rounded-2xl border transition-all ${selectedCategory === category.id
+                                className={`text-left p-6 rounded-2xl border transition-all ${selectedCategory === (category.id || category._id)
                                     ? 'bg-primary text-primary-foreground ring-2 ring-primary ring-offset-2'
                                     : 'bg-card hover:shadow-lg hover:border-primary/50'
                                     }`}
                             >
-                                <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-4 ${selectedCategory === category.id ? 'bg-white/20' : 'bg-primary/10'
+                                <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-4 ${selectedCategory === (category.id || category._id) ? 'bg-white/20' : 'bg-primary/10'
                                     }`}>
                                     <IconComponent
-                                        name={category.iconName}
-                                        className={`w-6 h-6 ${selectedCategory === category.id ? 'text-white' : 'text-primary'}`}
+                                        name={category.icon || 'HelpCircle'}
+                                        className={`w-6 h-6 ${selectedCategory === (category.id || category._id) ? 'text-white' : 'text-primary'}`}
                                     />
                                 </div>
                                 <h3 className="font-bold text-lg mb-2">{category.title}</h3>
-                                <p className={`text-sm ${selectedCategory === category.id ? 'text-white/80' : 'text-muted-foreground'}`}>
+                                <p className={`text-sm ${selectedCategory === (category.id || category._id) ? 'text-white/80' : 'text-muted-foreground'}`}>
                                     {category.description}
                                 </p>
                             </motion.button>
@@ -85,14 +92,14 @@ export default function HelpContent() {
                     <div className="max-w-4xl mx-auto">
                         <h2 className="text-2xl font-bold mb-8">
                             {selectedCategory
-                                ? `${supportCategories.find(c => c.id === selectedCategory)?.title} Articles`
+                                ? `${displayCategories.find(c => (c.id || c._id) === selectedCategory)?.title} Articles`
                                 : searchQuery ? 'Search Results' : 'Popular Articles'}
                         </h2>
 
                         <div className="space-y-4">
                             {filteredArticles.length > 0 ? filteredArticles.map((article, index) => (
                                 <motion.div
-                                    key={article.id}
+                                    key={article.id || article._id}
                                     initial={{ opacity: 0, x: -10 }}
                                     animate={{ opacity: 1, x: 0 }}
                                     transition={{ delay: index * 0.05 }}
@@ -102,7 +109,7 @@ export default function HelpContent() {
                                         <h3 className="font-semibold text-lg group-hover:text-primary transition-colors">
                                             {article.title}
                                         </h3>
-                                        <p className="text-muted-foreground text-sm mt-1">{article.summary}</p>
+                                        <p className="text-muted-foreground text-sm mt-1">{article.summary || 'Click to read more...'}</p>
                                     </div>
                                     <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:translate-x-1 transition-transform" />
                                 </motion.div>

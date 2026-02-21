@@ -4,9 +4,10 @@ import { motion } from 'framer-motion';
 import { ExternalLink, Download } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { pressReleases } from '@/data/content';
 
-export default function PressContent() {
+export default function PressContent({ releases }: { releases: any[] }) {
+    const displayReleases = releases && releases.length > 0 ? releases : [];
+
     return (
         <>
             <section className="pt-32 pb-16 bg-muted/50">
@@ -37,9 +38,9 @@ export default function PressContent() {
                     <h2 className="text-2xl font-bold mb-8">Latest Press Releases</h2>
 
                     <div className="space-y-4">
-                        {pressReleases.map((release, index) => (
+                        {displayReleases.map((release, index) => (
                             <motion.div
-                                key={release.id}
+                                key={release.id || release._id}
                                 initial={{ opacity: 0, x: -20 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 transition={{ delay: index * 0.1 }}
@@ -50,15 +51,20 @@ export default function PressContent() {
                                         {release.source}
                                     </span>
                                     <h3 className="text-lg font-bold mb-2">{release.title}</h3>
-                                    <p className="text-sm text-muted-foreground">{release.date}</p>
+                                    <p className="text-sm text-muted-foreground">{release.date || new Date(release.createdAt).toLocaleDateString()}</p>
                                 </div>
-                                <Link href={release.link} className="shrink-0">
+                                <Link href={release.link || '#'} className="shrink-0" target="_blank" rel="noopener noreferrer">
                                     <Button variant="ghost" size="icon">
                                         <ExternalLink className="w-5 h-5" />
                                     </Button>
                                 </Link>
                             </motion.div>
                         ))}
+                        {displayReleases.length === 0 && (
+                            <div className="col-span-full py-20 text-center text-muted-foreground">
+                                No press releases found.
+                            </div>
+                        )}
                     </div>
                 </div>
             </section>

@@ -71,7 +71,7 @@ const FeaturesSection = ({ features: propFeatures }: { features?: FeatureItem[] 
             const IconComponent = iconMap[feature.icon];
             return (
               <motion.div
-                key={feature.id || (feature as any)._id || index}
+                key={(feature as any)._id || feature.id || index}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}

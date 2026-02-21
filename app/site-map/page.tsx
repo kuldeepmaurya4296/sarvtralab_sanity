@@ -2,14 +2,15 @@
 import React from 'react';
 import Link from 'next/link';
 import PublicLayout from '@/components/layout/PublicLayout';
-import { courses } from '@/data/courses';
+import { getAllCourses } from '@/lib/actions/course.actions';
 
 export const metadata = {
     title: 'Sitemap | Sarvtra Labs',
     description: 'Sitemap for Sarvtra Labs website.',
 };
 
-export default function SitemapPage() {
+export default async function SitemapPage() {
+    const courses = await getAllCourses();
     const staticRoutes = [
         { name: 'Home', path: '/' },
         { name: 'About Us', path: '/about' },
@@ -47,7 +48,7 @@ export default function SitemapPage() {
                         <section>
                             <h2 className="text-xl font-semibold mb-4 text-primary">Courses</h2>
                             <ul className="space-y-2">
-                                {courses.map((course) => (
+                                {courses.map((course: any) => (
                                     <li key={course.id || course.customId || course._id}>
                                         <Link href={`/courses/${course.id || course.customId || course._id}`} className="text-muted-foreground hover:text-primary transition-colors">
                                             {course.title}

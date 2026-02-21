@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Search, Download, Plus, Building2 } from 'lucide-react';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
-import { GovtOrg } from '@/data/users';
+import { GovtOrg } from '@/types/user';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import {

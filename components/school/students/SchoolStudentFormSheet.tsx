@@ -11,7 +11,7 @@ import { Separator } from '@/components/ui/separator';
 import {
     Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { Student } from '@/data/users';
+import { Student } from '@/types/user';
 import {
     Command,
     CommandEmpty,

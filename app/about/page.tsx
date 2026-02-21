@@ -1,6 +1,7 @@
 import PublicLayout from '@/components/layout/PublicLayout';
 import AboutContent from '@/components/about/AboutContent';
 import { constructMetadata } from '@/lib/seo';
+import { getOrganizationDetails, getTeamMembers } from '@/lib/actions/content.actions';
 
 export const metadata = constructMetadata({
     title: 'About Us | Sarvtra Labs',
@@ -8,10 +9,15 @@ export const metadata = constructMetadata({
     keywords: ['About Sarvtra Labs', 'Robotics Education India', 'STEM Platform', 'Edutech Bhopal', 'Sarwatra Labs'],
 });
 
-export default function AboutPage() {
+export default async function AboutPage() {
+    const [organization, team] = await Promise.all([
+        getOrganizationDetails(),
+        getTeamMembers()
+    ]);
+
     return (
         <PublicLayout>
-            <AboutContent />
+            <AboutContent organization={organization} team={team} />
         </PublicLayout>
     );
 }

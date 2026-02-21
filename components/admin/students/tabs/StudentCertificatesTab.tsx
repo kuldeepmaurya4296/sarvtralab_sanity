@@ -6,7 +6,7 @@ import {
     Loader2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Student } from '@/data/users';
+import { Student } from '@/types/user';
 import { getStudentCertificates } from '@/lib/actions/certificate.actions';
 import { CertificateTemplate } from '@/components/admin/CertificateTemplate';
 import { toast } from 'sonner';

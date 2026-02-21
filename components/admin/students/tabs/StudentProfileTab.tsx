@@ -16,7 +16,7 @@ import {
     Trash2,
     Mail
 } from 'lucide-react';
-import { Student } from '@/data/users';
+import { Student } from '@/types/user';
 import { format } from 'date-fns';
 
 interface StudentProfileTabProps {
@@ -108,11 +108,11 @@ export function StudentProfileTab({ student, onEdit, onDelete }: StudentProfileT
                 <div className="flex items-center justify-between">
                     <h4 className="font-semibold text-sm flex items-center gap-2 text-primary">
                         <BookOpen className="h-4 w-4" />
-                        Enrolled Courses ({student.enrolledCourses.length})
+                        Enrolled Courses ({(student.enrolledCourses || []).length})
                     </h4>
                 </div>
 
-                {student.enrolledCourses.length > 0 ? (
+                {student.enrolledCourses && student.enrolledCourses.length > 0 ? (
                     <div className="grid grid-cols-1 gap-2">
                         {student.enrolledCourses.map((courseId: string, idx: number) => (
                             <div key={idx} className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors">

@@ -26,7 +26,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { GovtOrg } from '@/data/users';
+import { GovtOrg } from '@/types/user';
 
 interface GovtTableProps {
     orgs: GovtOrg[];
@@ -57,9 +57,9 @@ export function GovtTable({ orgs, onView, onEdit, onDelete }: GovtTableProps) {
                             </TableCell>
                         </TableRow>
                     ) : (
-                        orgs.map((org) => (
+                        orgs.map((org, index) => (
                             <TableRow
-                                key={org.id}
+                                key={org._id || org.id || index}
                                 className="cursor-pointer hover:bg-muted/50"
                                 onClick={(e) => {
                                     if ((e.target as any).closest('.action-btn')) return;
@@ -69,7 +69,7 @@ export function GovtTable({ orgs, onView, onEdit, onDelete }: GovtTableProps) {
                                 <TableCell>
                                     <div className="flex items-center gap-3">
                                         <Avatar className="h-9 w-9 bg-primary/10">
-                                            <AvatarFallback className="text-primary">{org.organizationName.substring(0, 2).toUpperCase()}</AvatarFallback>
+                                            <AvatarFallback className="text-primary">{(org.organizationName || 'GO').substring(0, 2).toUpperCase()}</AvatarFallback>
                                         </Avatar>
                                         <div className="flex flex-col">
                                             <span className="font-medium text-foreground">{org.organizationName}</span>

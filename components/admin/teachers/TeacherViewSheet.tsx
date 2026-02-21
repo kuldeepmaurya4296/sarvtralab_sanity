@@ -19,7 +19,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from '@/components/ui/separator';
-import { Teacher, School as SchoolType } from '@/data/users';
+import { Teacher, School as SchoolType } from '@/types/user';
 
 interface TeacherViewSheetProps {
     teacher: Teacher | null;

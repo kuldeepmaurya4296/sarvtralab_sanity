@@ -5,7 +5,7 @@ import { Search, Download, Plus, GraduationCap } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { useAuth } from '@/context/AuthContext';
-import { Teacher, School, SuperAdmin } from '@/data/users';
+import { Teacher, School, SuperAdmin } from '@/types/user';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import {

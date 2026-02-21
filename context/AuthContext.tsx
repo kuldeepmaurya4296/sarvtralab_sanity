@@ -3,7 +3,7 @@
 import React, { createContext, useContext } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession, signIn, signOut, getSession } from 'next-auth/react';
-import { User, UserRole } from '@/data/users';
+import { User, UserRole } from '@/types/user';
 import { toast } from 'sonner';
 
 interface AuthContextType {

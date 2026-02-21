@@ -19,7 +19,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { GovtOrg } from '@/data/users';
+import { GovtOrg } from '@/types/user';
 
 interface GovtFormSheetProps {
     open: boolean;

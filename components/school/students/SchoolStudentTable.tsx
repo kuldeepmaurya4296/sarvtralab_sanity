@@ -17,7 +17,7 @@ import {
     DropdownMenu, DropdownMenuContent, DropdownMenuItem,
     DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Student } from '@/data/users';
+import { Student } from '@/types/user';
 
 interface SchoolStudentTableProps {
     students: Student[];
@@ -48,9 +48,9 @@ export function SchoolStudentTable({ students, onView, onEdit, onDelete }: Schoo
                             </TableCell>
                         </TableRow>
                     ) : (
-                        students.map((student) => (
+                        students.map((student, index) => (
                             <TableRow
-                                key={student.id || student.customId || student._id}
+                                key={student._id || student.id || student.customId || index}
                                 className="cursor-pointer hover:bg-muted/50"
                                 onClick={(e) => {
                                     if ((e.target as any).closest('.action-btn')) return;
@@ -61,7 +61,7 @@ export function SchoolStudentTable({ students, onView, onEdit, onDelete }: Schoo
                                     <div className="flex items-center gap-3">
                                         <Avatar className="h-9 w-9">
                                             <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${student.name}`} alt={student.name} />
-                                            <AvatarFallback>{student.name.substring(0, 2).toUpperCase()}</AvatarFallback>
+                                            <AvatarFallback>{(student.name || 'ST').substring(0, 2).toUpperCase()}</AvatarFallback>
                                         </Avatar>
                                         <div className="flex flex-col">
                                             <span className="font-medium text-foreground">{student.name}</span>
@@ -80,7 +80,7 @@ export function SchoolStudentTable({ students, onView, onEdit, onDelete }: Schoo
                                 </TableCell>
                                 <TableCell>
                                     <div className="flex flex-col gap-1">
-                                        <span className="text-sm font-medium">{student.enrolledCourses.length} Active</span>
+                                        <span className="text-sm font-medium">{student.enrolledCourses?.length || 0} Active</span>
                                         <span className="text-xs text-muted-foreground flex items-center gap-1">
                                             <CheckCircle2 className="h-3 w-3 text-green-500" />
                                             {student.completedCourses?.length || 0} Completed

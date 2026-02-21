@@ -60,7 +60,7 @@ const FAQSection = ({ faqs: propFAQs }: { faqs?: FAQItem[] }) => {
             <Accordion type="single" collapsible className="space-y-4">
               {displayFAQs.map((faq, index) => (
                 <AccordionItem
-                  key={faq.id || (faq as any)._id || index}
+                  key={(faq as any)._id || faq.id || index}
                   value={faq.id}
                   className="bg-card border rounded-xl px-6 data-[state=open]:shadow-lg transition-shadow"
                 >

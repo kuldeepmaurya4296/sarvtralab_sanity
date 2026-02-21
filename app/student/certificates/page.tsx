@@ -34,7 +34,7 @@ import { jsPDF } from 'jspdf';
 
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
-import { Student } from '@/data/users';
+import { Student } from '@/types/user';
 import { CertificateTemplate } from '@/components/admin/CertificateTemplate';
 
 // Server actions

@@ -5,9 +5,9 @@ import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import StatCard from '@/components/dashboard/StatCard';
 import FilterTabs from '@/components/dashboard/FilterTabs';
 import { ChartCard, AreaChartComponent, BarChartComponent } from '@/components/dashboard/Charts';
-import { monthlyData, gradeDistribution } from '@/data/analytics';
+// Removed data imports
 import { getGovtDashboardStats } from '@/lib/actions/dashboard.actions';
-import { GovtOrg } from '@/data/users';
+import { GovtOrg } from '@/types/user';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 
@@ -71,7 +71,7 @@ export default function GovtDashboardPage() {
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <ChartCard title="Student Growth Trend" subtitle="Monthly enrollment">
-                        <AreaChartComponent data={monthlyData} dataKey="students" color="hsl(var(--accent))" />
+                        <AreaChartComponent data={stats.monthlyGrowth || []} dataKey="students" color="hsl(var(--accent))" />
                     </ChartCard>
                     <ChartCard title="Grade Distribution" subtitle="Students by grade">
                         <BarChartComponent data={stats.gradeDistribution || []} dataKey="students" xAxisKey="grade" color="hsl(var(--primary))" />

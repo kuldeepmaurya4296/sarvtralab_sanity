@@ -18,7 +18,7 @@ export function PlanCardGrid({ plans, onEdit, onDelete }: PlanCardGridProps) {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {plans.map((plan, index) => (
                 <motion.div
-                    key={plan.id}
+                    key={plan._id || plan.id || index}
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: index * 0.05 }}

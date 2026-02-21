@@ -1,6 +1,7 @@
 
 import PublicLayout from '@/components/layout/PublicLayout';
 import { getAllPlans } from '@/lib/actions/plan.actions';
+import { getOrganizationDetails, getFeatures } from '@/lib/actions/content.actions';
 import SchoolsClient from './SchoolsClient';
 import { constructMetadata } from '@/lib/seo';
 
@@ -10,11 +11,19 @@ export const metadata = constructMetadata({
 });
 
 export default async function SchoolsPage() {
-    const plans = await getAllPlans();
+    const [plans, organization, features] = await Promise.all([
+        getAllPlans(),
+        getOrganizationDetails(),
+        getFeatures()
+    ]);
 
     return (
         <PublicLayout>
-            <SchoolsClient plans={plans} />
+            <SchoolsClient
+                plans={plans}
+                organization={organization}
+                benefits={features}
+            />
         </PublicLayout>
     );
 }

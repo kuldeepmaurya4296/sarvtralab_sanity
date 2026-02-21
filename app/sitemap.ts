@@ -1,9 +1,9 @@
 import { MetadataRoute } from 'next';
-import { courses } from '@/data/courses';
+import { getAllCourses } from '@/lib/actions/course.actions';
 
 const SITE_URL = 'https://sarvtralabs.com'; // Replace with actual URL
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const routes = [
         '',
         '/about',
@@ -23,12 +23,18 @@ export default function sitemap(): MetadataRoute.Sitemap {
         priority: route === '' ? 1 : 0.8,
     }));
 
-    const courseRoutes = courses.map((course) => ({
-        url: `${SITE_URL}/courses/${course.id || (course as any).customId || (course as any)._id}`,
-        lastModified: new Date(),
-        changeFrequency: 'monthly' as const,
-        priority: 0.7,
-    }));
+    let courseRoutes: any[] = [];
+    try {
+        const courses = await getAllCourses();
+        courseRoutes = courses.map((course: any) => ({
+            url: `${SITE_URL}/courses/${course.id || course.customId || course._id}`,
+            lastModified: new Date(),
+            changeFrequency: 'monthly' as const,
+            priority: 0.7,
+        }));
+    } catch (e) {
+        console.error("Sitemap courses fetch error:", e);
+    }
 
     return [...routes, ...courseRoutes];
 }

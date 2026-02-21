@@ -20,7 +20,7 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Course } from '@/data/courses';
+import { Course } from '@/types/course';
 
 interface CourseFormSheetProps {
     open: boolean;

@@ -22,7 +22,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { Student, School } from '@/data/users';
+import { Student, School } from '@/types/user';
 
 interface StudentFormSheetProps {
     open: boolean;

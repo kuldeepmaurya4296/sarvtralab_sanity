@@ -3,12 +3,12 @@
 import { motion } from 'framer-motion';
 import { Briefcase, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { jobs } from '@/data/content';
 import { useNotifications } from '@/context/NotificationContext';
 import { toast } from 'sonner';
 
-export default function CareersContent() {
+export default function CareersContent({ jobs }: { jobs: any[] }) {
     const { notifyAdmin } = useNotifications();
+    const displayJobs = jobs && jobs.length > 0 ? jobs : [];
 
     const handleApply = (jobTitle: string) => {
         toast.success(`Application for ${jobTitle} submitted successfully!`);
@@ -47,9 +47,9 @@ export default function CareersContent() {
                     <h2 className="text-2xl font-bold mb-8">Open Positions</h2>
 
                     <div className="space-y-4">
-                        {jobs.map((job, index) => (
+                        {displayJobs.map((job, index) => (
                             <motion.div
-                                key={job.id}
+                                key={job.id || job._id}
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: index * 0.1 }}
@@ -78,6 +78,12 @@ export default function CareersContent() {
                                 </Button>
                             </motion.div>
                         ))}
+                        {displayJobs.length === 0 && (
+                            <div className="text-center py-20 text-muted-foreground border-2 border-dashed rounded-xl">
+                                <p className="text-lg">No open positions at the moment.</p>
+                                <p className="text-sm">Check back later or send your resume spontaneously!</p>
+                            </div>
+                        )}
                     </div>
 
                     <div className="mt-12 text-center bg-primary/5 rounded-2xl p-8">

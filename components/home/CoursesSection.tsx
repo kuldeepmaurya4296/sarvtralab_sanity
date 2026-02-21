@@ -98,7 +98,7 @@ const CoursesSection = ({ courses }: CoursesSectionProps) => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
           {featuredCourses.map((course, index) => (
             <motion.div
-              key={course.id || course.customId || course._id || index}
+              key={course._id || course.id || index}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}

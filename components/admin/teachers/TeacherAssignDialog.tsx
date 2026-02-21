@@ -12,7 +12,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from "@/components/ui/checkbox";
-import { Teacher, School } from '@/data/users';
+import { Teacher, School } from '@/types/user';
 
 interface TeacherAssignDialogProps {
     teacher: Teacher | null;

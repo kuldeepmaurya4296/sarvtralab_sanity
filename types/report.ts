@@ -1,6 +1,7 @@
 
 export interface Report {
     id: string;
+    _id?: string;
     name: string;
     type: string;
     generatedBy: string;
@@ -10,6 +11,3 @@ export interface Report {
     description: string;
     schoolId?: string;
 }
-
-// Reports are now fetched from Sanity CMS via report.actions.ts
-export const mockReports: Report[] = [];

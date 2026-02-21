@@ -38,7 +38,7 @@ import { StudentTable } from '@/components/admin/students/StudentTable';
 import { StudentViewSheet } from '@/components/admin/students/StudentViewSheet';
 import { StudentFormSheet } from '@/components/admin/students/StudentFormSheet';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
-import { Student, School, SuperAdmin } from '@/data/users';
+import { Student, School, SuperAdmin } from '@/types/user';
 
 export default function AdminStudentsPage() {
     const { user, isLoading: isAuthLoading } = useAuth();

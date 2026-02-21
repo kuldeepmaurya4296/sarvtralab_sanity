@@ -1,6 +1,7 @@
 import PublicLayout from '@/components/layout/PublicLayout';
 import ContactContent from '@/components/contact/ContactContent';
 import { constructMetadata } from '@/lib/seo';
+import { getOrganizationDetails } from '@/lib/actions/content.actions';
 
 export const metadata = constructMetadata({
     title: 'Contact Us | Sarvtra Labs',
@@ -8,10 +9,12 @@ export const metadata = constructMetadata({
     keywords: ['Contact Sarvtra Labs', 'Sarvatra Labs Bhopal', 'Robotics Course Inquiry', 'School Partnership India', 'Sarwatra Labs Contact'],
 });
 
-export default function ContactPage() {
+export default async function ContactPage() {
+    const organization = await getOrganizationDetails();
+
     return (
         <PublicLayout>
-            <ContactContent />
+            <ContactContent organization={organization} />
         </PublicLayout>
     );
 }

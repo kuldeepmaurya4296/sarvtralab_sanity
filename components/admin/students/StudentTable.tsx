@@ -20,7 +20,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { MoreVertical, Eye, Edit, Trash2, School } from 'lucide-react';
-import { Student } from '@/data/users';
+import { Student } from '@/types/user';
 
 interface StudentTableProps {
     students: Student[];
@@ -70,9 +70,9 @@ export function StudentTable({ students, onView, onEdit, onDelete }: StudentTabl
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {students.map((student) => (
+                    {students.map((student, index) => (
                         <TableRow
-                            key={student.id || student.customId || student._id}
+                            key={student._id || student.id || student.customId || index}
                             className="cursor-pointer hover:bg-muted/50"
                             onClick={(e) => {
                                 // Prevent open details when clicking actions
@@ -84,7 +84,7 @@ export function StudentTable({ students, onView, onEdit, onDelete }: StudentTabl
                                 <div className="flex items-center gap-3">
                                     <Avatar className="h-9 w-9">
                                         <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${student.name}`} alt={student.name} />
-                                        <AvatarFallback>{student.name.substring(0, 2).toUpperCase()}</AvatarFallback>
+                                        <AvatarFallback>{(student.name || 'ST').substring(0, 2).toUpperCase()}</AvatarFallback>
                                     </Avatar>
                                     <div className="flex flex-col">
                                         <span className="font-medium text-foreground">{student.name}</span>
@@ -107,7 +107,7 @@ export function StudentTable({ students, onView, onEdit, onDelete }: StudentTabl
                                 </Badge>
                             </TableCell>
                             <TableCell>
-                                <span className="font-medium">{student.enrolledCourses.length}</span>
+                                <span className="font-medium">{student.enrolledCourses?.length || 0}</span>
                             </TableCell>
                             <TableCell className="text-right">
                                 <DropdownMenu>

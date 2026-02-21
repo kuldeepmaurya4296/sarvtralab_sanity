@@ -9,7 +9,7 @@ import {
     SheetTitle,
 } from "@/components/ui/sheet";
 import { Card, CardContent } from '@/components/ui/card';
-import { School } from '@/data/users';
+import { School } from '@/types/user';
 
 interface SchoolAnalyticsSheetProps {
     school: School | null;

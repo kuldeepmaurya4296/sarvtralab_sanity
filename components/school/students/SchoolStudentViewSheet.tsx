@@ -13,7 +13,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Student } from '@/data/users';
+import { Student } from '@/types/user';
 import { StudentPerformanceTab } from '@/components/admin/students/tabs/StudentPerformanceTab';
 import { format } from 'date-fns';
 
@@ -121,7 +121,7 @@ export function SchoolStudentViewSheet({ student, open, onOpenChange }: SchoolSt
                                     <h4 className="font-semibold flex items-center gap-2 text-sm text-primary">
                                         <BookOpen className="h-4 w-4" /> Current Enrollment
                                     </h4>
-                                    {student.enrolledCourses.length > 0 ? (
+                                    {student.enrolledCourses && student.enrolledCourses.length > 0 ? (
                                         <div className="space-y-2">
                                             {student.enrolledCourses.map((course: string, idx: number) => (
                                                 <div key={idx} className="flex items-center justify-between p-3 rounded-md border text-sm hover:bg-muted/50 transition-colors">

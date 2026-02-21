@@ -26,7 +26,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Teacher, School as SchoolType } from '@/data/users';
+import { Teacher, School as SchoolType } from '@/types/user';
 
 interface TeacherTableProps {
     teachers: Teacher[];
@@ -67,9 +67,9 @@ export function TeacherTable({ teachers, schools, onView, onEdit, onDelete, onAs
                             </TableCell>
                         </TableRow>
                     ) : (
-                        teachers.map((teacher) => (
+                        teachers.map((teacher, index) => (
                             <TableRow
-                                key={teacher.id || teacher.customId || teacher._id}
+                                key={teacher._id || teacher.id || teacher.customId || index}
                                 className="cursor-pointer hover:bg-muted/50"
                                 onClick={(e) => {
                                     if ((e.target as any).closest('.action-btn')) return;
@@ -80,7 +80,7 @@ export function TeacherTable({ teachers, schools, onView, onEdit, onDelete, onAs
                                     <div className="flex items-center gap-3">
                                         <Avatar className="h-9 w-9">
                                             <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${teacher.name}`} alt={teacher.name} />
-                                            <AvatarFallback>{teacher.name.substring(0, 2).toUpperCase()}</AvatarFallback>
+                                            <AvatarFallback>{(teacher.name || 'TR').substring(0, 2).toUpperCase()}</AvatarFallback>
                                         </Avatar>
                                         <div className="flex flex-col">
                                             <span className="font-medium text-foreground">{teacher.name}</span>
@@ -96,9 +96,9 @@ export function TeacherTable({ teachers, schools, onView, onEdit, onDelete, onAs
                                 </TableCell>
                                 <TableCell>{teacher.experience} Years</TableCell>
                                 <TableCell>
-                                    <div className="flex items-center gap-1 text-muted-foreground text-sm max-w-[200px] truncate" title={getSchoolNames(teacher.assignedSchools)}>
+                                    <div className="flex items-center gap-1 text-muted-foreground text-sm max-w-[200px] truncate" title={getSchoolNames(teacher.assignedSchools || [])}>
                                         <School className="h-3 w-3 inline mr-1" />
-                                        {getSchoolNames(teacher.assignedSchools)}
+                                        {getSchoolNames(teacher.assignedSchools || [])}
                                     </div>
                                 </TableCell>
                                 <TableCell>

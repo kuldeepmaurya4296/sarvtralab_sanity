@@ -1,18 +1,17 @@
+
 'use client';
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Mail, Phone, MapPin, Clock, MessageSquare, CheckCircle, Send } from 'lucide-react';
+import { Mail, Phone, MapPin, Clock, MessageSquare, CheckCircle, Send, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { contactCards, organizationDetails } from '@/data/organization';
 import { useNotifications } from '@/context/NotificationContext';
 import * as Icons from 'lucide-react';
 import { sendContactEmail } from '@/lib/actions/mail.actions';
-import { Loader2 } from 'lucide-react';
 
 const IconComponent = ({ name, className }: { name: string; className?: string }) => {
     // @ts-ignore
@@ -20,7 +19,7 @@ const IconComponent = ({ name, className }: { name: string; className?: string }
     return Icon ? <Icon className={className} /> : null;
 };
 
-export default function ContactContent() {
+export default function ContactContent({ organization }: { organization: any }) {
     const { toast } = useToast();
     const [formData, setFormData] = useState({
         name: '',
@@ -33,6 +32,37 @@ export default function ContactContent() {
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const { notifyAdmin } = useNotifications();
+
+    const contactCards = [
+        {
+            title: 'Email Us',
+            content: organization?.email || 'connect@pushpako2.com',
+            subtext: 'We respond within 24 hours',
+            iconName: 'Mail',
+            link: `mailto:${organization?.email || 'connect@pushpako2.com'}`
+        },
+        {
+            title: 'Call Us',
+            content: organization?.phone || '+91-8085613350',
+            subtext: 'Mon-Sat, 10am-6pm',
+            iconName: 'Phone',
+            link: `tel:${(organization?.phone || '+91-8085613350').replace(/\s+/g, '')}`
+        },
+        {
+            title: 'Office Address',
+            content: 'Sarvtra Labs, Bhopal',
+            subtext: organization?.address || 'Bhopal, Madhya Pradesh, India',
+            iconName: 'MapPin',
+            link: '#'
+        },
+        {
+            title: 'Working Hours',
+            content: '10:00 AM - 06:00 PM',
+            subtext: 'Monday to Saturday',
+            iconName: 'Clock',
+            link: '#'
+        }
+    ];
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -246,7 +276,7 @@ export default function ContactContent() {
                             {/* Map */}
                             <div className="h-72 rounded-2xl bg-muted overflow-hidden border">
                                 <iframe
-                                    src={organizationDetails.contact.mapEmbedUrl}
+                                    src={organization?.mapEmbedUrl || "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d117307.67914801362!2d77.3060269!3d23.2599333!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x397c428f873ad307%3A0x62661d47157f4935!2sBhopal%2C%20Madhya%20Pradesh!5e0!3m2!1sen!2sin!4v1700000000000!5m2!1sen!2sin"}
                                     width="100%"
                                     height="100%"
                                     style={{ border: 0 }}

@@ -4,7 +4,7 @@ import { sanityClient, sanityWriteClient, cleanSanityDoc } from '@/lib/sanity';
 import { revalidatePath } from 'next/cache';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth';
-import { School } from '@/data/users';
+import { School } from '@/types/user';
 import { logActivity } from './activity.actions';
 import bcrypt from 'bcryptjs';
 

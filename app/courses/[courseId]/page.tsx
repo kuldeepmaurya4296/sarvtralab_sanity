@@ -52,9 +52,9 @@ export default async function CourseDetailPage({ params }: Props) {
     }
 
     return (
-        <>
+        <PublicLayout>
             <CourseSchema course={course} />
             <CourseDetailContent course={course as any} />
-        </>
+        </PublicLayout>
     );
 }

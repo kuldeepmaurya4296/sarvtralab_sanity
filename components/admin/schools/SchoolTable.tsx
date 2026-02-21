@@ -28,7 +28,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { School } from '@/data/users';
+import { School } from '@/types/user';
 
 interface SchoolTableProps {
     schools: School[];
@@ -78,8 +78,8 @@ export function SchoolTable({ schools, onView, onEdit, onDelete, onAccess, onAna
                             </TableCell>
                         </TableRow>
                     ) : (
-                        schools.map((school) => (
-                            <TableRow key={school.id || school.customId || school._id}
+                        schools.map((school, index) => (
+                            <TableRow key={school._id || school.id || school.customId || index}
                                 className="cursor-pointer hover:bg-muted/50"
                                 onClick={(e) => {
                                     if ((e.target as any).closest('.action-btn')) return;
@@ -129,10 +129,10 @@ export function SchoolTable({ schools, onView, onEdit, onDelete, onAccess, onAna
                                         <Badge variant="secondary" className="w-fit capitalize">
                                             {school.subscriptionPlan}
                                         </Badge>
-                                        <span className={`text-[10px] font-medium ${getStatusColor(school.subscriptionExpiry) === 'destructive' ? 'text-red-600' :
-                                            getStatusColor(school.subscriptionExpiry) === 'warning' ? 'text-amber-600' : 'text-green-600'
+                                        <span className={`text-[10px] font-medium ${getStatusColor(school.subscriptionExpiry || new Date().toISOString()) === 'destructive' ? 'text-red-600' :
+                                            getStatusColor(school.subscriptionExpiry || new Date().toISOString()) === 'warning' ? 'text-amber-600' : 'text-green-600'
                                             }`}>
-                                            {getStatusLabel(school.subscriptionExpiry)}
+                                            {getStatusLabel(school.subscriptionExpiry || new Date().toISOString())}
                                         </span>
                                     </div>
                                 </TableCell>

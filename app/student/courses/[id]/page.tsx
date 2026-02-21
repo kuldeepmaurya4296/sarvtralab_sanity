@@ -12,8 +12,8 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { useAuth } from '@/context/AuthContext';
 import { getCourseById } from '@/lib/actions/course.actions';
-import { Course, Lesson } from '@/data/courses'; // Keeping type imports
-import { Student } from '@/data/users';
+import { Course, Lesson } from '@/types/course';
+import { Student } from '@/types/user';
 
 export default function CoursePlayerPage() {
     const params = useParams();

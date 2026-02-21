@@ -80,18 +80,36 @@ export async function getCrmAnalytics() {
         throw new Error("Unauthorized");
     }
     try {
+        const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+
         const stats = await sanityClient.fetch(`{
             "totalLeads": count(*[_type == "lead"]),
-            "newLeads": count(*[_type == "lead" && status == "New"]),
-            "contactedLeads": count(*[_type == "lead" && status == "Contacted"]),
+            "recentLeadsCount": count(*[_type == "lead" && createdAt >= $thirtyDaysAgo]),
             "convertedDocs": count(*[_type == "lead" && status == "Converted"]),
-            "lostLeads": count(*[_type == "lead" && status == "Lost"]),
-            "recentLeads": *[_type == "lead"] | order(createdAt desc)[0...5]
-        }`);
+            "sourceDistribution": *[_type == "lead"]{source}
+        }`, { thirtyDaysAgo });
+
+        // Calculate conversion rate
+        const total = stats.totalLeads || 0;
+        const converted = stats.convertedDocs || 0;
+        const conversionRate = total > 0 ? Math.round((converted / total) * 100) : 0;
+
+        // Calculate source distribution
+        const sources = stats.sourceDistribution.reduce((acc: any, curr: any) => {
+            const src = curr.source || 'Unknown';
+            acc[src] = (acc[src] || 0) + 1;
+            return acc;
+        }, {});
+
+        const distribution = Object.entries(sources)
+            .map(([name, count]) => ({ _id: name, count }))
+            .sort((a: any, b: any) => b.count - a.count);
 
         return {
-            ...stats,
-            convertedLeads: stats.convertedDocs // renamed for consistency if needed
+            totalLeads: stats.totalLeads,
+            recentLeads: stats.recentLeadsCount, // Match the expected field name in the component
+            conversionRate,
+            sourceDistribution: distribution
         };
     } catch (e) {
         console.error("Get CRM Analytics Error:", e);

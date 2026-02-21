@@ -209,13 +209,27 @@ export async function getGovtDashboardStats() {
             if (g) gradeCounts[g] = (gradeCounts[g] || 0) + 1;
         });
 
+        const growthResult = await sanityClient.fetch(`*[_type == "user" && role == "student"] | order(createdAt asc){createdAt}`);
+        const growthMap: any = {};
+        growthResult.forEach((u: any) => {
+            const month = new Date(u.createdAt).toLocaleString('default', { month: 'short' });
+            if (!growthMap[month]) growthMap[month] = { date: month, students: 0 };
+            growthMap[month].students++;
+        });
+
+        // Ensure we have at least some data for the chart if no students exist
+        const monthlyGrowth = Object.values(growthMap).length > 0
+            ? Object.values(growthMap)
+            : [{ date: 'Jan', students: 0 }];
+
         return {
             totalSchools: results.totalSchools,
             totalStudents: results.totalStudents,
             avgCompletion: `${avgProgress.toFixed(1)}%`,
             reportsCount: results.reportsCount,
             schools: results.schools,
-            gradeDistribution: Object.keys(gradeCounts).map(g => ({ grade: g, students: gradeCounts[g] }))
+            gradeDistribution: Object.keys(gradeCounts).map(g => ({ grade: g, students: gradeCounts[g] })),
+            monthlyGrowth
         };
     } catch (e) {
         console.error("Govt Dashboard Stats Error:", e);

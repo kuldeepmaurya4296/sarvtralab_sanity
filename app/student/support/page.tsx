@@ -1,8 +1,8 @@
+
 'use client';
 
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { useAuth } from '@/context/AuthContext';
-import { organizationDetails } from '@/data/organization';
 import { Mail, Phone, Clock, Construction, LifeBuoy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNotifications } from '@/context/NotificationContext';
@@ -14,6 +14,10 @@ export default function StudentSupportPage() {
 
     if (authLoading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
     if (!user) return null;
+
+    const supportEmail = 'connect@pushpako2.com';
+    const supportPhone = '+91-8085613350';
+    const supportHours = 'Mon-Sat, 10am-6pm';
 
     const handleCreateTicket = () => {
         toast.success("Support ticket created!");
@@ -55,7 +59,7 @@ export default function StudentSupportPage() {
                             Get help with account issues, course content, or technical problems.
                         </p>
                         <Button variant="outline" className="w-full" asChild>
-                            <a href={`mailto:${organizationDetails.contact.email}`}>Send Email</a>
+                            <a href={`mailto:${supportEmail}`}>Send Email</a>
                         </Button>
                     </div>
 
@@ -68,7 +72,7 @@ export default function StudentSupportPage() {
                             Speak directly with our support team during business hours.
                         </p>
                         <Button variant="outline" className="w-full" asChild>
-                            <a href={`tel:${organizationDetails.contact.phone}`}>{organizationDetails.contact.phone}</a>
+                            <a href={`tel:${supportPhone.replace(/\s+/g, '')}`}>{supportPhone}</a>
                         </Button>
                     </div>
 
@@ -80,7 +84,7 @@ export default function StudentSupportPage() {
                         <p className="text-muted-foreground text-sm mb-4">
                             Our team is available to assist you during the following times:
                         </p>
-                        <p className="font-medium text-foreground">{organizationDetails.contact.hours}</p>
+                        <p className="font-medium text-foreground">{supportHours}</p>
                     </div>
                 </div>
 

@@ -25,7 +25,7 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { toast } from 'sonner';
-import { School } from '@/data/users';
+import { School } from '@/types/user';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 

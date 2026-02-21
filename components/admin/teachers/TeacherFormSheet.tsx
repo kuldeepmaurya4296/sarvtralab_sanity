@@ -19,7 +19,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { Teacher } from '@/data/users';
+import { Teacher } from '@/types/user';
 
 interface TeacherFormSheetProps {
     open: boolean;
