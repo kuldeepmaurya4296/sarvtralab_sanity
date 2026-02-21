@@ -3,7 +3,8 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
-import { Users, Search, Eye, Mail } from 'lucide-react';
+import { Users, Search, Eye, Mail, Upload } from 'lucide-react';
+import { BulkStudentUpload } from '@/components/shared/BulkStudentUpload';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -52,9 +53,12 @@ export default function TeacherStudentsPage() {
                         </h1>
                         <p className="text-muted-foreground">Students enrolled in your courses</p>
                     </div>
-                    <div className="relative w-full sm:w-64">
-                        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                        <Input placeholder="Search students..." className="pl-8" value={search} onChange={e => setSearch(e.target.value)} />
+                    <div className="flex items-center gap-2">
+                        <div className="relative w-full sm:w-64">
+                            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                            <Input placeholder="Search students..." className="pl-8" value={search} onChange={e => setSearch(e.target.value)} />
+                        </div>
+                        <BulkStudentUpload onComplete={() => router.refresh()} />
                     </div>
                 </div>
 

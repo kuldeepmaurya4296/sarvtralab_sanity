@@ -39,6 +39,8 @@ import { StudentViewSheet } from '@/components/admin/students/StudentViewSheet';
 import { StudentFormSheet } from '@/components/admin/students/StudentFormSheet';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
 import { Student, School, SuperAdmin } from '@/types/user';
+import { BulkStudentUpload } from '@/components/shared/BulkStudentUpload';
+
 
 export default function AdminStudentsPage() {
     const { user, isLoading: isAuthLoading } = useAuth();
@@ -256,6 +258,11 @@ export default function AdminStudentsPage() {
                             <Download className="h-4 w-4" />
                             Export Data
                         </Button>
+                        <BulkStudentUpload
+                            onComplete={() => {
+                                getAllStudents().then(setStudents);
+                            }}
+                        />
                         <Button
                             className="gap-2 bg-primary text-primary-foreground hover:bg-primary/90"
                             onClick={() => setIsAddOpen(true)}

@@ -48,9 +48,11 @@ export async function getAllStudents() {
         // If it's a school admin, only return students from their school
         if (session.user.role === 'school') {
             const user = session.user as any;
-            if (!user.schoolId) return [];
-            query = `*[_type == "user" && role == "student" && (schoolRef._ref == $schoolId || schoolId == $schoolId)]`;
-            params = { schoolId: user.schoolId };
+            const sId = user.schoolId || user.dbId || user.id; // Schools themselves use their ID as schoolId
+            if (!sId) return [];
+
+            query = `*[_type == "user" && role == "student" && (schoolRef._ref == $sId || schoolId == $sId)]`;
+            params = { sId };
         }
 
         const students = await sanityClient.fetch(query + ` | order(createdAt desc)`, params);
@@ -58,6 +60,109 @@ export async function getAllStudents() {
     } catch (e) {
         console.error("Get All Students Error:", e);
         return [];
+    }
+}
+
+export async function bulkCreateStudents(studentsData: any[], schoolContext?: { id: string, name: string, city: string, state: string }) {
+    const session = await getServerSession(authOptions);
+    if (!session || !['superadmin', 'admin', 'school', 'govt', 'teacher'].includes(session.user.role)) {
+        throw new Error("Unauthorized");
+    }
+
+    try {
+        const results = {
+            success: [] as any[],
+            errors: [] as any[]
+        };
+
+        // Get base start ID
+        const lastStudent = await sanityClient.fetch(
+            `*[_type == "user" && role == "student" && customId match "SRV-*"] | order(customId desc)[0]`
+        );
+        let currentNum = 1;
+        if (lastStudent?.customId) {
+            const num = parseInt(lastStudent.customId.split('-')[1]);
+            if (!isNaN(num)) currentNum = num + 1;
+        }
+
+        const transaction = sanityWriteClient.transaction();
+
+        for (const data of studentsData) {
+            try {
+                if (!data.email || !data.name) {
+                    results.errors.push({ email: data.email || 'Unknown', error: "Name and Email are required" });
+                    continue;
+                }
+
+                // Check if already in this batch to avoid internal duplicates
+                const isInternalDup = results.success.some(s => s.email === data.email);
+                if (isInternalDup) {
+                    results.errors.push({ email: data.email, error: "Duplicate email in sheet" });
+                    continue;
+                }
+
+                const existing = await sanityClient.fetch(
+                    `*[_type == "user" && email == $email][0]`,
+                    { email: data.email }
+                );
+                if (existing) {
+                    results.errors.push({ email: data.email, error: "Email already registered" });
+                    continue;
+                }
+
+                const hashedPassword = await bcrypt.hash(data.password || 'student123', 10);
+                const customId = `SRV-${(currentNum++).toString().padStart(4, '0')}`;
+
+                let schoolRef = undefined;
+                const sId = data.schoolId || schoolContext?.id;
+                const sName = data.schoolName || schoolContext?.name || 'Individual Learner';
+
+                if (sId) {
+                    const school = await sanityClient.fetch(
+                        `*[_type == "user" && role == "school" && (customId == $id || _id == $id)][0]`,
+                        { id: sId }
+                    );
+                    if (school) {
+                        schoolRef = { _type: 'reference', _ref: school._id };
+                    }
+                }
+
+                const studentDoc = {
+                    _type: 'user',
+                    ...data,
+                    role: 'student',
+                    customId,
+                    password: hashedPassword,
+                    schoolRef,
+                    schoolName: sName,
+                    city: data.city || schoolContext?.city,
+                    state: data.state || schoolContext?.state,
+                    status: 'active',
+                    profileCompleted: true,
+                    createdAt: new Date().toISOString()
+                };
+
+                // Remove fields that shouldn't be spread
+                delete (studentDoc as any).schoolId;
+
+                transaction.create(studentDoc);
+                results.success.push({ email: data.email, name: data.name, customId });
+
+            } catch (err: any) {
+                results.errors.push({ email: data.email, error: err.message });
+            }
+        }
+
+        if (results.success.length > 0) {
+            await transaction.commit();
+            await logActivity(session.user.id, 'STUDENT_BULK_CREATE', `Bulk created ${results.success.length} students`);
+        }
+
+        return results;
+
+    } catch (e: any) {
+        console.error("Bulk Create Student Error:", e);
+        throw e;
     }
 }
 
@@ -110,6 +215,7 @@ export async function createStudent(data: any) {
         throw e;
     }
 }
+
 
 export async function updateStudent(id: string, updates: any) {
     const session = await getServerSession(authOptions);

@@ -34,6 +34,18 @@ export default function SignupPage() {
         schoolName: '',
         newSchoolName: '',
         newSchoolEmail: '',
+        // New school-specific fields
+        schoolCode: '',
+        principalName: '',
+        phone: '',
+        website: '',
+        schoolType: 'Private',
+        board: 'CBSE',
+        address: '',
+        city: '',
+        state: '',
+        pincode: '',
+        subscriptionPlan: 'None',
     });
     const [selectedRole, setSelectedRole] = useState<UserRole>('student');
 
@@ -98,15 +110,13 @@ export default function SignupPage() {
         }
 
         if (selectedRole === 'school') {
-            if (formData.schoolId === 'new_school') {
-                if (!formData.newSchoolName || !formData.newSchoolEmail) {
-                    toast.error('Please enter new school name and email');
+            // Validate all required school fields from the image
+            const requiredFields = ['name', 'principalName', 'phone', 'address', 'city', 'state', 'pincode'];
+            for (const field of requiredFields) {
+                if (!(formData as any)[field]) {
+                    toast.error(`Please fill in the ${field.replace(/([A-Z])/g, ' $1').toLowerCase()}`);
                     return;
                 }
-            } else if (!formData.schoolId) {
-                // Schools must identify themselves or create new
-                toast.error('Please select or create your institution');
-                return;
             }
         }
 
@@ -120,9 +130,9 @@ export default function SignupPage() {
             const registrationData = {
                 ...formData,
                 role: selectedRole,
-                schoolName: formData.schoolId === 'new_school' ? formData.newSchoolName : formData.schoolName,
+                schoolName: selectedRole === 'school' ? formData.name : (formData.schoolId === 'new_school' ? formData.newSchoolName : formData.schoolName),
                 schoolEmail: formData.schoolId === 'new_school' ? formData.newSchoolEmail : undefined,
-                createNewSchool: formData.schoolId === 'new_school'
+                createNewSchool: selectedRole === 'student' && formData.schoolId === 'new_school'
             };
 
             const result = await registerUser(registrationData);
@@ -227,10 +237,10 @@ export default function SignupPage() {
                         transition={{ duration: 0.5 }}
                     >
                         <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">
-                            Create Account
+                            {selectedRole === 'school' ? 'Institution Signup' : 'Create Account'}
                         </h1>
                         <p className="text-muted-foreground mb-8 text-base">
-                            Get started with your free account
+                            {selectedRole === 'school' ? 'Register your school or institute' : 'Get started with your free account'}
                         </p>
 
                         <form onSubmit={handleSubmit} className="space-y-5">
@@ -255,17 +265,23 @@ export default function SignupPage() {
                                 </div>
                             </div>
 
-                            {/* Full Name */}
+                            {/* Full Name / School Name */}
                             <div className="space-y-1.5">
-                                <label className="block text-sm font-medium text-foreground">Full Name</label>
+                                <label className="block text-sm font-medium text-foreground">
+                                    {selectedRole === 'school' ? 'School Name' : 'Full Name'}
+                                </label>
                                 <div className="relative">
-                                    <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                                    {selectedRole === 'school' ? (
+                                        <Building2 className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                                    ) : (
+                                        <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                                    )}
                                     <input
                                         name="name"
                                         type="text"
                                         value={formData.name}
                                         onChange={handleChange}
-                                        placeholder="Enter your full name"
+                                        placeholder={selectedRole === 'school' ? "Enter school name" : "Enter your full name"}
                                         className="w-full px-4 py-3.5 rounded-xl border bg-background pl-12 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-sm"
                                         required
                                         disabled={isLoading}
@@ -273,17 +289,14 @@ export default function SignupPage() {
                                 </div>
                             </div>
 
-                            {/* School Selection (mandatory for students & schools) */}
-                            {(selectedRole === 'school' || selectedRole === 'student') && (
+                            {/* School / Student Specific Conditional Fields */}
+                            {selectedRole === 'student' && (
                                 <motion.div
                                     initial={{ opacity: 0, height: 0 }}
                                     animate={{ opacity: 1, height: 'auto' }}
-                                    exit={{ opacity: 0, height: 0 }}
                                     className="space-y-3"
                                 >
-                                    <label className="block text-sm font-medium text-foreground">
-                                        {selectedRole === 'student' ? 'School Name' : 'School / Institution Name'}
-                                    </label>
+                                    <label className="block text-sm font-medium text-foreground">School Name</label>
                                     <div className="relative">
                                         <Building2 className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground pointer-events-none z-10" />
                                         <select
@@ -297,57 +310,170 @@ export default function SignupPage() {
                                             <option value="" disabled>
                                                 {isLoadingSchools ? 'Loading schools...' : 'Select your school'}
                                             </option>
-                                            <option value="no_school" className="font-medium text-foreground">
-                                                I am not in any school (Individual)
-                                            </option>
+                                            <option value="no_school">I am not in any school (Individual)</option>
                                             {schools.map((school: any) => (
                                                 <option key={school.id} value={school.id}>
                                                     {school.name} ({school.email})
                                                 </option>
                                             ))}
-                                            <option value="new_school" className="font-semibold text-primary">
-                                                + Add New School...
-                                            </option>
+                                            <option value="new_school" className="font-semibold text-primary">+ Add New School...</option>
                                         </select>
                                         <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
                                     </div>
 
-                                    {/* Conditional New School Fields */}
                                     {formData.schoolId === 'new_school' && (
-                                        <motion.div
-                                            initial={{ opacity: 0, height: 0 }}
-                                            animate={{ opacity: 1, height: 'auto' }}
-                                            className="space-y-3 pt-2 pb-3 border-t border-dashed"
-                                        >
+                                        <div className="space-y-3 pt-2 pb-3 border-t border-dashed">
                                             <p className="text-xs font-semibold text-primary uppercase tracking-wider">New School Details</p>
-                                            <div className="relative">
-                                                <Building2 className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                                                <input
-                                                    name="newSchoolName"
-                                                    type="text"
-                                                    value={formData.newSchoolName}
-                                                    onChange={handleChange}
-                                                    placeholder="Enter new school name"
-                                                    className="w-full px-4 py-3 rounded-xl border bg-background pl-12 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-sm"
-                                                    required
-                                                    disabled={isLoading}
-                                                />
-                                            </div>
-                                            <div className="relative">
-                                                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                                                <input
-                                                    name="newSchoolEmail"
-                                                    type="email"
-                                                    value={formData.newSchoolEmail}
-                                                    onChange={handleChange}
-                                                    placeholder="Enter school email"
-                                                    className="w-full px-4 py-3 rounded-xl border bg-background pl-12 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-sm"
-                                                    required
-                                                    disabled={isLoading}
-                                                />
-                                            </div>
-                                        </motion.div>
+                                            <input
+                                                name="newSchoolName"
+                                                type="text"
+                                                value={formData.newSchoolName}
+                                                onChange={handleChange}
+                                                placeholder="Enter new school name"
+                                                className="w-full px-4 py-3 rounded-xl border bg-background focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-sm"
+                                                required
+                                            />
+                                            <input
+                                                name="newSchoolEmail"
+                                                type="email"
+                                                value={formData.newSchoolEmail}
+                                                onChange={handleChange}
+                                                placeholder="Enter school email"
+                                                className="w-full px-4 py-3 rounded-xl border bg-background focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-sm"
+                                                required
+                                            />
+                                        </div>
                                     )}
+                                </motion.div>
+                            )}
+
+                            {selectedRole === 'school' && (
+                                <motion.div
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    className="space-y-4 pt-2"
+                                >
+                                    <p className="text-xs font-semibold text-primary uppercase tracking-wider">Institutional Details</p>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-medium text-muted-foreground">School Code (Optional)</label>
+                                            <input
+                                                name="schoolCode"
+                                                value={formData.schoolCode}
+                                                onChange={handleChange}
+                                                placeholder="e.g. 001001"
+                                                className="w-full px-4 py-3 rounded-xl border bg-background focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm"
+                                            />
+                                        </div>
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-medium text-muted-foreground">Principal Name</label>
+                                            <input
+                                                name="principalName"
+                                                value={formData.principalName}
+                                                onChange={handleChange}
+                                                placeholder="Enter principal name"
+                                                className="w-full px-4 py-3 rounded-xl border bg-background focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm"
+                                                required
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-medium text-muted-foreground">Contact Phone</label>
+                                            <input
+                                                name="phone"
+                                                value={formData.phone}
+                                                onChange={handleChange}
+                                                placeholder="7400XXXXXX"
+                                                className="w-full px-4 py-3 rounded-xl border bg-background focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm"
+                                                required
+                                            />
+                                        </div>
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-medium text-muted-foreground">Website (Optional)</label>
+                                            <input
+                                                name="website"
+                                                value={formData.website}
+                                                onChange={handleChange}
+                                                placeholder="www.school.com"
+                                                className="w-full px-4 py-3 rounded-xl border bg-background focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-medium text-muted-foreground">School Type</label>
+                                            <select
+                                                name="schoolType"
+                                                value={formData.schoolType}
+                                                onChange={handleChange}
+                                                className="w-full px-4 py-3 rounded-xl border bg-background focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm appearance-none"
+                                            >
+                                                <option value="Private">Private</option>
+                                                <option value="Government">Government</option>
+                                                <option value="Semi-Government">Semi-Government</option>
+                                            </select>
+                                        </div>
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-medium text-muted-foreground">Board</label>
+                                            <select
+                                                name="board"
+                                                value={formData.board}
+                                                onChange={handleChange}
+                                                className="w-full px-4 py-3 rounded-xl border bg-background focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm appearance-none"
+                                            >
+                                                <option value="CBSE">CBSE</option>
+                                                <option value="ICSE">ICSE</option>
+                                                <option value="IB">IB</option>
+                                                <option value="State Board">State Board</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-1.5">
+                                        <label className="text-xs font-medium text-muted-foreground">Full Address</label>
+                                        <input
+                                            name="address"
+                                            value={formData.address}
+                                            onChange={handleChange}
+                                            placeholder="Enter complete address"
+                                            className="w-full px-4 py-3 rounded-xl border bg-background focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm"
+                                            required
+                                        />
+                                    </div>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-medium text-muted-foreground">City</label>
+                                            <input name="city" value={formData.city} onChange={handleChange} placeholder="City" className="w-full px-4 py-3 rounded-xl border bg-background focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm" required />
+                                        </div>
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-medium text-muted-foreground">State</label>
+                                            <input name="state" value={formData.state} onChange={handleChange} placeholder="State" className="w-full px-4 py-3 rounded-xl border bg-background focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm" required />
+                                        </div>
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-medium text-muted-foreground">Pincode</label>
+                                            <input name="pincode" value={formData.pincode} onChange={handleChange} placeholder="Pincode" className="w-full px-4 py-3 rounded-xl border bg-background focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm" required />
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-1.5">
+                                        <label className="text-xs font-medium text-muted-foreground">Subscription Plan</label>
+                                        <select
+                                            name="subscriptionPlan"
+                                            value={formData.subscriptionPlan}
+                                            onChange={handleChange}
+                                            className="w-full px-4 py-3 rounded-xl border bg-background focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm appearance-none"
+                                        >
+                                            <option value="None">None</option>
+                                            <option value="Free">Free</option>
+                                            <option value="Basic">Basic</option>
+                                            <option value="Premium">Premium</option>
+                                        </select>
+                                    </div>
                                 </motion.div>
                             )}
 

@@ -13,11 +13,13 @@ import { toast } from "sonner";
 
 
 import { getAllStudents, createStudent, updateStudent, deleteStudent } from '@/lib/actions/student.actions';
-import { getSchoolById } from '@/lib/actions/school.actions'; // Ensure this exists
+import { getSchoolById } from '@/lib/actions/school.actions';
 import { SchoolStudentTable } from '@/components/school/students/SchoolStudentTable';
 import { SchoolStudentViewSheet } from '@/components/school/students/SchoolStudentViewSheet';
 import { SchoolStudentFormSheet } from '@/components/school/students/SchoolStudentFormSheet';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
+import { BulkStudentUpload } from '@/components/shared/BulkStudentUpload';
+
 
 export default function SchoolStudentsPage() {
     const { user, isLoading: isAuthLoading } = useAuth();
@@ -177,6 +179,18 @@ export default function SchoolStudentsPage() {
                         <Button variant="outline" className="gap-2" onClick={handleExport}>
                             <Download className="h-4 w-4" /> Export List
                         </Button>
+                        <BulkStudentUpload
+                            schoolContext={{
+                                id: school.id,
+                                name: school.name,
+                                city: school.city,
+                                state: school.state
+                            }}
+                            onComplete={() => {
+                                // Refresh student list
+                                getAllStudents().then(setStudents);
+                            }}
+                        />
                         <Button className="gap-2 bg-primary text-primary-foreground hover:bg-primary/90" onClick={() => setIsAddOpen(true)}>
                             <Plus className="h-4 w-4" /> Add Student
                         </Button>

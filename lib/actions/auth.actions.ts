@@ -44,18 +44,20 @@ export async function registerUser(data: any) {
                 password: schoolPassword,
                 role: 'school',
                 schoolName: data.newSchoolName,
-                schoolCode: `CODE-${Date.now().toString().slice(-6)}`,
-                principalName: 'Principal Name',
-                schoolType: 'private',
-                board: 'CBSE',
-                address: 'Address not provided',
-                city: 'City',
-                state: 'State',
-                pincode: '000000',
-                phone: '0000000000',
+                schoolCode: data.schoolCode || `CODE-${Date.now().toString().slice(-6)}`,
+                principalName: data.principalName || 'Principal Name',
+                schoolType: (data.schoolType || 'private').toLowerCase(),
+                board: data.board || 'CBSE',
+                address: data.address || 'Address not provided',
+                city: data.city || 'City',
+                state: data.state || 'State',
+                pincode: data.pincode || '000000',
+                phone: data.phone || '0000000000',
+                websiteUrl: data.website || '',
                 assignedCourses: [],
                 status: 'active',
-                subscriptionPlan: 'basic',
+                subscriptionPlan: data.subscriptionPlan || 'basic',
+                profileCompleted: true,
                 createdAt: new Date().toISOString()
             });
 
@@ -80,14 +82,25 @@ export async function registerUser(data: any) {
         const role = data.role || 'student';
         const userCustomId = role === 'student' ? await getNextStudentId() : `usr-${Date.now()}`;
 
+        // Ensure fields are correctly mapped for school role
+        const extraFields: any = {};
+        if (role === 'school') {
+            extraFields.schoolName = data.name; // For schools, the name field is the school name
+            extraFields.websiteUrl = data.website || '';
+            extraFields.profileCompleted = true;
+            // Also ensure numeric fields or specific enums are correct
+            if (data.schoolType) extraFields.schoolType = data.schoolType.toLowerCase();
+        }
+
         const newUser = await sanityWriteClient.create({
             _type: 'user',
             ...data,
+            ...extraFields,
             customId: userCustomId,
             password: hashedPassword,
-            role: data.role || 'student',
+            role: role,
             schoolId: schoolId || undefined,
-            schoolName: schoolName || undefined,
+            schoolName: schoolName || extraFields.schoolName || undefined,
             schoolRef: schoolRef,
             createdAt: new Date().toISOString()
         });

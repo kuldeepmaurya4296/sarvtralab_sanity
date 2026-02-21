@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import { GovtStudentTable } from '@/components/govt/students/GovtStudentTable';
 import { GovtStudentViewSheet } from '@/components/govt/students/GovtStudentViewSheet';
 import { GovtStudentContactDialog } from '@/components/govt/students/GovtStudentContactDialog';
+import { BulkStudentUpload } from '@/components/shared/BulkStudentUpload';
 
 export default function GovtStudentsPage() {
     const { user, isLoading: authLoading } = useAuth();
@@ -81,9 +82,16 @@ export default function GovtStudentsPage() {
                         </h1>
                         <p className="text-muted-foreground">Monitor student progress across schools in your jurisdiction</p>
                     </div>
-                    <Button variant="outline" className="gap-2" onClick={handleExport}>
-                        <Download className="h-4 w-4" /> Export Data
-                    </Button>
+                    <div className="flex items-center gap-2">
+                        <Button variant="outline" className="gap-2" onClick={handleExport}>
+                            <Download className="h-4 w-4" /> Export Data
+                        </Button>
+                        <BulkStudentUpload
+                            onComplete={() => {
+                                getGovtStudentData().then(setData);
+                            }}
+                        />
+                    </div>
                 </div>
 
                 <Card>
