@@ -31,6 +31,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
+import ProfileCompletionDialog from '@/components/student/ProfileCompletionDialog';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -144,7 +145,7 @@ const DashboardLayout = ({ children, role, userName, userEmail, hideSidebar = fa
   const pathname = usePathname();
   const router = useRouter();
 
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
   const menuItems = roleMenuItems[role] || roleMenuItems['student'];
 
   const notificationRef = useRef<HTMLDivElement>(null);
@@ -170,6 +171,9 @@ const DashboardLayout = ({ children, role, userName, userEmail, hideSidebar = fa
 
   return (
     <div className="min-h-screen bg-background flex">
+      {role === 'student' && user && (
+        <ProfileCompletionDialog user={user} isOpen={!(user as any).profileCompleted} />
+      )}
       {/* Sidebar - Desktop */}
       {!hideSidebar && (
         <aside

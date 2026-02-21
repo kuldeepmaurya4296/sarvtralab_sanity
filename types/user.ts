@@ -11,6 +11,7 @@ export interface User {
     createdAt?: string;
     phone?: string;
     password?: string;
+    profileCompleted?: boolean;
 }
 
 export interface Student extends User {
@@ -32,6 +33,7 @@ export interface Student extends User {
     city?: string;
     state?: string;
     pincode?: string;
+    profileCompleted?: boolean;
 }
 
 export interface Teacher extends User {

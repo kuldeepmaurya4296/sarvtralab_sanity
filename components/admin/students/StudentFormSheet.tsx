@@ -22,6 +22,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
 import { Student, School } from '@/types/user';
 
 interface StudentFormSheetProps {
@@ -39,7 +40,13 @@ export function StudentFormSheet({ open, onOpenChange, initialData, mode, onSubm
         email: '',
         grade: '',
         schoolId: '',
-        status: 'active'
+        status: 'active',
+        parentName: '',
+        parentPhone: '',
+        phone: '',
+        city: '',
+        state: '',
+        profileCompleted: false
     };
 
     const [formData, setFormData] = useState(defaultForm);
@@ -52,7 +59,13 @@ export function StudentFormSheet({ open, onOpenChange, initialData, mode, onSubm
                     email: initialData.email || '',
                     grade: initialData.grade || '',
                     schoolId: initialData.schoolId || '',
-                    status: initialData.status || 'active'
+                    status: initialData.status || 'active',
+                    parentName: (initialData as any).parentName || '',
+                    parentPhone: (initialData as any).parentPhone || '',
+                    phone: initialData.phone || '',
+                    city: (initialData as any).city || '',
+                    state: (initialData as any).state || '',
+                    profileCompleted: (initialData as any).profileCompleted || false
                 });
             } else {
                 setFormData(defaultForm);
@@ -174,6 +187,68 @@ export function StudentFormSheet({ open, onOpenChange, initialData, mode, onSubm
                                 <SelectItem value="inactive">Inactive</SelectItem>
                             </SelectContent>
                         </Select>
+                    </div>
+
+                    <Separator className="my-2" />
+
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="phone" className="text-right">Phone</Label>
+                        <Input
+                            id="phone"
+                            value={formData.phone}
+                            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                            className="col-span-3"
+                        />
+                    </div>
+
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="parentName" className="text-right">Guardian</Label>
+                        <Input
+                            id="parentName"
+                            value={formData.parentName}
+                            onChange={(e) => setFormData({ ...formData, parentName: e.target.value })}
+                            className="col-span-3"
+                        />
+                    </div>
+
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="parentPhone" className="text-right">Guardian Ph</Label>
+                        <Input
+                            id="parentPhone"
+                            value={formData.parentPhone}
+                            onChange={(e) => setFormData({ ...formData, parentPhone: e.target.value })}
+                            className="col-span-3"
+                        />
+                    </div>
+
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="location" className="text-right">Location</Label>
+                        <div className="col-span-3 grid grid-cols-2 gap-2">
+                            <Input
+                                placeholder="City"
+                                value={formData.city}
+                                onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                            />
+                            <Input
+                                placeholder="State"
+                                value={formData.state}
+                                onChange={(e) => setFormData({ ...formData, state: e.target.value })}
+                            />
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="profileCompleted" className="text-right text-xs">Profile Completed</Label>
+                        <div className="col-span-3 flex items-center gap-2">
+                            <input
+                                type="checkbox"
+                                id="profileCompleted"
+                                checked={formData.profileCompleted}
+                                onChange={(e) => setFormData({ ...formData, profileCompleted: e.target.checked })}
+                                className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                            />
+                            <span className="text-sm text-muted-foreground">{formData.profileCompleted ? 'Yes' : 'No'}</span>
+                        </div>
                     </div>
                 </div>
                 <SheetFooter>

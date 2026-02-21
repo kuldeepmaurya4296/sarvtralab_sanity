@@ -71,6 +71,8 @@ export default defineType({
         // Subscription
         defineField({ name: 'subscriptionPlan', title: 'Subscription Plan', type: 'string' }),
         defineField({ name: 'subscriptionExpiry', title: 'Subscription Expiry', type: 'string' }),
+        // Profile Status
+        defineField({ name: 'profileCompleted', title: 'Profile Completed', type: 'boolean', initialValue: false }),
     ],
     preview: {
         select: { title: 'name', subtitle: 'role' }

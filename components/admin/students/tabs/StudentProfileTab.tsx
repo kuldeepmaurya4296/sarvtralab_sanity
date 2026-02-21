@@ -49,6 +49,12 @@ export function StudentProfileTab({ student, onEdit, onDelete }: StudentProfileT
                                 <span className="text-muted-foreground">Grade</span>
                                 <span className="font-medium">{student.grade}</span>
                             </div>
+                            <div className="flex justify-between border-t pt-2 mt-2">
+                                <span className="text-muted-foreground">Profile Status</span>
+                                <Badge variant={student.profileCompleted ? 'default' : 'destructive'} className="text-[10px]">
+                                    {student.profileCompleted ? 'Completed' : 'Incomplete'}
+                                </Badge>
+                            </div>
                         </CardContent>
                     </Card>
                 </div>

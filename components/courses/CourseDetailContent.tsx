@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import Image from 'next/image';
 import { Course, CurriculumModule, Lesson } from '@/types/course';
+import { useRouter } from 'next/navigation';
 
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
@@ -23,6 +24,7 @@ interface CourseDetailContentProps {
 
 export default function CourseDetailContent({ course }: CourseDetailContentProps) {
     const { user } = useAuth();
+    const router = useRouter();
     const [isEnrolled, setIsEnrolled] = useState(false);
     const [isChecking, setIsChecking] = useState(true);
 
@@ -159,14 +161,20 @@ export default function CourseDetailContent({ course }: CourseDetailContentProps
                                         </Button>
                                     </Link>
                                 ) : (
-                                    <Link href={`/checkout/course/${course.id || (course as any).customId || (course as any)._id}`} className="block w-full mb-3">
-                                        <Button
-                                            className="w-full h-12 text-lg font-bold"
-                                            disabled={isChecking}
-                                        >
-                                            {isChecking ? 'Checking...' : 'Enroll Now'}
-                                        </Button>
-                                    </Link>
+                                    <Button
+                                        className="w-full h-12 text-lg font-bold"
+                                        disabled={isChecking}
+                                        onClick={() => {
+                                            if (user && user.role === 'student' && !(user as any).profileCompleted) {
+                                                toast.error("Please complete your profile first!");
+                                                router.push('/student/dashboard');
+                                                return;
+                                            }
+                                            router.push(`/checkout/course/${course.id || (course as any).customId || (course as any)._id}`);
+                                        }}
+                                    >
+                                        {isChecking ? 'Checking...' : 'Enroll Now'}
+                                    </Button>
                                 )}
 
                                 {!isEnrolled && (

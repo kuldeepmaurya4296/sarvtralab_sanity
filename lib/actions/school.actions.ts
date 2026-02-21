@@ -24,7 +24,7 @@ export async function getAllSchools(): Promise<School[]> {
 
 export async function getPublicSchools() {
     try {
-        const schools = await sanityClient.fetch(`*[_type == "user" && role == "school"]{customId, name, email}`);
+        const schools = await sanityClient.fetch(`*[_type == "user" && role == "school"]{_id, customId, name, email}`);
         return cleanSanityDoc(schools);
     } catch (e) {
         console.error("Get Public Schools Error:", e);

@@ -323,3 +323,61 @@ export async function checkEnrollmentStatus(userId: string, courseId: string) {
         return false;
     }
 }
+
+export async function completeStudentProfile(userId: string, data: any) {
+    try {
+        const student = await sanityClient.fetch(
+            `*[_type == "user" && role == "student" && (customId == $userId || _id == $userId)][0]`,
+            { userId }
+        );
+        if (!student) throw new Error("Student not found");
+
+        // Initialize updates with standard fields
+        const updates: any = {
+            name: data.name,
+            email: data.email,
+            phone: data.phone,
+            schoolName: data.schoolName,
+            grade: data.grade,
+            parentName: data.parentName,
+            parentPhone: data.parentPhone,
+            parentEmail: data.parentEmail,
+            address: data.address,
+            city: data.city,
+            state: data.state,
+            pincode: data.pincode,
+            profileCompleted: true,
+            status: 'active'
+        };
+
+        // Handle School Reference if applicable
+        if (data.schoolId && data.schoolId !== 'no_school') {
+            // Check if schoolId is already a Sanity ID (starting with usr- or being a UUID)
+            // Even if it's a customId, we want the _id for the reference
+            const schoolDoc = await sanityClient.fetch(
+                `*[_type == "user" && role == "school" && (customId == $id || _id == $id)][0]`,
+                { id: data.schoolId }
+            );
+            if (schoolDoc) {
+                updates.schoolRef = { _type: 'reference', _ref: schoolDoc._id };
+                updates.schoolId = schoolDoc.customId || schoolDoc._id;
+            }
+        } else {
+            // Independent learner case
+            updates.schoolId = 'no_school';
+            updates.schoolRef = null; // Clear any existing reference
+        }
+
+        const updated = await sanityWriteClient
+            .patch(student._id)
+            .set(updates)
+            .commit();
+
+        await logActivity(userId, 'PROFILE_COMPLETE', `Completed profile for student: ${data.name}`);
+
+        return { success: true, user: scrubStudent(updated) };
+    } catch (error: any) {
+        console.error("Complete Profile Error:", error);
+        return { success: false, error: error.message };
+    }
+}
