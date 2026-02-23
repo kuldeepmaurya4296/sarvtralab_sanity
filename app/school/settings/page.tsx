@@ -296,34 +296,7 @@ export default function SchoolSettingsPage() {
                                     </div>
                                 </div>
 
-                                <Separator />
 
-                                <div className="space-y-4">
-                                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                                        <div className="space-y-0.5">
-                                            <Label className="text-base font-semibold">Platform Theme</Label>
-                                            <p className="text-sm text-muted-foreground">
-                                                Adjust the primary accent color of your dashboard environment.
-                                            </p>
-                                        </div>
-                                        <div className="flex gap-3 p-2 bg-white rounded-full border shadow-sm">
-                                            {['blue', 'green', 'red', 'violet'].map((color) => {
-                                                const colors: any = {
-                                                    blue: 'bg-blue-600',
-                                                    green: 'bg-emerald-600',
-                                                    red: 'bg-rose-600',
-                                                    violet: 'bg-violet-600'
-                                                };
-                                                return (
-                                                    <div
-                                                        key={color}
-                                                        className={`w-10 h-10 rounded-full ${colors[color]} cursor-pointer transition-all hover:scale-110 hover:shadow-md ${color === 'blue' ? 'ring-2 ring-primary ring-offset-2' : ''}`}
-                                                    ></div>
-                                                );
-                                            })}
-                                        </div>
-                                    </div>
-                                </div>
                             </CardContent>
                         </Card>
                     </TabsContent>
