@@ -19,11 +19,11 @@ const HeroSection = () => {
           sizes="100vw"
           className="object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-foreground/95 via-foreground/80 to-foreground/40" />
+        <div className="absolute inset-0 bg-gradient-to-r from-foreground/95 via-foreground/90 to-foreground/50" />
       </div>
 
       {/* Content */}
-      <div className="container mx-auto px-4 relative z-10">
+      <div className="container mx-auto px-4 relative z-10 pt-20">
         <div className="max-w-3xl">
           {/* Badge */}
           <motion.div
@@ -41,7 +41,7 @@ const HeroSection = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="text-4xl md:text-5xl lg:text-6xl font-bold text-background leading-tight mb-6"
+            className="text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight text-background leading-tight mb-6"
           >
             Future-Ready
             <span className="block text-transparent bg-clip-text bg-gradient-to-r from-primary via-accent to-secondary">
@@ -55,10 +55,10 @@ const HeroSection = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="text-lg md:text-xl text-background/80 mb-8 max-w-2xl"
+            className="text-lg md:text-xl text-background/80 mb-8 max-w-2xl leading-relaxed"
           >
             India's premier robotics education platform. Hands-on learning with real kits,
-            expert instructors, and industry-recognized certifications.
+            expert instructors, and industry-recognized certifications. Join the movement of future innovators.
           </motion.p>
 
           {/* EMI Badge */}
@@ -86,18 +86,36 @@ const HeroSection = () => {
             className="flex flex-col sm:flex-row gap-4 mb-10"
           >
             <Link href="/courses">
-              <button className="btn-hero-primary group">
-                Explore Courses
+              <button className="btn-hero-primary group hover:scale-105 hover:shadow-lg transition-all">
+                Start Free Robotics Trial
                 <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
               </button>
             </Link>
-            <button
-              className="btn-hero-outline group"
-              onClick={() => document.getElementById('videos')?.scrollIntoView({ behavior: 'smooth' })}
-            >
-              <Play className="w-5 h-5 fill-current transition-transform group-hover:scale-110" />
-              Watch Demo
-            </button>
+            <Link href="/courses">
+              <button className="btn-hero-outline group hover:scale-105 hover:shadow-lg transition-all">
+                View Programs
+              </button>
+            </Link>
+          </motion.div>
+
+          {/* Trust Indicators */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.5 }}
+            className="flex items-center gap-4 mb-8 text-background/90"
+          >
+
+            <div className="flex items-center gap-1">
+              <span className="text-sm font-medium">4.9/5 Rating</span>
+              <div className="flex">
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <svg key={i} className="w-4 h-4 text-yellow-400 fill-current" viewBox="0 0 20 20">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                  </svg>
+                ))}
+              </div>
+            </div>
           </motion.div>
 
           {/* Features List */}

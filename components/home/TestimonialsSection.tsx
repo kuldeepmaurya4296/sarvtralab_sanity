@@ -30,7 +30,7 @@ const TestimonialsSection = ({ testimonials: propTestimonials }: { testimonials?
   const displayTestimonials = propTestimonials && propTestimonials.length > 0 ? propTestimonials : defaultTestimonials;
 
   return (
-    <section className="py-20 md:py-28 bg-muted/50">
+    <section className="py-24 md:py-32 bg-muted/50">
       <div className="container mx-auto px-4">
         {/* Section Header */}
         <div className="text-center mb-16">
@@ -47,10 +47,10 @@ const TestimonialsSection = ({ testimonials: propTestimonials }: { testimonials?
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.1 }}
-            className="section-heading"
+            className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight mb-6"
           >
-            What Our Community
-            <span className="block gradient-text">Says About Us</span>
+            What Our Community{' '}
+            <span className="gradient-text">Says About Us</span>
           </motion.h2>
         </div>
 
@@ -72,7 +72,7 @@ const TestimonialsSection = ({ testimonials: propTestimonials }: { testimonials?
                       whileInView={{ opacity: 1, y: 0 }}
                       viewport={{ once: true }}
                       transition={{ duration: 0.5, delay: index * 0.1 }}
-                      className="card-elevated p-6 md:p-8 h-full flex flex-col"
+                      className="card-elevated p-8 h-full flex flex-col hover:-translate-y-2 hover:shadow-2xl transition-all duration-300"
                     >
                       {/* Quote Icon */}
                       <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4 shrink-0">

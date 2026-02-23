@@ -39,7 +39,7 @@ const CoursesSection = ({ courses }: CoursesSectionProps) => {
   const featuredCourses = (courses && courses.length > 0 ? courses : defaultCourses).slice(0, 3);
 
   return (
-    <section className="py-20 md:py-28 bg-muted/50">
+    <section className="py-24 md:py-32 bg-muted/50">
       <div className="container mx-auto px-4">
         {/* Section Header */}
         <div className="text-center mb-16">
@@ -56,10 +56,10 @@ const CoursesSection = ({ courses }: CoursesSectionProps) => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.1 }}
-            className="section-heading"
+            className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight mb-6"
           >
-            CBSE-Aligned
-            <span className="block gradient-text-secondary">Robotics Courses</span>
+            CBSE-Aligned{' '}
+            <span className="gradient-text-secondary">Robotics Courses</span>
           </motion.h2>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -103,16 +103,16 @@ const CoursesSection = ({ courses }: CoursesSectionProps) => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
-              className="course-card"
+              className="course-card group hover:-translate-y-2 hover:shadow-2xl transition-all duration-300"
             >
               {/* Image */}
-              <div className="course-card-image">
+              <div className="relative w-full aspect-video overflow-hidden rounded-t-2xl">
                 <Image
                   src="/robotics-illustration.jpg"
                   alt={course.title}
                   fill
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                  className="object-cover"
+                  className="object-cover transition-transform duration-500 group-hover:scale-105"
                 />
                 <div className="absolute top-4 left-4 z-10">
                   <span className={`px-3 py-1 rounded-full text-xs font-semibold
@@ -134,11 +134,11 @@ const CoursesSection = ({ courses }: CoursesSectionProps) => {
               </div>
 
               {/* Content */}
-              <div className="p-6">
-                <h3 className="text-lg font-semibold text-foreground mb-2 line-clamp-2">
+              <div className="p-8">
+                <h3 className="text-xl font-bold text-foreground mb-3 line-clamp-2">
                   {course.title}
                 </h3>
-                <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+                <p className="text-base text-muted-foreground mb-6 line-clamp-2 leading-relaxed">
                   {course.description}
                 </p>
 
@@ -169,7 +169,7 @@ const CoursesSection = ({ courses }: CoursesSectionProps) => {
                     </span>
                   </div>
                   <Link href={`/courses/${course.id || course.customId || course._id}`}>
-                    <Button size="sm" variant="outline" className="gap-1">
+                    <Button size="sm" variant="outline" className="gap-1 hover:scale-105 transition-all">
                       View <ArrowRight className="w-4 h-4" />
                     </Button>
                   </Link>
@@ -193,9 +193,9 @@ const CoursesSection = ({ courses }: CoursesSectionProps) => {
           className="text-center mt-12"
         >
           <Link href="/courses">
-            <Button size="lg" className="btn-hero-secondary">
+            <Button size="lg" className="btn-hero-secondary hover:scale-105 hover:shadow-lg transition-all text-lg px-8 py-6 rounded-xl">
               View All Courses
-              <ArrowRight className="w-5 h-5" />
+              <ArrowRight className="w-5 h-5 ml-2 transition-transform group-hover:translate-x-1" />
             </Button>
           </Link>
         </motion.div>

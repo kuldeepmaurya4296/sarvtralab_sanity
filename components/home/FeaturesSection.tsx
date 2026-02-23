@@ -31,7 +31,7 @@ const FeaturesSection = ({ features: propFeatures }: { features?: FeatureItem[] 
   const displayFeatures = propFeatures && propFeatures.length > 0 ? propFeatures : defaultFeatures;
 
   return (
-    <section className="py-20 md:py-28 bg-background">
+    <section className="py-24 md:py-32 bg-background">
       <div className="container mx-auto px-4">
         {/* Section Header */}
         <div className="text-center mb-16">
@@ -48,10 +48,10 @@ const FeaturesSection = ({ features: propFeatures }: { features?: FeatureItem[] 
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.1 }}
-            className="section-heading"
+            className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight mb-6"
           >
-            Why Parents & Schools
-            <span className="block gradient-text">Trust Sarvtra Labs</span>
+            Why Parents & Schools{' '}
+            <span className="gradient-text">Trust Sarvtra Labs</span>
           </motion.h2>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -76,15 +76,15 @@ const FeaturesSection = ({ features: propFeatures }: { features?: FeatureItem[] 
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
-                className="feature-card"
+                className="feature-card group hover:-translate-y-2 hover:shadow-xl transition-all duration-300 p-8"
               >
-                <div className="feature-icon mb-4">
+                <div className="feature-icon mb-4 group-hover:scale-110 transition-transform duration-300">
                   {IconComponent && <IconComponent className="w-7 h-7" />}
                 </div>
-                <h3 className="text-xl font-semibold text-foreground mb-2">
+                <h3 className="text-xl font-bold text-foreground mb-3">
                   {feature.title}
                 </h3>
-                <p className="text-muted-foreground">
+                <p className="text-muted-foreground leading-relaxed">
                   {feature.description}
                 </p>
               </motion.div>

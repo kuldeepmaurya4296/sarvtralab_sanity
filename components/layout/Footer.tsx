@@ -80,13 +80,13 @@ const Footer = ({ footerSections, organization }: FooterProps) => {
         <span className="text-[25vw] font-black tracking-tighter uppercase whitespace-nowrap text-foreground leading-none">SARVTRA</span>
       </div>
 
-      <div className="container mx-auto px-4 lg:px-12 pt-24 pb-12 relative z-10">
+      <div className="container mx-auto px-4 lg:px-12 pt-16 pb-8 relative z-10">
 
-        {/* Asymmetrical Tension Grid (90/10 brutalist split) */}
-        <div className="grid grid-cols-1 xl:grid-cols-12 gap-16 xl:gap-8 mb-24 border-b border-border pb-16">
+        {/* Compact Grid */}
+        <div className="grid grid-cols-1 xl:grid-cols-12 gap-12 xl:gap-8 mb-12 border-b border-border pb-12">
 
-          {/* Brand Vision (Massive Text instead of soft paragraph) */}
-          <div className="xl:col-span-8 space-y-8 pr-0 xl:pr-24">
+          {/* Brand Vision */}
+          <div className="xl:col-span-8 space-y-6 pr-0 xl:pr-24">
             <Link href="/" className="inline-flex items-center gap-2 group border-b-2 border-transparent hover:border-primary transition-all duration-300 pb-1">
               <span className="font-display text-4xl lg:text-5xl font-black uppercase tracking-tight">
                 <span className="text-foreground">{org.name?.split(' ')[0] || 'Sarvtra'}</span>
@@ -94,11 +94,11 @@ const Footer = ({ footerSections, organization }: FooterProps) => {
               </span>
             </Link>
 
-            <p className="text-2xl lg:text-4xl font-semibold tracking-tight leading-tight text-foreground/80 max-w-4xl font-display">
+            <p className="text-lg lg:text-2xl font-semibold tracking-tight leading-loose text-foreground/80 max-w-4xl font-display">
               EMPOWERING THE <span className="text-primary italic">NEXT GENERATION</span> OF INNOVATORS WITH HANDS-ON K-12 ROBOTICS EDUCATION.
             </p>
 
-            <div className="pt-8 flex flex-wrap gap-4">
+            <div className="pt-4 flex flex-wrap gap-4">
               {[
                 { Icon: Facebook, label: "Facebook", href: org.socials?.find((s: any) => s.platform === 'Facebook')?.url || '#' },
                 { Icon: Twitter, label: "Twitter", href: org.socials?.find((s: any) => s.platform === 'Twitter')?.url || '#' },
@@ -122,38 +122,38 @@ const Footer = ({ footerSections, organization }: FooterProps) => {
             </div>
           </div>
 
-          {/* Contact Brutality Sidebar */}
-          <div className="xl:col-span-4 flex flex-col justify-end space-y-12 xl:border-l xl:border-border xl:pl-8">
-            <div className="space-y-4">
-              <h5 className="font-bold text-xs tracking-widest uppercase text-muted-foreground">Direct Line</h5>
-              <a href={`tel:${org.phone?.replace(/[^0-9+]/g, '') || ''}`} className="text-2xl sm:text-3xl lg:text-4xl font-black text-foreground hover:text-primary transition-colors block font-display tracking-tight">
-                {org.phone}
+          {/* Contact Information */}
+          <div className="xl:col-span-4 flex flex-col justify-end space-y-6 xl:border-l xl:border-border xl:pl-8 mt-8 xl:mt-0">
+            <div className="space-y-2">
+              <h5 className="font-bold text-[10px] tracking-widest uppercase text-muted-foreground">Direct Line</h5>
+              <a href={`tel:${(org.phone || '+91-8085613350').replace(/[^0-9+]/g, '')}`} className="text-xl sm:text-2xl lg:text-3xl font-black text-foreground hover:text-primary transition-colors block font-display tracking-tight">
+                {org.phone || '+91-8085613350'}
               </a>
-              <span className="text-xs uppercase tracking-wider font-semibold text-primary">{org.hours}</span>
+              <span className="text-[10px] uppercase tracking-wider font-semibold text-primary">{org.hours || 'Mon - Sat: 9:00 AM - 6:00 PM'}</span>
             </div>
 
-            <div className="space-y-4 border-t border-border pt-8">
-              <h5 className="font-bold text-xs tracking-widest uppercase text-muted-foreground">Digital Inbox</h5>
-              <a href={`mailto:${org.email}`} className="text-xl sm:text-2xl font-bold text-foreground hover:text-primary transition-colors block break-all">
-                {org.email}
+            <div className="space-y-1 border-t border-border pt-4">
+              <h5 className="font-bold text-[10px] tracking-widest uppercase text-muted-foreground">Digital Inbox</h5>
+              <a href={`mailto:${org.email || 'connect@pushpako2.com'}`} className="text-base sm:text-lg font-bold text-foreground hover:text-primary transition-colors block break-all">
+                {org.email || 'connect@pushpako2.com'}
               </a>
-              <span className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">24H Response Time</span>
+              <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">24H Response Time</span>
             </div>
 
-            <div className="space-y-4 border-t border-border pt-8">
-              <h5 className="font-bold text-xs tracking-widest uppercase text-muted-foreground">Headquarters</h5>
-              <p className="text-lg font-medium text-foreground max-w-[250px] leading-snug">
-                {org.address}
+            <div className="space-y-1 border-t border-border pt-4">
+              <h5 className="font-bold text-[10px] tracking-widest uppercase text-muted-foreground">Headquarters</h5>
+              <p className="text-sm font-medium text-foreground max-w-[250px] leading-snug">
+                {org.address || 'Bhopal, Madhya Pradesh'}
               </p>
             </div>
           </div>
         </div>
 
-        {/* Links Navigation - Brutalist Grid */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-16 mb-24">
+        {/* Links Navigation */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-12 mb-12">
           {sectionsToRender.map((section: any, idx) => (
             <div key={idx}>
-              <h4 className="font-black text-xs uppercase tracking-[0.2em] text-muted-foreground mb-8 border-b-2 border-foreground/10 pb-4 inline-block w-full">
+              <h4 className="font-bold text-xs uppercase tracking-widest text-muted-foreground mb-6 border-b border-foreground/10 pb-3 inline-block w-full">
                 {section.title}
               </h4>
               <ul className="space-y-4">
@@ -171,7 +171,7 @@ const Footer = ({ footerSections, organization }: FooterProps) => {
         </div>
 
         {/* Absolute Bottom Strip */}
-        <div className="flex flex-col lg:flex-row items-center justify-between gap-6 pt-8 border-t border-border text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+        <div className="flex flex-col lg:flex-row items-center justify-between gap-6 pt-8 border-t border-border text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
           <p>© {new Date().getFullYear()} {org.name?.toUpperCase() || 'SARVTRA LABS'}. THE FUTURE IS NOW.</p>
           <div className="flex flex-wrap justify-center gap-6 lg:gap-12">
             <Link href="/terms" className="hover:text-foreground transition-colors relative after:absolute after:-bottom-1 after:left-0 after:w-0 after:h-[1px] after:bg-foreground hover:after:w-full after:transition-all">

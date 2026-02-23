@@ -27,7 +27,7 @@ export default function StatsSection({ stats: propStats }: { stats?: StatItem[] 
   const stats = propStats && propStats.length > 0 ? propStats : defaultStats;
 
   return (
-    <section className="py-16 md:py-20 bg-gradient-to-r from-primary to-primary/80">
+    <section className="py-12 md:py-20 bg-gradient-to-r from-primary to-primary/70">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
           {stats.map((stat, index) => {
