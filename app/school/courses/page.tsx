@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, Suspense } from 'react';
 import {
     Search,
     BookOpen,
@@ -92,7 +92,7 @@ function getStatusColor(status: string) {
 // ────────────────────────────────────────────────────────────────────
 // Page Component
 // ────────────────────────────────────────────────────────────────────
-export default function SchoolCoursesPage() {
+function SchoolCoursesContent() {
     const { user, isLoading: isAuthLoading } = useAuth();
     const router = useRouter();
 
@@ -886,3 +886,19 @@ function CourseDetailDialog({ course, open, onOpenChange }: {
         </Dialog>
     );
 }
+
+export default function SchoolCoursesPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen flex items-center justify-center">
+                <div className="flex flex-col items-center gap-3">
+                    <div className="h-10 w-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+                    <p className="text-muted-foreground text-sm">Loading courses...</p>
+                </div>
+            </div>
+        }>
+            <SchoolCoursesContent />
+        </Suspense>
+    );
+}
+
