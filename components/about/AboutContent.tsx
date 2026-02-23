@@ -89,6 +89,7 @@ export default function AboutContent({ organization, team }: { organization: any
                                 alt="Students learning at Sarvtra Labs"
                                 fill
                                 className="object-cover"
+                                sizes="(max-width: 768px) 100vw, 50vw"
                             />
                         </motion.div>
                         <motion.div
@@ -215,7 +216,7 @@ export default function AboutContent({ organization, team }: { organization: any
                             >
                                 <div className="w-32 h-32 rounded-full bg-gradient-to-br from-primary to-accent mx-auto mb-4 overflow-hidden border-4 border-card shadow-lg relative">
                                     {member.image ? (
-                                        <Image src={member.image} alt={member.name} fill className="object-cover" />
+                                        <Image src={member.image} alt={member.name} fill className="object-cover" sizes="128px" />
                                     ) : (
                                         <div className="w-full h-full bg-muted flex items-center justify-center text-muted-foreground absolute inset-0">
                                             <Users className="w-12 h-12" />
