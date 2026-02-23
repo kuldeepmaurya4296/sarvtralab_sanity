@@ -1,14 +1,27 @@
 
 'use client';
 
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
     Check, ArrowRight,
-    Phone
+    Phone, Crown, Sparkles, Eye, Shield, CheckCircle2, X
 } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import * as Icons from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
+import { getUserActivePlan } from '@/lib/actions/plan.actions';
 
 const IconComponent = ({ name, className }: { name: string; className?: string }) => {
     const Icon = (Icons as any)[name];
@@ -22,9 +35,52 @@ interface SchoolsClientProps {
     benefits: any[];
 }
 
+const MAX_VISIBLE_FEATURES = 6;
+
 export default function SchoolsClient({ plans, organization, benefits }: SchoolsClientProps) {
     const phone = organization?.phone || '+91-8085613350';
     const partnerStudentsStat = organization?.stats?.find((s: any) => s.label.includes('Partner'))?.value || '120+';
+
+    const { user } = useAuth();
+    const router = useRouter();
+
+    const [userActivePlanId, setUserActivePlanId] = useState<string | null>(null);
+    const [isLoadingPlan, setIsLoadingPlan] = useState(false);
+    const [selectedPlan, setSelectedPlan] = useState<any>(null);
+    const [isDetailOpen, setIsDetailOpen] = useState(false);
+
+    // Fetch user's active plan if logged in
+    useEffect(() => {
+        const fetchActivePlan = async () => {
+            if (user?.id) {
+                setIsLoadingPlan(true);
+                try {
+                    const activePlan = await getUserActivePlan(user.id);
+                    setUserActivePlanId(activePlan);
+                } catch (e) {
+                    console.error("Error fetching user plan:", e);
+                } finally {
+                    setIsLoadingPlan(false);
+                }
+            }
+        };
+        fetchActivePlan();
+    }, [user]);
+
+    const isPlanPurchased = (plan: any) => {
+        if (!userActivePlanId) return false;
+        const planId = plan.customId || plan._id || plan.id;
+        return userActivePlanId === planId;
+    };
+
+    const handleGetStarted = (plan: any) => {
+        const planId = plan.customId || plan._id || plan.id;
+        if (!user) {
+            router.push(`/login?redirect=/checkout/plan/${planId}`);
+            return;
+        }
+        router.push(`/checkout/plan/${planId}`);
+    };
 
     return (
         <>
@@ -42,11 +98,11 @@ export default function SchoolsClient({ plans, organization, benefits }: Schools
                     >
                         <span className="inline-block px-4 py-1.5 rounded-full bg-primary text-primary-foreground font-semibold mb-4 text-sm">For Schools</span>
                         <h1 className="text-4xl md:text-5xl font-bold text-background mb-6">
-                            Partner with India's Leading
+                            Partner with India&apos;s Leading
                             <span className="block text-primary">Robotics Education Platform</span>
                         </h1>
                         <p className="text-lg text-gray-300 mb-8">
-                            Transform your school's STEM program with our comprehensive robotics curriculum,
+                            Transform your school&apos;s STEM program with our comprehensive robotics curriculum,
                             training, and support. Join {partnerStudentsStat} partner schools across India.
                         </p>
                         <div className="flex flex-col sm:flex-row gap-4">
@@ -134,48 +190,93 @@ export default function SchoolsClient({ plans, organization, benefits }: Schools
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-                        {plans && plans.length > 0 ? plans.map((plan, index) => (
-                            <motion.div
-                                key={plan._id || plan.id || plan.customId || index}
-                                initial={{ opacity: 0, y: 20 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                viewport={{ once: true }}
-                                transition={{ delay: index * 0.1 }}
-                                className={`p-8 rounded-2xl bg-card border-2 relative transition-all hover:-translate-y-2 ${plan.popular ? 'border-primary shadow-xl ring-2 ring-primary/20' : 'border-transparent shadow-lg'
-                                    }`}
-                            >
-                                {plan.popular && (
-                                    <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-primary text-primary-foreground text-sm font-semibold rounded-full shadow-md">
-                                        Most Popular
-                                    </span>
-                                )}
-                                <h3 className="text-xl font-bold mb-2">{plan.name}</h3>
-                                <p className="text-muted-foreground mb-4">{plan.description}</p>
-                                <div className="mb-6">
-                                    <span className="text-4xl font-bold">{plan.price}</span>
-                                    <span className="text-muted-foreground">{plan.period}</span>
-                                </div>
-                                <ul className="space-y-3 mb-8">
-                                    {plan.features?.map((feature: string) => (
-                                        <li key={feature} className="flex items-start gap-2">
-                                            <Check className="w-5 h-5 text-green-500 mt-0.5 shrink-0" />
-                                            <span className="text-sm">{feature}</span>
-                                        </li>
-                                    ))}
-                                </ul>
-                                <div className="mt-auto">
-                                    <Button
-                                        className="w-full h-12 font-medium"
-                                        variant={plan.popular ? 'default' : 'outline'}
-                                        asChild
-                                    >
-                                        <Link href="/contact">
-                                            Get Started
-                                        </Link>
-                                    </Button>
-                                </div>
-                            </motion.div>
-                        )) : (
+                        {plans && plans.length > 0 ? plans.map((plan, index) => {
+                            const purchased = isPlanPurchased(plan);
+                            const features = plan.features || [];
+                            const visibleFeatures = features.slice(0, MAX_VISIBLE_FEATURES);
+                            const hasMoreFeatures = features.length > MAX_VISIBLE_FEATURES;
+
+                            return (
+                                <motion.div
+                                    key={plan._id || plan.id || plan.customId || index}
+                                    initial={{ opacity: 0, y: 20 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    viewport={{ once: true }}
+                                    transition={{ delay: index * 0.1 }}
+                                    className={`rounded-2xl bg-card border-2 relative transition-all hover:-translate-y-2 flex flex-col ${plan.popular ? 'border-primary shadow-xl ring-2 ring-primary/20' : 'border-transparent shadow-lg'
+                                        }`}
+                                >
+                                    {plan.popular && (
+                                        <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-primary text-primary-foreground text-sm font-semibold rounded-full shadow-md flex items-center gap-1 z-10">
+                                            <Crown className="w-3.5 h-3.5" />
+                                            Most Popular
+                                        </span>
+                                    )}
+
+                                    {/* Card Body — fixed height sections */}
+                                    <div className="p-8 flex flex-col flex-1">
+                                        {/* Title + Description  (fixed min-height) */}
+                                        <div className="min-h-[72px]">
+                                            <h3 className="text-xl font-bold mb-1">{plan.name}</h3>
+                                            <p className="text-muted-foreground text-sm line-clamp-2">{plan.description}</p>
+                                        </div>
+
+                                        {/* Price */}
+                                        <div className="my-5">
+                                            <span className="text-4xl font-bold">{plan.price}</span>
+                                            {plan.period && (
+                                                <span className="text-muted-foreground ml-1">/{plan.period}</span>
+                                            )}
+                                        </div>
+
+                                        {/* Features  (fixed height container) */}
+                                        <div className="min-h-[160px] flex flex-col">
+                                            <ul className="space-y-2.5 flex-1">
+                                                {visibleFeatures.map((feature: string, i: number) => (
+                                                    <li key={i} className="flex items-start gap-2">
+                                                        <Check className="w-4.5 h-4.5 text-green-500 mt-0.5 shrink-0" />
+                                                        <span className="text-sm">{feature}</span>
+                                                    </li>
+                                                ))}
+                                            </ul>
+
+                                            {/* "More" button — only appears when features > limit */}
+                                            {hasMoreFeatures && (
+                                                <button
+                                                    onClick={() => {
+                                                        setSelectedPlan(plan);
+                                                        setIsDetailOpen(true);
+                                                    }}
+                                                    className="mt-3 text-sm text-primary font-medium hover:underline inline-flex items-center gap-1 cursor-pointer transition-colors hover:text-primary/80"
+                                                >
+                                                    <Eye className="w-3.5 h-3.5" />
+                                                    +{features.length - MAX_VISIBLE_FEATURES} more features
+                                                </button>
+                                            )}
+                                        </div>
+
+                                        {/* Action Button — always at the bottom */}
+                                        <div className="mt-6 pt-4 border-t">
+                                            {purchased ? (
+                                                <div className="w-full h-12 rounded-lg bg-emerald-50 border-2 border-emerald-200 flex items-center justify-center gap-2">
+                                                    <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+                                                    <span className="font-semibold text-emerald-700">Already Purchased</span>
+                                                </div>
+                                            ) : (
+                                                <Button
+                                                    className="w-full h-12 font-medium text-base"
+                                                    variant={plan.popular ? 'default' : 'outline'}
+                                                    onClick={() => handleGetStarted(plan)}
+                                                >
+                                                    Get Started
+                                                    <ArrowRight className="w-4 h-4 ml-2" />
+                                                </Button>
+                                            )}
+                                        </div>
+                                    </div>
+                                </motion.div>
+                            );
+                        }) : (
                             <div className="col-span-full py-20 text-center text-muted-foreground">
                                 No plans available at the moment.
                             </div>
@@ -188,7 +289,7 @@ export default function SchoolsClient({ plans, organization, benefits }: Schools
             <section className="py-20 bg-gradient-to-r from-primary to-accent">
                 <div className="container mx-auto px-4 text-center">
                     <h2 className="text-3xl md:text-4xl font-bold text-primary-foreground mb-4">
-                        Ready to Transform Your School's STEM Program?
+                        Ready to Transform Your School&apos;s STEM Program?
                     </h2>
                     <p className="text-primary-foreground/80 mb-8 max-w-2xl mx-auto">
                         Schedule a free demo to see how Sarvtra Labs can help your students excel in robotics and coding.
@@ -201,6 +302,114 @@ export default function SchoolsClient({ plans, organization, benefits }: Schools
                     </Button>
                 </div>
             </section>
+
+            {/* Plan Detail Dialog */}
+            <PlanDetailDialog
+                plan={selectedPlan}
+                open={isDetailOpen}
+                onOpenChange={setIsDetailOpen}
+                isPurchased={selectedPlan ? isPlanPurchased(selectedPlan) : false}
+                onGetStarted={() => {
+                    if (selectedPlan) {
+                        setIsDetailOpen(false);
+                        handleGetStarted(selectedPlan);
+                    }
+                }}
+            />
         </>
+    );
+}
+
+// ────────────────────────────────────────────────────────────────────
+// Plan Detail Dialog
+// ────────────────────────────────────────────────────────────────────
+function PlanDetailDialog({ plan, open, onOpenChange, isPurchased, onGetStarted }: {
+    plan: any;
+    open: boolean;
+    onOpenChange: (open: boolean) => void;
+    isPurchased: boolean;
+    onGetStarted: () => void;
+}) {
+    if (!plan) return null;
+
+    const features = plan.features || [];
+
+    return (
+        <Dialog open={open} onOpenChange={onOpenChange}>
+            <DialogContent className="max-w-lg max-h-[85vh] p-0 overflow-hidden">
+                <DialogHeader className="sr-only">
+                    <DialogTitle>{plan.name} - Plan Details</DialogTitle>
+                </DialogHeader>
+
+                <ScrollArea className="h-[85vh]">
+                    <div className="p-6 space-y-6">
+                        {/* Plan Header */}
+                        <div className="text-center space-y-3">
+                            <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto">
+                                <Shield className="w-8 h-8 text-primary" />
+                            </div>
+                            <div>
+                                <div className="flex items-center justify-center gap-2 mb-1">
+                                    <h2 className="text-2xl font-bold">{plan.name}</h2>
+                                    {plan.popular && (
+                                        <Badge className="bg-primary text-primary-foreground">
+                                            <Sparkles className="w-3 h-3 mr-1" />
+                                            Popular
+                                        </Badge>
+                                    )}
+                                </div>
+                                {plan.description && (
+                                    <p className="text-muted-foreground text-sm">{plan.description}</p>
+                                )}
+                            </div>
+                            <div className="pt-2">
+                                <span className="text-4xl font-bold text-primary">{plan.price}</span>
+                                {plan.period && (
+                                    <span className="text-muted-foreground ml-1">/{plan.period}</span>
+                                )}
+                            </div>
+                        </div>
+
+                        <Separator />
+
+                        {/* All Features */}
+                        <div className="space-y-3">
+                            <h3 className="text-lg font-semibold flex items-center gap-2">
+                                <Sparkles className="h-5 w-5 text-primary" />
+                                All Features & Benefits
+                            </h3>
+                            <ul className="space-y-2.5">
+                                {features.map((feature: string, i: number) => (
+                                    <li key={i} className="flex items-start gap-3 p-2.5 rounded-lg bg-muted/40 border">
+                                        <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
+                                        <span className="text-sm font-medium">{feature}</span>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+
+                        <Separator />
+
+                        {/* Action */}
+                        <div className="pb-2">
+                            {isPurchased ? (
+                                <div className="w-full h-12 rounded-lg bg-emerald-50 border-2 border-emerald-200 flex items-center justify-center gap-2">
+                                    <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+                                    <span className="font-semibold text-emerald-700">You already have this plan</span>
+                                </div>
+                            ) : (
+                                <Button
+                                    className="w-full h-12 font-semibold text-base"
+                                    onClick={onGetStarted}
+                                >
+                                    Get Started with {plan.name}
+                                    <ArrowRight className="w-4 h-4 ml-2" />
+                                </Button>
+                            )}
+                        </div>
+                    </div>
+                </ScrollArea>
+            </DialogContent>
+        </Dialog>
     );
 }

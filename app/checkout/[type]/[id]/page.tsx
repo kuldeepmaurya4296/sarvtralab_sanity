@@ -12,13 +12,7 @@ import { useAuth } from '@/context/AuthContext';
 import { toast } from 'sonner';
 import { createRazorpayOrder, verifyPayment } from '@/lib/actions/payment.actions';
 import { getCourseById } from '@/lib/actions/course.actions';
-
-// Mock plans data (should be in a config file)
-const PLANS = {
-    basic: { id: 'basic', name: 'Basic Plan', price: 4999, features: ['Access to basic courses', 'Certificate of completion'] },
-    standard: { id: 'standard', name: 'Standard Plan', price: 9999, features: ['Access to all courses', 'Priority support', 'Mentorship'] },
-    premium: { id: 'premium', name: 'Premium Plan', price: 14999, features: ['Lifetime access', '1-on-1 Mentorship', 'Job assistance'] }
-};
+import { getPlanById } from '@/lib/actions/plan.actions';
 
 export default function CheckoutPage() {
     const params = useParams();
@@ -36,14 +30,36 @@ export default function CheckoutPage() {
     useEffect(() => {
         const fetchItemDetails = async () => {
             if (type === 'plan') {
-                const plan = PLANS[id as keyof typeof PLANS];
-                if (plan) {
-                    setItemDetails(plan);
-                } else {
-                    toast.error("Plan not found");
-                    router.push('/pricing');
+                try {
+                    const plan = await getPlanById(id);
+                    if (plan) {
+                        // Parse price: handle strings like "₹4,999" or "4999" or numeric values
+                        let numericPrice = 0;
+                        if (typeof plan.price === 'number') {
+                            numericPrice = plan.price;
+                        } else if (typeof plan.price === 'string') {
+                            numericPrice = parseFloat(plan.price.replace(/[₹,\s]/g, '')) || 0;
+                        }
+                        setItemDetails({
+                            id: plan.customId || plan._id || plan.id,
+                            name: plan.name,
+                            price: numericPrice,
+                            displayPrice: plan.price,
+                            features: plan.features || [],
+                            period: plan.period || 'yearly',
+                            description: plan.description
+                        });
+                    } else {
+                        toast.error("Plan not found");
+                        router.push('/schools');
+                    }
+                } catch (e) {
+                    console.error(e);
+                    toast.error("Error loading plan");
+                    router.push('/schools');
+                } finally {
+                    setIsLoading(false);
                 }
-                setIsLoading(false);
             } else if (type === 'course') {
                 try {
                     const course = await getCourseById(id);

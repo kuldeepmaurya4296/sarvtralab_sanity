@@ -96,7 +96,9 @@ export default function SchoolDashboardPage() {
                                 ))}
                             </div>
                             <Button variant="outline" size="sm" className="bg-white" asChild>
-                                <Link href="/schools">View Plans</Link>
+                                <Link href={stats.subscription.details ? '/school/courses?tab=plan' : '/schools'}>
+                                    {stats.subscription.details ? 'View Active Plan' : 'View Plans'}
+                                </Link>
                             </Button>
                         </div>
                     </motion.div>

@@ -103,6 +103,224 @@ export async function getSchoolDashboardStats(schoolId: string) {
 }
 
 /* -------------------------------------------------------------------------- */
+/*                    School Courses & Plans Dashboard Data                    */
+/* -------------------------------------------------------------------------- */
+
+export async function getSchoolCoursesAndPlansData(schoolId: string) {
+    try {
+        const results = await sanityClient.fetch(`{
+            "schoolUser": *[_type == "user" && role == "school" && (customId == $schoolId || _id == $schoolId)][0],
+            "students": *[_type == "user" && role == "student" && (schoolRef._ref == $schoolId || schoolId == $schoolId)]{
+                _id, customId, name, email, grade, enrolledCourses, completedCourses, createdAt, status
+            },
+            "courses": *[_type == "course"]{
+                _id, customId, title, description, category, level, duration, price, grade, image, rating, studentsEnrolled,
+                curriculum
+            },
+            "enrollments": *[_type == "enrollment"]{
+                _id, student, courseCustomId, courseRef, enrolledAt, status, progress, grade, completionDate
+            },
+            "payments": *[_type == "payment" && status == "Completed"]{
+                _id, user, amount, currency, status, method, transactionId, _createdAt
+            },
+            "allPlans": *[_type == "plan"]{
+                _id, customId, name, description, price, period, features, popular, planType, status
+            }
+        }`, { schoolId });
+
+        if (!results.schoolUser) throw new Error("School not found");
+
+        const school = results.schoolUser;
+        const students = results.students || [];
+        const allCourses = results.courses || [];
+        const enrollments = results.enrollments || [];
+        const payments = results.payments || [];
+        const allPlans = results.allPlans || [];
+
+        // ── Student IDs for this school ──
+        const studentIds = new Set(students.map((s: any) => s.customId || s._id));
+        const studentMap: Map<string, any> = new Map(students.map((s: any) => [s.customId || s._id, s]));
+
+        // ── Enrollments belonging to this school's students ──
+        const schoolEnrollments = enrollments.filter((e: any) => studentIds.has(e.student));
+
+        // ── Payments by this school's students ──
+        const schoolPayments = payments.filter((p: any) => studentIds.has(p.user));
+        const totalStudentSpend = schoolPayments.reduce((acc: number, p: any) => acc + (p.amount || 0), 0);
+
+        // ── Build course-level purchase analytics ──
+        const courseEnrollmentMap: Record<string, {
+            courseId: string;
+            enrolledStudents: { id: string; name: string; email: string; grade: string; enrolledAt: string; progress: number; status: string }[];
+            completedCount: number;
+            activeCount: number;
+            droppedCount: number;
+            avgProgress: number;
+        }> = {};
+
+        schoolEnrollments.forEach((e: any) => {
+            const cId = e.courseCustomId || e.courseRef?._ref || '';
+            if (!courseEnrollmentMap[cId]) {
+                courseEnrollmentMap[cId] = {
+                    courseId: cId,
+                    enrolledStudents: [],
+                    completedCount: 0,
+                    activeCount: 0,
+                    droppedCount: 0,
+                    avgProgress: 0
+                };
+            }
+            const student = studentMap.get(e.student);
+            courseEnrollmentMap[cId].enrolledStudents.push({
+                id: e.student,
+                name: student?.name || 'Unknown',
+                email: student?.email || '',
+                grade: student?.grade || 'N/A',
+                enrolledAt: e.enrolledAt || '',
+                progress: e.progress || 0,
+                status: e.status || 'Active'
+            });
+            if (e.status === 'Completed') courseEnrollmentMap[cId].completedCount++;
+            else if (e.status === 'Dropped') courseEnrollmentMap[cId].droppedCount++;
+            else courseEnrollmentMap[cId].activeCount++;
+        });
+
+        // Calculate avg progress per course
+        Object.values(courseEnrollmentMap).forEach(c => {
+            if (c.enrolledStudents.length > 0) {
+                c.avgProgress = Math.round(
+                    c.enrolledStudents.reduce((sum, s) => sum + s.progress, 0) / c.enrolledStudents.length
+                );
+            }
+        });
+
+        // ── Purchased courses with full details ──
+        const purchasedCourses = allCourses
+            .filter((c: any) => {
+                const cId = c.customId || c._id;
+                return courseEnrollmentMap[cId] || courseEnrollmentMap[c._id];
+            })
+            .map((c: any) => {
+                const cId = c.customId || c._id;
+                const stats = courseEnrollmentMap[cId] || courseEnrollmentMap[c._id] || {
+                    enrolledStudents: [], completedCount: 0, activeCount: 0, droppedCount: 0, avgProgress: 0
+                };
+                return {
+                    id: c.customId || c._id,
+                    title: c.title,
+                    description: c.description,
+                    category: c.category,
+                    level: c.level,
+                    duration: c.duration,
+                    price: c.price,
+                    grade: c.grade,
+                    image: c.image,
+                    rating: c.rating,
+                    totalEnrolled: stats.enrolledStudents.length,
+                    activeCount: stats.activeCount,
+                    completedCount: stats.completedCount,
+                    droppedCount: stats.droppedCount,
+                    avgProgress: stats.avgProgress,
+                    students: stats.enrolledStudents,
+                    curriculum: c.curriculum
+                };
+            })
+            .sort((a: any, b: any) => b.totalEnrolled - a.totalEnrolled);
+
+        // ── Plan subscription details ──
+        const activePlanId = school.subscriptionPlan;
+        const activePlan = activePlanId
+            ? allPlans.find((p: any) => (p.customId === activePlanId) || (p._id === activePlanId))
+            : null;
+
+        const subscriptionExpiry = school.subscriptionExpiry ? new Date(school.subscriptionExpiry) : null;
+        const now = new Date();
+        let daysRemaining = 0;
+        let isExpired = false;
+        let expiryFormatted = 'N/A';
+
+        if (subscriptionExpiry) {
+            daysRemaining = Math.ceil((subscriptionExpiry.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+            isExpired = daysRemaining < 0;
+            expiryFormatted = subscriptionExpiry.toLocaleDateString('en-IN', {
+                day: 'numeric', month: 'long', year: 'numeric'
+            });
+        }
+
+        // ── Plan beneficiaries (students benefiting from this plan) ──
+        // Students who have active enrollments are plan beneficiaries
+        const beneficiaries = students
+            .filter((s: any) => (s.enrolledCourses?.length || 0) > 0)
+            .map((s: any) => ({
+                id: s.customId || s._id,
+                name: s.name,
+                email: s.email,
+                grade: s.grade || 'N/A',
+                coursesEnrolled: s.enrolledCourses?.length || 0,
+                coursesCompleted: s.completedCourses?.length || 0,
+                joinedAt: s.createdAt || ''
+            }));
+
+        // ── Summary stats ──
+        const totalCoursesWithEnrollments = purchasedCourses.length;
+        const totalEnrollments = schoolEnrollments.length;
+        const totalCompletedEnrollments = schoolEnrollments.filter((e: any) => e.status === 'Completed').length;
+        const overallCompletionRate = totalEnrollments > 0
+            ? Math.round((totalCompletedEnrollments / totalEnrollments) * 100) : 0;
+        const overallAvgProgress = schoolEnrollments.length > 0
+            ? Math.round(schoolEnrollments.reduce((sum: number, e: any) => sum + (e.progress || 0), 0) / schoolEnrollments.length)
+            : 0;
+
+        // ── Monthly enrollment trend ──
+        const monthlyTrend: Record<string, number> = {};
+        schoolEnrollments.forEach((e: any) => {
+            if (e.enrolledAt) {
+                const month = new Date(e.enrolledAt).toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
+                monthlyTrend[month] = (monthlyTrend[month] || 0) + 1;
+            }
+        });
+
+        return {
+            school: {
+                name: school.name,
+                email: school.email,
+                principalName: school.principalName || 'Not Set',
+            },
+            summary: {
+                totalStudents: students.length,
+                totalCoursesWithEnrollments,
+                totalEnrollments,
+                totalCompletedEnrollments,
+                overallCompletionRate,
+                overallAvgProgress,
+                totalStudentSpend,
+                beneficiaryCount: beneficiaries.length,
+            },
+            purchasedCourses: cleanSanityDoc(purchasedCourses),
+            plan: activePlan ? {
+                id: activePlan.customId || activePlan._id,
+                name: activePlan.name,
+                description: activePlan.description,
+                price: activePlan.price,
+                period: activePlan.period || 'yearly',
+                features: activePlan.features || [],
+                status: isExpired ? 'expired' : 'active',
+                expiryDate: expiryFormatted,
+                daysRemaining: Math.max(daysRemaining, 0),
+                isExpired,
+                popular: activePlan.popular || false,
+            } : null,
+            beneficiaries: cleanSanityDoc(beneficiaries),
+            allPlans: cleanSanityDoc(allPlans.filter((p: any) => p.status === 'active')),
+            monthlyTrend: Object.entries(monthlyTrend).map(([month, count]) => ({ month, enrollments: count })),
+        };
+    } catch (e) {
+        console.error("School Courses & Plans Data Error:", e);
+        throw e;
+    }
+}
+
+/* -------------------------------------------------------------------------- */
 /*                                Admin Dashboard                             */
 /* -------------------------------------------------------------------------- */
 

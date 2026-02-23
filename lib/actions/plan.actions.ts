@@ -15,6 +15,32 @@ export async function getAllPlans() {
     }
 }
 
+export async function getPlanById(id: string) {
+    try {
+        const plan = await sanityClient.fetch(
+            `*[_type == "plan" && (customId == $id || _id == $id)][0]`,
+            { id }
+        );
+        return plan ? cleanSanityDoc(plan) : null;
+    } catch (e) {
+        console.error("Get Plan By ID Error:", e);
+        return null;
+    }
+}
+
+export async function getUserActivePlan(userId: string) {
+    try {
+        const user = await sanityClient.fetch(
+            `*[_type == "user" && (customId == $userId || _id == $userId)][0]{subscriptionPlan}`,
+            { userId }
+        );
+        return user?.subscriptionPlan || null;
+    } catch (e) {
+        console.error("Get User Active Plan Error:", e);
+        return null;
+    }
+}
+
 export async function getAdminPlans() {
     const session = await getServerSession(authOptions);
     if (!session || session.user.role !== 'superadmin') {
