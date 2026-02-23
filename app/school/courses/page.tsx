@@ -50,6 +50,7 @@ import {
 import {
     Dialog,
     DialogContent,
+    DialogDescription,
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog";
@@ -739,6 +740,9 @@ function CourseDetailDialog({ course, open, onOpenChange }: {
             <DialogContent className="max-w-3xl max-h-[85vh] p-0 overflow-hidden">
                 <DialogHeader className="sr-only">
                     <DialogTitle>Course Details: {course.title}</DialogTitle>
+                    <DialogDescription className="sr-only">
+                        Detailed statistics and enrolled students for {course.title}.
+                    </DialogDescription>
                 </DialogHeader>
                 <ScrollArea className="h-[85vh]">
                     <div className="p-6 space-y-6">

@@ -173,19 +173,20 @@ export default function AboutContent({ organization, team }: { organization: any
                                 initial={{ opacity: 0, x: index % 2 === 0 ? -20 : 20 }}
                                 whileInView={{ opacity: 1, x: 0 }}
                                 viewport={{ once: true }}
-                                className="flex items-center gap-6 mb-8 relative"
+                                className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6 mb-12 last:mb-0 relative"
                             >
-                                <div className="w-20 text-right shrink-0">
-                                    <span className="text-xl font-bold text-primary">{milestone.year}</span>
+                                <div className="w-24 sm:w-20 text-center sm:text-right shrink-0">
+                                    <span className="text-2xl sm:text-xl font-bold text-primary">{milestone.year}</span>
                                 </div>
-                                <div className="flex flex-col items-center">
+                                <div className="hidden sm:flex flex-col items-center">
                                     <div className="w-4 h-4 rounded-full bg-primary relative z-10 box-content border-4 border-background" />
                                     {index < milestones.length - 1 && (
-                                        <div className="w-0.5 h-16 bg-muted-foreground/30 absolute top-4 translate-y-2" />
+                                        <div className="w-0.5 h-full bg-muted-foreground/30 absolute top-4 translate-y-2 pb-8" />
                                     )}
                                 </div>
-                                <div className="flex-1 p-4 rounded-xl bg-muted/50 border">
-                                    <p className="font-medium">{milestone.event}</p>
+                                <div className="flex-1 p-5 rounded-2xl bg-card border shadow-sm relative w-full">
+                                    <div className="sm:hidden absolute -top-2 left-6 w-4 h-4 rounded-full bg-primary border-4 border-background" />
+                                    <p className="font-medium text-foreground leading-relaxed">{milestone.event}</p>
                                 </div>
                             </motion.div>
                         ))}

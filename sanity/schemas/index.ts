@@ -29,6 +29,7 @@ import supportCategory from './supportCategory';
 import supportArticle from './supportArticle';
 import navLink from './navLink';
 import footerSection from './footerLink';
+import legalContent from './legalContent';
 
 export const schemaTypes = [
     user,
@@ -62,4 +63,5 @@ export const schemaTypes = [
     supportArticle,
     navLink,
     footerSection,
+    legalContent,
 ];

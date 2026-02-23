@@ -198,6 +198,30 @@ export async function getFooterSections() {
 }
 
 /* -------------------------------------------------------------------------- */
+/*                               Legal Content                                */
+/* -------------------------------------------------------------------------- */
+
+export async function getLegalDocs() {
+    try {
+        const docs = await sanityClient.fetch(`*[_type == "legalContent"] | order(order asc)`);
+        return cleanSanityDoc(docs);
+    } catch (e) {
+        console.error("Get Legal Docs Error:", e);
+        return [];
+    }
+}
+
+export async function getLegalDocBySlug(slug: string) {
+    try {
+        const doc = await sanityClient.fetch(`*[_type == "legalContent" && slug.current == $slug][0]`, { slug });
+        return cleanSanityDoc(doc);
+    } catch (e) {
+        console.error("Get Legal Doc By Slug Error:", e);
+        return null;
+    }
+}
+
+/* -------------------------------------------------------------------------- */
 /*                            All Home Page Data                              */
 /* -------------------------------------------------------------------------- */
 

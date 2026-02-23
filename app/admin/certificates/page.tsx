@@ -40,6 +40,7 @@ import {
 import {
     Dialog,
     DialogContent,
+    DialogDescription,
     DialogTitle,
 } from "@/components/ui/dialog";
 import {
@@ -776,8 +777,11 @@ export default function AdminCertificatesPage() {
 
             {/* Preview Dialog */}
             <Dialog open={!!previewCertificate} onOpenChange={(open) => !open && setPreviewCertificate(null)}>
-                <DialogContent className="max-w-5xl w-full p-0 overflow-hidden bg-transparent border-0 shadow-none">
+                <DialogContent className="max-w-[1200px] w-full p-0 overflow-hidden bg-transparent border-0 shadow-none">
                     <DialogTitle className="sr-only">Certificate Preview</DialogTitle>
+                    <DialogDescription className="sr-only">
+                        Full size preview of the issued certificate.
+                    </DialogDescription>
                     <div className="relative w-full overflow-auto flex justify-center bg-muted/20 p-8">
                         <div className="scale-[0.6] sm:scale-75 md:scale-90 lg:scale-100 origin-top shadow-xl">
                             <CertificateTemplate

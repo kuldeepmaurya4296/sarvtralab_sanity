@@ -30,21 +30,25 @@ export function cleanSanityDoc(doc: any): any {
     if (Array.isArray(doc)) return doc.map(cleanSanityDoc);
 
     const cleaned: any = {};
+
+    // First pass: extract standard fields
     for (const [key, value] of Object.entries(doc)) {
-        // Keep _id but rename to id-compatible field, skip _rev, _type internals
         if (key === '_id') {
             cleaned._id = value;
-            cleaned.id = value;
+            cleaned.id = value; // Default id to _id
         } else if (key === '_createdAt') {
             cleaned.createdAt = value;
         } else if (key === '_updatedAt') {
             cleaned.updatedAt = value;
-        } else if (key.startsWith('_')) {
-            // Skip _rev, _type, _key etc for client serialization
-            continue;
-        } else {
+        } else if (!key.startsWith('_')) {
             cleaned[key] = value;
         }
     }
+
+    // Second pass: Ensure _id takes precedence over any field named 'id' in the doc
+    if (doc._id) {
+        cleaned.id = doc._id;
+    }
+
     return cleaned;
 }

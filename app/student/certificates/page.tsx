@@ -25,7 +25,7 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { format } from 'date-fns';
 // @ts-ignore
 import html2canvas from 'html2canvas';
@@ -275,6 +275,9 @@ export default function StudentCertificatesPage() {
                                         {/* Full Size View Modal */}
                                         <DialogContent className="max-w-[1200px] w-full overflow-auto max-h-[90vh] bg-muted/50 p-6 flex flex-col items-center">
                                             <DialogTitle className="sr-only">Certificate Preview</DialogTitle>
+                                            <DialogDescription className="sr-only">
+                                                A preview of the earned certificate for {cert.courseName}.
+                                            </DialogDescription>
                                             <div className="bg-white shadow-2xl scale-[0.8] md:scale-100 origin-top">
                                                 <CertificateTemplate
                                                     studentName={cert.studentName}

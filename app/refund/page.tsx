@@ -1,20 +1,45 @@
 import PublicLayout from '@/components/layout/PublicLayout';
+import { getLegalDocBySlug } from '@/lib/actions/content.actions';
 
-export default function RefundPage() {
+export default async function RefundPage() {
+    const doc = await getLegalDocBySlug('refund');
+
+    if (!doc) {
+        return (
+            <PublicLayout>
+                <div className="container mx-auto px-4 py-32 text-center">
+                    <h1 className="text-4xl font-bold mb-8 text-muted-foreground uppercase tracking-widest opacity-20">Legal Content Unavailable</h1>
+                    <p>The refund policy is currently being updated. Please check back later.</p>
+                </div>
+            </PublicLayout>
+        );
+    }
+
     return (
         <PublicLayout>
-            <div className="container mx-auto px-4 py-32">
-                <h1 className="text-4xl font-bold mb-8">Refund Policy</h1>
-                <div className="prose dark:prose-invert max-w-none space-y-4 text-muted-foreground">
-                    <p>At Sarvtra Labs, we strive to ensure our customers are satisfied with their purchases. Please read our refund policy carefully.</p>
-                    <h2 className="text-2xl font-semibold text-foreground mt-8 mb-4">1. Course Refunds</h2>
-                    <p>We offer a full money-back guarantee for all purchases made on our website. If you are not satisfied with the course that you have purchased from us, you can get your money back no questions asked.</p>
-                    <h2 className="text-2xl font-semibold text-foreground mt-8 mb-4">2. Eligibility</h2>
-                    <p>You are eligible for a full reimbursement within 14 calendar days of your purchase. After the 14-day period you will no longer be eligible and won&apos;t be able to receive a refund.</p>
-                    <h2 className="text-2xl font-semibold text-foreground mt-8 mb-4">3. Processing Time</h2>
-                    <p>If you have any additional questions or would like to request a refund, feel free to contact us. Refunds are typically processed within 5-7 business days.</p>
+            <div className="container mx-auto px-4 py-32 max-w-4xl">
+                <h1 className="text-4xl md:text-5xl font-black mb-12 uppercase tracking-tighter border-b-4 border-primary pb-4 inline-block">
+                    {doc.title}
+                </h1>
+                <div className="prose dark:prose-invert max-w-none space-y-12 text-foreground">
+                    {(doc.sections || []).map((section: any, idx: number) => (
+                        <div key={idx} className="space-y-4">
+                            <h2 className="text-2xl font-bold uppercase tracking-tight text-primary">
+                                {section.heading}
+                            </h2>
+                            {section.subheading && (
+                                <h3 className="text-lg font-semibold text-muted-foreground italic">
+                                    {section.subheading}
+                                </h3>
+                            )}
+                            <p className="text-lg text-muted-foreground leading-relaxed whitespace-pre-wrap">
+                                {section.paragraph}
+                            </p>
+                        </div>
+                    ))}
                 </div>
             </div>
         </PublicLayout>
     );
 }
+

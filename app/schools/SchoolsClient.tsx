@@ -15,6 +15,7 @@ import { Separator } from '@/components/ui/separator';
 import {
     Dialog,
     DialogContent,
+    DialogDescription,
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog";
@@ -339,6 +340,9 @@ function PlanDetailDialog({ plan, open, onOpenChange, isPurchased, onGetStarted 
             <DialogContent className="max-w-lg max-h-[85vh] p-0 overflow-hidden">
                 <DialogHeader className="sr-only">
                     <DialogTitle>{plan.name} - Plan Details</DialogTitle>
+                    <DialogDescription className="sr-only">
+                        Detailed information about the {plan.name} partnership plan.
+                    </DialogDescription>
                 </DialogHeader>
 
                 <ScrollArea className="h-[85vh]">

@@ -23,6 +23,7 @@ import {
 import {
     Dialog,
     DialogContent,
+    DialogDescription,
     DialogHeader,
     DialogTitle,
     DialogTrigger
@@ -133,6 +134,9 @@ export default function CRMPage() {
                         <DialogContent>
                             <DialogHeader>
                                 <DialogTitle>Add New Lead</DialogTitle>
+                                <DialogDescription>
+                                    Enter the details of the potential student lead here.
+                                </DialogDescription>
                             </DialogHeader>
                             <form onSubmit={handleCreateLead} className="space-y-4">
                                 <div className="space-y-2">

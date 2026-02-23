@@ -1,6 +1,5 @@
 import Link from 'next/link';
-import { Facebook, Twitter, Instagram, Linkedin, Youtube, Mail, Phone, MapPin } from 'lucide-react';
-import Image from 'next/image';
+import { Facebook, Twitter, Instagram, Linkedin, Youtube, Mail, Phone, MapPin, ArrowUpRight } from 'lucide-react';
 
 export interface FooterLink {
   label: string;
@@ -11,6 +10,7 @@ export interface FooterSectionData {
   category: string;
   title: string;
   links: FooterLink[];
+  order?: number;
 }
 
 export interface OrgData {
@@ -55,49 +55,50 @@ const defaultFooterLinks = {
 };
 
 const Footer = ({ footerSections, organization }: FooterProps) => {
-  // Build footer links object from sections or use defaults
-  const footerLinks = footerSections?.length ? {
-    courses: footerSections.find(s => s.category === 'courses')?.links || defaultFooterLinks.courses,
-    company: footerSections.find(s => s.category === 'company')?.links || defaultFooterLinks.company,
-    support: footerSections.find(s => s.category === 'support')?.links || defaultFooterLinks.support,
-    dashboards: footerSections.find(s => s.category === 'dashboards')?.links || defaultFooterLinks.dashboards,
-  } : defaultFooterLinks;
+  const sectionsToRender = footerSections?.length
+    ? [...footerSections].sort((a, b) => (a.order || 0) - (b.order || 0))
+    : [
+      { title: 'COURSES', links: defaultFooterLinks.courses },
+      { title: 'COMPANY', links: defaultFooterLinks.company },
+      { title: 'SUPPORT', links: defaultFooterLinks.support },
+      { title: 'PORTALS', links: defaultFooterLinks.dashboards },
+    ];
 
   const org = organization || {
+    name: 'Sarvtra Labs',
     email: 'connect@pushpako2.com',
     phone: '+91-8085613350',
     address: 'Bhopal, Madhya Pradesh',
     hours: 'Mon - Sat: 9:00 AM - 6:00 PM',
     socials: []
   };
+
   return (
-    <footer className="bg-zinc-950 text-zinc-200 pt-20 pb-10 border-t border-zinc-800 font-sans">
-      <div className="container mx-auto px-4">
-        {/* Main Footer Content */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-12 lg:gap-8 mb-16">
-          {/* Brand Column (4 cols) */}
-          <div className="lg:col-span-4 space-y-6">
-            <Link href="/" className="flex items-center gap-2 group">
-              {/* Logo commented as per request */}
-              {/* <div className="h-10 w-10 relative overflow-hidden flex items-center justify-center">
-                <Image
-                  src="/favicon.svg"
-                  alt="Sarvtra Labs Logo"
-                  width={40}
-                  height={40}
-                  className="object-contain"
-                />
-              </div> */}
-              <span className="font-display text-2xl font-bold transition-all duration-300 group-hover:scale-105">
-                <span className="text-white">Sarvtra</span>
-                <span className="text-primary ml-1">Labs</span>
+    <footer className="bg-background text-foreground border-t-[8px] border-primary font-sans relative overflow-hidden">
+      {/* Massive Typographic Hero Section in Background */}
+      <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center pointer-events-none opacity-[0.02] select-none z-0 overflow-hidden">
+        <span className="text-[25vw] font-black tracking-tighter uppercase whitespace-nowrap text-foreground leading-none">SARVTRA</span>
+      </div>
+
+      <div className="container mx-auto px-4 lg:px-12 pt-24 pb-12 relative z-10">
+
+        {/* Asymmetrical Tension Grid (90/10 brutalist split) */}
+        <div className="grid grid-cols-1 xl:grid-cols-12 gap-16 xl:gap-8 mb-24 border-b border-border pb-16">
+
+          {/* Brand Vision (Massive Text instead of soft paragraph) */}
+          <div className="xl:col-span-8 space-y-8 pr-0 xl:pr-24">
+            <Link href="/" className="inline-flex items-center gap-2 group border-b-2 border-transparent hover:border-primary transition-all duration-300 pb-1">
+              <span className="font-display text-4xl lg:text-5xl font-black uppercase tracking-tight">
+                <span className="text-foreground">{org.name?.split(' ')[0] || 'Sarvtra'}</span>
+                <span className="text-primary ml-2">{org.name?.split(' ').slice(1).join(' ') || 'Labs'}</span>
               </span>
             </Link>
-            <p className="text-zinc-400 leading-relaxed max-w-sm">
-              India's leading CBSE-aligned robotics and coding education platform for K-12 students.
-              Empowering the next generation of innovators with hands-on learning.
+
+            <p className="text-2xl lg:text-4xl font-semibold tracking-tight leading-tight text-foreground/80 max-w-4xl font-display">
+              EMPOWERING THE <span className="text-primary italic">NEXT GENERATION</span> OF INNOVATORS WITH HANDS-ON K-12 ROBOTICS EDUCATION.
             </p>
-            <div className="flex gap-3 pt-2">
+
+            <div className="pt-8 flex flex-wrap gap-4">
               {[
                 { Icon: Facebook, label: "Facebook", href: org.socials?.find((s: any) => s.platform === 'Facebook')?.url || '#' },
                 { Icon: Twitter, label: "Twitter", href: org.socials?.find((s: any) => s.platform === 'Twitter')?.url || '#' },
@@ -111,131 +112,86 @@ const Footer = ({ footerSections, organization }: FooterProps) => {
                   aria-label={`Follow us on ${label}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-primary hover:text-white transition-all duration-300 text-zinc-400"
+                  className="group relative w-14 h-14 border border-border flex items-center justify-center overflow-hidden hover:border-primary transition-all duration-500"
+                  style={{ borderRadius: '0px' }}
                 >
-                  <Icon className="w-5 h-5" />
+                  <span className="absolute inset-x-0 bottom-0 h-[2px] bg-primary transition-all duration-300 group-hover:h-full z-0"></span>
+                  <Icon className="w-6 h-6 z-10 text-muted-foreground group-hover:text-primary-foreground transition-colors duration-300" />
                 </a>
               ))}
             </div>
           </div>
 
-          {/* Links Sections (8 cols total, 2 cols each) */}
-          <div className="lg:col-span-2">
-            <h4 className="font-bold text-white text-lg mb-6">Courses</h4>
-            <ul className="space-y-3">
-              {footerLinks.courses.map((link) => (
-                <li key={link.href}>
-                  <Link href={link.href} className="text-zinc-400 hover:text-primary transition-colors text-sm">
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div className="lg:col-span-2">
-            <h4 className="font-bold text-white text-lg mb-6">Company</h4>
-            <ul className="space-y-3">
-              {footerLinks.company.map((link) => (
-                <li key={link.href}>
-                  <Link href={link.href} className="text-zinc-400 hover:text-primary transition-colors text-sm">
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div className="lg:col-span-2">
-            <h4 className="font-bold text-white text-lg mb-6">Support</h4>
-            <ul className="space-y-3">
-              {footerLinks.support.map((link) => (
-                <li key={link.href}>
-                  <Link href={link.href} className="text-zinc-400 hover:text-primary transition-colors text-sm">
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div className="lg:col-span-2">
-            <h4 className="font-bold text-white text-lg mb-6">Dashboards</h4>
-            <ul className="space-y-3">
-              {footerLinks.dashboards.map((link) => (
-                <li key={link.href}>
-                  <Link href={link.href} className="text-zinc-400 hover:text-primary transition-colors text-sm">
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-
-        {/* Contact Strip - Industry Style */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 py-8 border-y border-white/10 mb-8">
-          <div className="flex items-start gap-4">
-            <div className="p-3 rounded-full bg-primary/10 text-primary shrink-0">
-              <Mail className="w-5 h-5" />
-            </div>
-            <div>
-              <h5 className="font-bold text-white mb-1">Email Us</h5>
-              <a href={`mailto:${org.email}`} className="text-zinc-400 hover:text-white transition-colors block">
-                {org.email}
-              </a>
-              <span className="text-xs text-zinc-500 mt-1 block">We reply within 24 hours</span>
-            </div>
-          </div>
-
-          <div className="flex items-start gap-4">
-            <div className="p-3 rounded-full bg-primary/10 text-primary shrink-0">
-              <Phone className="w-5 h-5" />
-            </div>
-            <div>
-              <h5 className="font-bold text-white mb-1">Call Us</h5>
-              <a href={`tel:${org.phone?.replace(/[^0-9+]/g, '') || ''}`} className="text-zinc-400 hover:text-white transition-colors block">
+          {/* Contact Brutality Sidebar */}
+          <div className="xl:col-span-4 flex flex-col justify-end space-y-12 xl:border-l xl:border-border xl:pl-8">
+            <div className="space-y-4">
+              <h5 className="font-bold text-xs tracking-widest uppercase text-muted-foreground">Direct Line</h5>
+              <a href={`tel:${org.phone?.replace(/[^0-9+]/g, '') || ''}`} className="text-2xl sm:text-3xl lg:text-4xl font-black text-foreground hover:text-primary transition-colors block font-display tracking-tight">
                 {org.phone}
               </a>
-              <span className="text-xs text-zinc-500 mt-1 block">{org.hours}</span>
+              <span className="text-xs uppercase tracking-wider font-semibold text-primary">{org.hours}</span>
             </div>
-          </div>
 
-          <div className="flex items-start gap-4">
-            <div className="p-3 rounded-full bg-primary/10 text-primary shrink-0">
-              <MapPin className="w-5 h-5" />
+            <div className="space-y-4 border-t border-border pt-8">
+              <h5 className="font-bold text-xs tracking-widest uppercase text-muted-foreground">Digital Inbox</h5>
+              <a href={`mailto:${org.email}`} className="text-xl sm:text-2xl font-bold text-foreground hover:text-primary transition-colors block break-all">
+                {org.email}
+              </a>
+              <span className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">24H Response Time</span>
             </div>
-            <div>
-              <h5 className="font-bold text-white mb-1">Visit Sarvtra Labs</h5>
-              <p className="text-zinc-400 text-sm leading-relaxed max-w-xs">
+
+            <div className="space-y-4 border-t border-border pt-8">
+              <h5 className="font-bold text-xs tracking-widest uppercase text-muted-foreground">Headquarters</h5>
+              <p className="text-lg font-medium text-foreground max-w-[250px] leading-snug">
                 {org.address}
               </p>
             </div>
           </div>
         </div>
 
-        {/* Bottom Bar */}
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-zinc-500">
-          <p>© {new Date().getFullYear()} Sarvtra Labs. All rights reserved.</p>
-          <div className="flex flex-wrap justify-center gap-6 md:gap-8">
-            <Link href="/terms" className="hover:text-white transition-colors">
-              Terms of Service
+        {/* Links Navigation - Brutalist Grid */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-16 mb-24">
+          {sectionsToRender.map((section: any, idx) => (
+            <div key={idx}>
+              <h4 className="font-black text-xs uppercase tracking-[0.2em] text-muted-foreground mb-8 border-b-2 border-foreground/10 pb-4 inline-block w-full">
+                {section.title}
+              </h4>
+              <ul className="space-y-4">
+                {(section.links || []).map((link: any, linkIdx: number) => (
+                  <li key={linkIdx} className="group flex items-center">
+                    <ArrowUpRight className="w-4 h-4 mr-2 text-primary opacity-0 -ml-6 group-hover:opacity-100 group-hover:ml-0 transition-all duration-300" />
+                    <Link href={link.href} className="text-foreground/80 hover:text-foreground font-semibold uppercase text-xs tracking-wider transition-all duration-300 group-hover:translate-x-2 block">
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+
+        {/* Absolute Bottom Strip */}
+        <div className="flex flex-col lg:flex-row items-center justify-between gap-6 pt-8 border-t border-border text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          <p>© {new Date().getFullYear()} {org.name?.toUpperCase() || 'SARVTRA LABS'}. THE FUTURE IS NOW.</p>
+          <div className="flex flex-wrap justify-center gap-6 lg:gap-12">
+            <Link href="/terms" className="hover:text-foreground transition-colors relative after:absolute after:-bottom-1 after:left-0 after:w-0 after:h-[1px] after:bg-foreground hover:after:w-full after:transition-all">
+              TERMS
             </Link>
-            <Link href="/privacy" className="hover:text-white transition-colors">
-              Privacy Policy
+            <Link href="/privacy" className="hover:text-foreground transition-colors relative after:absolute after:-bottom-1 after:left-0 after:w-0 after:h-[1px] after:bg-foreground hover:after:w-full after:transition-all">
+              PRIVACY
             </Link>
-            <Link href="/refund" className="hover:text-white transition-colors">
-              Refund Policy
+            <Link href="/refund" className="hover:text-foreground transition-colors relative after:absolute after:-bottom-1 after:left-0 after:w-0 after:h-[1px] after:bg-foreground hover:after:w-full after:transition-all">
+              REFUND POLICY
             </Link>
-            <Link href="/site-map" className="hover:text-white transition-colors">
-              Sitemap
+            <Link href="/site-map" className="hover:text-foreground transition-colors relative after:absolute after:-bottom-1 after:left-0 after:w-0 after:h-[1px] after:bg-foreground hover:after:w-full after:transition-all">
+              SITEMAP
             </Link>
           </div>
         </div>
+
       </div>
     </footer>
   );
 };
 
 export default Footer;
-

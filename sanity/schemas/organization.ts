@@ -40,6 +40,33 @@ export default defineType({
                 ]
             }]
         }),
+        defineField({ name: 'mission', title: 'Mission Statement', type: 'text' }),
+        defineField({ name: 'vision', title: 'Vision Statement', type: 'text' }),
+        defineField({
+            name: 'values',
+            title: 'Core Values',
+            type: 'array',
+            of: [{
+                type: 'object',
+                fields: [
+                    defineField({ name: 'icon', title: 'Icon Name', type: 'string' }),
+                    defineField({ name: 'title', title: 'Title', type: 'string' }),
+                    defineField({ name: 'description', title: 'Description', type: 'text' })
+                ]
+            }]
+        }),
+        defineField({
+            name: 'milestones',
+            title: 'Journey Milestones',
+            type: 'array',
+            of: [{
+                type: 'object',
+                fields: [
+                    defineField({ name: 'year', title: 'Year', type: 'string' }),
+                    defineField({ name: 'event', title: 'Event Name', type: 'string' })
+                ]
+            }]
+        }),
     ],
     preview: {
         select: { title: 'name' }
