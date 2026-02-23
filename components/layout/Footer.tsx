@@ -99,26 +99,24 @@ const Footer = ({ footerSections, organization }: FooterProps) => {
             </p>
 
             <div className="pt-4 flex flex-wrap gap-4">
-              {[
-                { Icon: Facebook, label: "Facebook", href: org.socials?.find((s: any) => s.platform === 'Facebook')?.url || '#' },
-                { Icon: Twitter, label: "Twitter", href: org.socials?.find((s: any) => s.platform === 'Twitter')?.url || '#' },
-                { Icon: Instagram, label: "Instagram", href: org.socials?.find((s: any) => s.platform === 'Instagram')?.url || '#' },
-                { Icon: Linkedin, label: "LinkedIn", href: org.socials?.find((s: any) => s.platform === 'LinkedIn')?.url || '#' },
-                { Icon: Youtube, label: "YouTube", href: org.socials?.find((s: any) => s.platform === 'YouTube')?.url || '#' },
-              ].map(({ Icon, label, href }, index) => (
-                <a
-                  key={index}
-                  href={href}
-                  aria-label={`Follow us on ${label}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group relative w-14 h-14 border border-border flex items-center justify-center overflow-hidden hover:border-primary transition-all duration-500"
-                  style={{ borderRadius: '0px' }}
-                >
-                  <span className="absolute inset-x-0 bottom-0 h-[2px] bg-primary transition-all duration-300 group-hover:h-full z-0"></span>
-                  <Icon className="w-6 h-6 z-10 text-muted-foreground group-hover:text-primary-foreground transition-colors duration-300" />
-                </a>
-              ))}
+              {(org.socials || []).filter((s: any) => s.url && s.platform).map(({ platform, url }: any, index: number) => {
+                const iconMap: Record<string, any> = { Facebook, Twitter, 'Twitter / X': Twitter, Instagram, Linkedin, LinkedIn: Linkedin, Youtube, YouTube: Youtube };
+                const Icon = iconMap[platform] || ArrowUpRight;
+                return (
+                  <a
+                    key={index}
+                    href={url}
+                    aria-label={`Follow us on ${platform}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group relative w-14 h-14 border border-border flex items-center justify-center overflow-hidden hover:border-primary transition-all duration-500"
+                    style={{ borderRadius: '0px' }}
+                  >
+                    <span className="absolute inset-x-0 bottom-0 h-[2px] bg-primary transition-all duration-300 group-hover:h-full z-0"></span>
+                    <Icon className="w-6 h-6 z-10 text-muted-foreground group-hover:text-primary-foreground transition-colors duration-300" />
+                  </a>
+                );
+              })}
             </div>
           </div>
 

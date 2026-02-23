@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { updateOrganization } from '@/lib/actions/cms.actions';
 import { toast } from 'sonner';
 import { Loader2, Plus, Trash2 } from 'lucide-react';
@@ -46,7 +47,8 @@ export default function CMSManager({
             mission: orgData.mission,
             vision: orgData.vision,
             values: orgData.values,
-            milestones: orgData.milestones
+            milestones: orgData.milestones,
+            socials: orgData.socials
         });
         if (res.success) {
             toast.success("Organization details updated.");
@@ -356,6 +358,84 @@ export default function CMSManager({
                                 { key: 'order', label: 'Order', type: 'number' }
                             ]}
                         />
+                    </CardContent>
+                </Card>
+
+                <Card className="rounded-none">
+                    <CardHeader>
+                        <CardTitle>Social Media Links</CardTitle>
+                        <CardDescription>Manage the social media icons shown in the footer and across the site.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        {(orgData.socials || []).map((social: any, idx: number) => (
+                            <div key={idx} className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center bg-muted/20 p-4 border relative pr-12">
+                                <div className="space-y-2">
+                                    <Label className="text-xs">Platform Name</Label>
+                                    <Select
+                                        value={social.platform || ''}
+                                        onValueChange={val => {
+                                            const arr = [...(orgData.socials || [])];
+                                            arr[idx].platform = val;
+                                            setOrgData({ ...orgData, socials: arr });
+                                        }}
+                                    >
+                                        <SelectTrigger className="rounded-none">
+                                            <SelectValue placeholder="Select platform" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="Facebook">Facebook</SelectItem>
+                                            <SelectItem value="Twitter">Twitter / X</SelectItem>
+                                            <SelectItem value="Instagram">Instagram</SelectItem>
+                                            <SelectItem value="LinkedIn">LinkedIn</SelectItem>
+                                            <SelectItem value="YouTube">YouTube</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <div className="space-y-2 md:col-span-2">
+                                    <Label className="text-xs">Profile URL</Label>
+                                    <Input
+                                        placeholder="https://..."
+                                        value={social.url || ''}
+                                        className="rounded-none"
+                                        onChange={e => {
+                                            const arr = [...(orgData.socials || [])];
+                                            arr[idx].url = e.target.value;
+                                            setOrgData({ ...orgData, socials: arr });
+                                        }}
+                                    />
+                                </div>
+                                <Button variant="ghost" size="icon" className="text-destructive h-10 w-10 absolute right-2 top-1/2 -translate-y-1/2" onClick={() => {
+                                    const arr = [...(orgData.socials || [])];
+                                    arr.splice(idx, 1);
+                                    setOrgData({ ...orgData, socials: arr });
+                                }}>
+                                    <Trash2 className="w-4 h-4" />
+                                </Button>
+                            </div>
+                        ))}
+                        <div className="flex flex-col sm:flex-row gap-4 pt-2">
+                            <Button
+                                type="button"
+                                variant="outline"
+                                className="rounded-none text-xs"
+                                onClick={() => {
+                                    setOrgData({
+                                        ...orgData,
+                                        socials: [...(orgData.socials || []), { platform: '', url: '', _type: 'object', _key: Math.random().toString(36).substring(7) }]
+                                    });
+                                }}
+                            >
+                                <Plus className="w-4 h-4 mr-2" /> Add Social Link
+                            </Button>
+                            <Button
+                                className="rounded-none px-8"
+                                onClick={handleOrgSave}
+                                disabled={isSavingOrg}
+                            >
+                                {isSavingOrg ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+                                Save Social Links
+                            </Button>
+                        </div>
                     </CardContent>
                 </Card>
             </TabsContent>

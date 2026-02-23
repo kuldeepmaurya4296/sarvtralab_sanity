@@ -87,9 +87,7 @@ export default function SchoolsClient({ plans, organization, benefits }: Schools
         <>
             {/* Hero Section */}
             <section className="pt-32 pb-20 relative overflow-hidden bg-foreground">
-                <div className="absolute inset-0 z-0 opacity-40">
-                    <div className="w-full h-full bg-linear-to-r from-gray-900 via-gray-800 to-gray-900" />
-                </div>
+
 
                 <div className="container mx-auto px-4 relative z-10">
                     <motion.div
@@ -125,7 +123,7 @@ export default function SchoolsClient({ plans, organization, benefits }: Schools
             </section>
 
             {/* Stats */}
-            <section className="py-12 bg-primary">
+            {/* <section className="py-12 bg-primary">
                 <div className="container mx-auto px-4">
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
                         {organization?.stats?.map((stat: any, index: number) => (
@@ -143,7 +141,7 @@ export default function SchoolsClient({ plans, organization, benefits }: Schools
                         ))}
                     </div>
                 </div>
-            </section>
+            </section> */}
 
             {/* Benefits */}
             <section className="py-20">

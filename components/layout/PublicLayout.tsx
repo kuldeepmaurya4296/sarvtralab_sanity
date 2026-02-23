@@ -1,5 +1,6 @@
 import Header from './Header';
 import Footer from './Footer';
+import SmoothScroll from './SmoothScroll';
 import { getNavLinks, getFooterSections, getOrganizationDetails } from '@/lib/actions/content.actions';
 
 interface PublicLayoutProps {
@@ -77,13 +78,15 @@ const PublicLayout = async ({ children }: PublicLayoutProps) => {
   const organization = orgData;
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Header navLinks={navLinks} />
-      <main id="main-content" className="flex-1 pt-16 md:pt-20 outline-none" tabIndex={-1}>
-        {children}
-      </main>
-      <Footer footerSections={footerSections} organization={organization} />
-    </div>
+    <SmoothScroll>
+      <div className="min-h-screen flex flex-col">
+        <Header navLinks={navLinks} />
+        <main id="main-content" className="flex-1 pt-16 md:pt-20 outline-none" tabIndex={-1}>
+          {children}
+        </main>
+        <Footer footerSections={footerSections} organization={organization} />
+      </div>
+    </SmoothScroll>
   );
 };
 
