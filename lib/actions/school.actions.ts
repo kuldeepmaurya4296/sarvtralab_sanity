@@ -166,3 +166,85 @@ export async function deleteSchool(id: string): Promise<boolean> {
         return false;
     }
 }
+
+/* -------------------------------------------------------------------------- */
+/*                                School Settings                             */
+/* -------------------------------------------------------------------------- */
+
+export async function updateSchoolSettings(id: string, updates: Partial<School>): Promise<School | null> {
+    const session = await getServerSession(authOptions);
+    if (!session || session.user.role !== 'school' || (session.user.id !== id && (session as any).user.customId !== id)) {
+        throw new Error("Unauthorized: You can only update your own school settings.");
+    }
+
+    try {
+        const school = await sanityClient.fetch(
+            `*[_type == "user" && role == "school" && (customId == $id || _id == $id)][0]`,
+            { id }
+        );
+        if (!school) throw new Error("School not found");
+
+        // Limit what fields a school can update themselves
+        const allowedUpdates: any = {
+            name: updates.name,
+            principalName: updates.principalName,
+            phone: updates.phone,
+            city: updates.city,
+            address: updates.address,
+            pincode: updates.pincode,
+            state: updates.state
+        };
+
+        // Remove undefined fields
+        Object.keys(allowedUpdates).forEach(key => allowedUpdates[key] === undefined && delete allowedUpdates[key]);
+
+        const updated = await sanityWriteClient
+            .patch(school._id)
+            .set(allowedUpdates)
+            .commit();
+
+        await logActivity(session.user.id, 'SCHOOL_SETTINGS_UPDATE', `School ${id} updated their own settings`);
+
+        revalidatePath('/school/settings');
+        return cleanSanityDoc(updated) as School | null;
+    } catch (e: any) {
+        console.error("Update School Settings Error:", e);
+        throw e;
+    }
+}
+
+export async function changeSchoolPassword(id: string, currentPass: string, newPass: string): Promise<{ success: boolean; message: string }> {
+    const session = await getServerSession(authOptions);
+    if (!session || session.user.role !== 'school' || (session.user.id !== id && (session as any).user.customId !== id)) {
+        throw new Error("Unauthorized");
+    }
+
+    try {
+        const school = await sanityClient.fetch(
+            `*[_type == "user" && role == "school" && (customId == $id || _id == $id)][0]{_id, password}`,
+            { id }
+        );
+        if (!school) throw new Error("School not found");
+
+        // Verify current password
+        const isMatch = await bcrypt.compare(currentPass, school.password);
+        if (!isMatch) {
+            return { success: false, message: "Incorrect current password." };
+        }
+
+        // Hash new password
+        const hashedPass = await bcrypt.hash(newPass, 10);
+
+        await sanityWriteClient
+            .patch(school._id)
+            .set({ password: hashedPass })
+            .commit();
+
+        await logActivity(session.user.id, 'PASSWORD_CHANGE', `School ${id} changed their password`);
+
+        return { success: true, message: "Password updated successfully." };
+    } catch (e: any) {
+        console.error("Change School Password Error:", e);
+        throw e;
+    }
+}
