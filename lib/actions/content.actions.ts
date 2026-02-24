@@ -100,6 +100,26 @@ export async function getBlogPosts() {
     }
 }
 
+export async function getBlogPostBySlug(slug: string) {
+    try {
+        const post = await sanityClient.fetch(`*[_type == "blogPost" && (slug.current == $slug || _id == $slug)][0]`, { slug });
+        return cleanSanityDoc(post);
+    } catch (e) {
+        console.error("Get Blog Post By Slug Error:", e);
+        return null;
+    }
+}
+
+export async function getRelatedBlogPosts(currentId: string, limit = 3) {
+    try {
+        const posts = await sanityClient.fetch(`*[_type == "blogPost" && _id != $currentId] | order(date desc)[0...$limit]`, { currentId, limit });
+        return cleanSanityDoc(posts);
+    } catch (e) {
+        console.error("Get Related Blog Posts Error:", e);
+        return [];
+    }
+}
+
 /* -------------------------------------------------------------------------- */
 /*                              Press Releases                                */
 /* -------------------------------------------------------------------------- */

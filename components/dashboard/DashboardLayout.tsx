@@ -83,6 +83,7 @@ const roleMenuItems: Record<string, MenuItem[]> = {
     { icon: Award, label: 'Certificates', href: '/admin/certificates' },
     { icon: FileText, label: 'Content', href: '/admin/content' },
     { icon: Globe, label: 'Website CMS', href: '/admin/website-cms' },
+    { icon: FileText, label: 'Blogs', href: '/admin/blogs' },
     { icon: Target, label: 'CRM', href: '/admin/crm' },
     { icon: Shield, label: 'Govt Orgs', href: '/admin/govt' },
     { icon: Settings, label: 'Settings', href: '/admin/settings' }
@@ -98,6 +99,7 @@ const roleMenuItems: Record<string, MenuItem[]> = {
     { icon: Award, label: 'Certificates', href: '/admin/certificates' },
     { icon: FileText, label: 'Content', href: '/admin/content' },
     { icon: Globe, label: 'Website CMS', href: '/admin/website-cms' },
+    { icon: FileText, label: 'Blogs', href: '/admin/blogs' },
     { icon: Target, label: 'CRM', href: '/admin/crm' },
     { icon: Shield, label: 'Govt Orgs', href: '/admin/govt' },
     { icon: Settings, label: 'Settings', href: '/admin/settings' }

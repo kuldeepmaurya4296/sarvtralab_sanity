@@ -4,6 +4,9 @@ import BlogContent from './BlogContent';
 import { constructMetadata } from '@/lib/seo';
 import { getBlogPosts } from '@/lib/actions/content.actions';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export const metadata = constructMetadata({
     title: 'Blog | Insights into Robotics & STEM | Sarvtra Labs',
     description: 'Read the latest updates, news, and insights about robotics, AI, and STEM education in India on the Sarvtra Labs (Sarwatra Labs) blog.',

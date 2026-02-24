@@ -4,12 +4,12 @@ const projectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID!;
 const dataset = process.env.NEXT_PUBLIC_SANITY_DATASET || 'production';
 const apiVersion = '2024-01-01';
 
-// Read-only client (uses CDN for faster reads)
+// Read-only client
 export const sanityClient = createClient({
     projectId,
     dataset,
     apiVersion,
-    useCdn: true,
+    useCdn: false, // Disabled CDN to fix read-after-write delays
 });
 
 // Write client (no CDN, requires API token, server-only)

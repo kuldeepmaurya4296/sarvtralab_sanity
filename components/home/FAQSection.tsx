@@ -56,12 +56,13 @@ const FAQSection = ({ faqs: propFAQs }: { faqs?: FAQItem[] }) => {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
+            suppressHydrationWarning
           >
             <Accordion type="single" collapsible className="space-y-4">
               {displayFAQs.map((faq, index) => (
                 <AccordionItem
-                  key={(faq as any)._id || faq.id || index}
-                  value={faq.id}
+                  key={(faq as any)._id || faq.id || index.toString()}
+                  value={(faq as any)._id || faq.id || index.toString()}
                   className="bg-card border rounded-xl px-6 data-[state=open]:shadow-lg transition-shadow"
                 >
                   <AccordionTrigger className="text-left py-5 hover:no-underline">

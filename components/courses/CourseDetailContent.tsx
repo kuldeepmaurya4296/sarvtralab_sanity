@@ -208,9 +208,9 @@ export default function CourseDetailContent({ course }: CourseDetailContentProps
                 <div className="container mx-auto px-4">
                     <h2 className="text-3xl font-bold mb-10">Course Curriculum</h2>
                     <div className="max-w-3xl mx-auto space-y-6">
-                        {course.curriculum.map((module: CurriculumModule) => (
-                            <Accordion key={module.id} type="single" collapsible>
-                                <AccordionItem value={module.id} className="border rounded-2xl overflow-hidden px-4">
+                        {course.curriculum?.map((module: CurriculumModule, index: number) => (
+                            <Accordion key={module.id || index.toString()} type="single" collapsible>
+                                <AccordionItem value={module.id || index.toString()} className="border rounded-2xl overflow-hidden px-4">
                                     <AccordionTrigger className="hover:no-underline py-6">
                                         <div className="flex items-center gap-4 text-left">
                                             <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center font-bold text-primary">

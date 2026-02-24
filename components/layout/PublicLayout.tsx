@@ -12,6 +12,7 @@ const defaultNavLinks = [
   { label: 'Courses', href: '/courses' },
   { label: 'For Schools', href: '/schools' },
   { label: 'About Us', href: '/about' },
+  { label: 'Blog', href: '/blog' },
   { label: 'Contact', href: '/contact' }
 ];
 
