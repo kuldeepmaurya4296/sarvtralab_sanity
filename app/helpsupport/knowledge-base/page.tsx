@@ -11,66 +11,78 @@ import { Badge } from '@/components/ui/badge';
 export default function HelpSupportKnowledgeBasePage() {
     const { user, isLoading: authLoading } = useAuth();
     const router = useRouter();
+    const [categories, setCategories] = useState<any[]>([]);
+    const [isLoadingData, setIsLoadingData] = useState(true);
     const [search, setSearch] = useState('');
 
     useEffect(() => {
         if (!authLoading && (!user || user.role !== 'helpsupport')) {
             router.push('/login');
+        } else if (user && user.role === 'helpsupport') {
+            import('@/lib/actions/support.actions').then(({ getSupportKnowledgeBaseData }) => {
+                getSupportKnowledgeBaseData().then((data) => {
+                    // fallback to default data if empty schema
+                    if (!data || data.length === 0) {
+                        setCategories([
+                            {
+                                title: 'Technical Issues',
+                                icon: '🔧',
+                                articles: [
+                                    { title: 'How to troubleshoot video playback issues', views: 245 },
+                                    { title: 'Resolving login and authentication errors', views: 189 },
+                                    { title: 'Browser compatibility guide', views: 156 },
+                                    { title: 'Mobile app common issues & fixes', views: 132 },
+                                ]
+                            },
+                            {
+                                title: 'Course & Academic',
+                                icon: '📚',
+                                articles: [
+                                    { title: 'Certificate generation process', views: 312 },
+                                    { title: 'How to handle course enrollment extensions', views: 178 },
+                                    { title: 'Quiz score recalculation process', views: 145 },
+                                    { title: 'Course completion requirements FAQ', views: 201 },
+                                ]
+                            },
+                            {
+                                title: 'Billing & Payments',
+                                icon: '💳',
+                                articles: [
+                                    { title: 'Processing refund requests', views: 267 },
+                                    { title: 'Subscription plan upgrade/downgrade', views: 198 },
+                                    { title: 'Payment gateway error codes', views: 134 },
+                                    { title: 'Invoice generation guide', views: 89 },
+                                ]
+                            },
+                            {
+                                title: 'General Inquiries',
+                                icon: '❓',
+                                articles: [
+                                    { title: 'Escalation procedures for complex issues', views: 156 },
+                                    { title: 'SLA response time guidelines', views: 234 },
+                                    { title: 'Student communication templates', views: 178 },
+                                    { title: 'Privacy & data handling policies', views: 112 },
+                                ]
+                            },
+                        ]);
+                    } else {
+                        setCategories(data);
+                    }
+                    setIsLoadingData(false);
+                });
+            });
         }
     }, [user, authLoading, router]);
 
-    if (authLoading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+    if (authLoading || isLoadingData) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
     if (!user || user.role !== 'helpsupport') return null;
 
-    const categories = [
-        {
-            title: 'Technical Issues',
-            icon: '🔧',
-            articles: [
-                { title: 'How to troubleshoot video playback issues', views: 245 },
-                { title: 'Resolving login and authentication errors', views: 189 },
-                { title: 'Browser compatibility guide', views: 156 },
-                { title: 'Mobile app common issues & fixes', views: 132 },
-            ]
-        },
-        {
-            title: 'Course & Academic',
-            icon: '📚',
-            articles: [
-                { title: 'Certificate generation process', views: 312 },
-                { title: 'How to handle course enrollment extensions', views: 178 },
-                { title: 'Quiz score recalculation process', views: 145 },
-                { title: 'Course completion requirements FAQ', views: 201 },
-            ]
-        },
-        {
-            title: 'Billing & Payments',
-            icon: '💳',
-            articles: [
-                { title: 'Processing refund requests', views: 267 },
-                { title: 'Subscription plan upgrade/downgrade', views: 198 },
-                { title: 'Payment gateway error codes', views: 134 },
-                { title: 'Invoice generation guide', views: 89 },
-            ]
-        },
-        {
-            title: 'General Inquiries',
-            icon: '❓',
-            articles: [
-                { title: 'Escalation procedures for complex issues', views: 156 },
-                { title: 'SLA response time guidelines', views: 234 },
-                { title: 'Student communication templates', views: 178 },
-                { title: 'Privacy & data handling policies', views: 112 },
-            ]
-        },
-    ];
-
-    const allArticles = categories.flatMap(c => c.articles.map(a => ({ ...a, category: c.title })));
+    const allArticles = categories.flatMap(c => c.articles.map((a: any) => ({ ...a, category: c.title })));
     const filteredCategories = search
         ? [{
             title: 'Search Results',
             icon: '🔍',
-            articles: allArticles.filter(a => a.title.toLowerCase().includes(search.toLowerCase()))
+            articles: allArticles.filter((a: any) => a.title.toLowerCase().includes(search.toLowerCase()))
         }]
         : categories;
 
@@ -101,7 +113,7 @@ export default function HelpSupportKnowledgeBasePage() {
                             <CardContent className="space-y-1">
                                 {cat.articles.length === 0 ? (
                                     <p className="text-sm text-muted-foreground py-4 text-center">No articles found</p>
-                                ) : cat.articles.map((article, aIdx) => (
+                                ) : cat.articles.map((article: any, aIdx: number) => (
                                     <div key={aIdx} className="flex items-center justify-between p-3 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer group">
                                         <div className="flex items-center gap-2 flex-1 min-w-0">
                                             <BookOpen className="h-4 w-4 text-muted-foreground shrink-0" />

@@ -16,25 +16,25 @@ import {
 export default function HelpSupportStudentsPage() {
     const { user, isLoading: authLoading } = useAuth();
     const router = useRouter();
+    const [students, setStudents] = useState<any[]>([]);
+    const [isLoadingData, setIsLoadingData] = useState(true);
     const [search, setSearch] = useState('');
 
     useEffect(() => {
         if (!authLoading && (!user || user.role !== 'helpsupport')) {
             router.push('/login');
+        } else if (user && user.role === 'helpsupport') {
+            import('@/lib/actions/support.actions').then(({ getSupportStudentsData }) => {
+                getSupportStudentsData().then((data) => {
+                    setStudents(data);
+                    setIsLoadingData(false);
+                });
+            });
         }
     }, [user, authLoading, router]);
 
-    if (authLoading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+    if (authLoading || isLoadingData) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
     if (!user || user.role !== 'helpsupport') return null;
-
-    const students = [
-        { id: 's1', name: 'Arjun Patel', email: 'arjun@student.sarvtralab.in', school: 'DPS Noida', grade: 'Grade 8', tickets: 3, lastTicket: '2026-02-19', status: 'active' },
-        { id: 's2', name: 'Priya Sharma', email: 'priya@student.sarvtralab.in', school: 'Ryan International', grade: 'Grade 9', tickets: 1, lastTicket: '2026-02-19', status: 'active' },
-        { id: 's3', name: 'Rahul Gupta', email: 'rahul@student.sarvtralab.in', school: 'Kendriya Vidyalaya', grade: 'Grade 10', tickets: 2, lastTicket: '2026-02-18', status: 'active' },
-        { id: 's4', name: 'Sneha Reddy', email: 'sneha@student.sarvtralab.in', school: 'DPS RK Puram', grade: 'Grade 8', tickets: 1, lastTicket: '2026-02-18', status: 'inactive' },
-        { id: 's5', name: 'Vikram Singh', email: 'vikram@student.sarvtralab.in', school: 'Modern School', grade: 'Grade 11', tickets: 4, lastTicket: '2026-02-17', status: 'active' },
-        { id: 's6', name: 'Meera Nair', email: 'meera@student.sarvtralab.in', school: 'Amity School', grade: 'Grade 9', tickets: 1, lastTicket: '2026-02-17', status: 'active' },
-    ];
 
     const filtered = students.filter(s =>
         s.name.toLowerCase().includes(search.toLowerCase()) ||

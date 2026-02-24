@@ -1,5 +1,5 @@
 'use client';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
@@ -11,31 +11,26 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 export default function TeacherReportsPage() {
     const { user, isLoading: authLoading } = useAuth();
     const router = useRouter();
+    const [data, setData] = useState<any>(null);
+    const [isLoadingData, setIsLoadingData] = useState(true);
 
     useEffect(() => {
         if (!authLoading && (!user || user.role !== 'teacher')) {
             router.push('/login');
+        } else if (user && user.role === 'teacher') {
+            import('@/lib/actions/teacher.actions').then(({ getTeacherReportsData }) => {
+                getTeacherReportsData(user.id).then((res) => {
+                    setData(res);
+                    setIsLoadingData(false);
+                });
+            });
         }
     }, [user, authLoading, router]);
 
-    if (authLoading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
-    if (!user || user.role !== 'teacher') return null;
+    if (authLoading || isLoadingData) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+    if (!user || user.role !== 'teacher' || !data) return null;
 
-    const monthlyStats = [
-        { name: 'Sep', students: 85, completions: 12 },
-        { name: 'Oct', students: 95, completions: 18 },
-        { name: 'Nov', students: 105, completions: 22 },
-        { name: 'Dec', students: 110, completions: 15 },
-        { name: 'Jan', students: 120, completions: 28 },
-        { name: 'Feb', students: 128, completions: 20 },
-    ];
-
-    const coursePerformance = [
-        { name: 'Robotics', avgScore: 78, completion: 68 },
-        { name: 'Python', avgScore: 72, completion: 45 },
-        { name: 'Arduino', avgScore: 85, completion: 82 },
-        { name: 'Coding', avgScore: 65, completion: 30 },
-    ];
+    const { totalStudents, totalCourses, totalCompletions, avgScore, monthlyStats, coursePerformance } = data;
 
     return (
         <DashboardLayout role="teacher" userName={user.name || ''} userEmail={user.email || ''}>
@@ -48,10 +43,10 @@ export default function TeacherReportsPage() {
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <StatCard title="Total Students" value="128" icon={Users} change="+12%" changeType="positive" />
-                    <StatCard title="Courses Taught" value="4" icon={BookOpen} change="+1" changeType="positive" />
-                    <StatCard title="Course Completions" value="48" icon={Award} change="+20%" changeType="positive" />
-                    <StatCard title="Avg Score" value="75%" icon={TrendingUp} change="+5%" changeType="positive" />
+                    <StatCard title="Total Students" value={totalStudents.toString()} icon={Users} change="+12%" changeType="positive" />
+                    <StatCard title="Courses Taught" value={totalCourses.toString()} icon={BookOpen} change="+1" changeType="positive" />
+                    <StatCard title="Course Completions" value={totalCompletions.toString()} icon={Award} change="+20%" changeType="positive" />
+                    <StatCard title="Avg Score" value={`${avgScore}%`} icon={TrendingUp} change="+5%" changeType="positive" />
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

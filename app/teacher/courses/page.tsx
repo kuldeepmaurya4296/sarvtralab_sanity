@@ -16,24 +16,25 @@ import {
 export default function TeacherCoursesPage() {
     const { user, isLoading: authLoading } = useAuth();
     const router = useRouter();
+    const [courses, setCourses] = useState<any[]>([]);
+    const [isLoadingData, setIsLoadingData] = useState(true);
     const [search, setSearch] = useState('');
 
     useEffect(() => {
         if (!authLoading && (!user || user.role !== 'teacher')) {
             router.push('/login');
+        } else if (user && user.role === 'teacher') {
+            import('@/lib/actions/teacher.actions').then(({ getTeacherCoursesData }) => {
+                getTeacherCoursesData(user.id).then((data) => {
+                    setCourses(data);
+                    setIsLoadingData(false);
+                });
+            });
         }
     }, [user, authLoading, router]);
 
-    if (authLoading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+    if (authLoading || isLoadingData) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
     if (!user || user.role !== 'teacher') return null;
-
-    const courses = [
-        { id: 'c1', title: 'Robotics Fundamentals', students: 42, progress: 68, status: 'active', grade: 'Grade 8', lessons: 24, completed: 16 },
-        { id: 'c2', title: 'Python for Beginners', students: 35, progress: 45, status: 'active', grade: 'Grade 9', lessons: 30, completed: 13 },
-        { id: 'c3', title: 'Arduino Workshop', students: 28, progress: 82, status: 'active', grade: 'Grade 10', lessons: 18, completed: 15 },
-        { id: 'c4', title: 'Advanced Coding Lab', students: 23, progress: 30, status: 'active', grade: 'Grade 11', lessons: 20, completed: 6 },
-        { id: 'c5', title: 'IoT Basics', students: 0, progress: 0, status: 'upcoming', grade: 'Grade 9', lessons: 16, completed: 0 },
-    ];
 
     const filtered = courses.filter(c => c.title.toLowerCase().includes(search.toLowerCase()));
 

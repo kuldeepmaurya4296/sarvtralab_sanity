@@ -377,7 +377,7 @@ export async function getStudentEnrolledCourses(userId: string) {
                     level,
                     category,
                     curriculum,
-                    instructorRef->{
+                    instructor->{
                         name
                     }
                 }

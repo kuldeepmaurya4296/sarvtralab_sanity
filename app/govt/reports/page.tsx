@@ -65,7 +65,7 @@ export default function GovtReportsPage() {
     if (!user || ((user.role as any) !== 'govt' && (user.role as any) !== 'superadmin' && (user.role as any) !== 'admin')) return null;
 
     const filteredReports = reports.filter(report => {
-        const matchesSearch = report.name.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesSearch = (report.name || '').toLowerCase().includes(searchTerm.toLowerCase());
         const matchesType = typeFilter === 'all' || report.type === typeFilter;
         return matchesSearch && matchesType;
     });

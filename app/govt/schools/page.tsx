@@ -75,13 +75,13 @@ export default function GovtSchoolsPage() {
     // Filter logic
     const filteredSchools = mySchools.filter(school => {
         const matchesSearch =
-            school.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            school.city.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            school.schoolCode.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            school.principalName.toLowerCase().includes(searchQuery.toLowerCase());
+            (school.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+            (school.city || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+            (school.schoolCode || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+            (school.principalName || '').toLowerCase().includes(searchQuery.toLowerCase());
 
-        const matchesType = typeFilter === 'all' || school.schoolType === typeFilter;
-        const matchesBoard = boardFilter === 'all' || school.board === boardFilter;
+        const matchesType = typeFilter === 'all' || (school.schoolType || '') === typeFilter;
+        const matchesBoard = boardFilter === 'all' || (school.board || '') === boardFilter;
 
         return matchesSearch && matchesType && matchesBoard;
     });
@@ -192,7 +192,7 @@ export default function GovtSchoolsPage() {
                                             </TableCell>
                                         </TableRow>
                                     ) : (
-                                        mySchools.map((school) => (
+                                        filteredSchools.map((school) => (
                                             <TableRow key={school.id}>
                                                 <TableCell>
                                                     <div className="flex flex-col">

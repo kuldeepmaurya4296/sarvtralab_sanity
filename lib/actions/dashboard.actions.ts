@@ -469,7 +469,7 @@ export async function getTeacherDashboardStats(teacherId: string) {
 
         const teacherRef = teacher._id;
         const results = await sanityClient.fetch(`{
-            "courses": *[_type == "course" && instructorRef._ref == $teacherRef],
+            "courses": *[_type == "course" && instructor._ref == $teacherRef],
             "materials": count(*[_type == "material" && instructor == $teacherId])
         }`, { teacherRef, teacherId });
 

@@ -17,25 +17,25 @@ import {
 export default function TeacherStudentsPage() {
     const { user, isLoading: authLoading } = useAuth();
     const router = useRouter();
+    const [students, setStudents] = useState<any[]>([]);
+    const [isLoadingData, setIsLoadingData] = useState(true);
     const [search, setSearch] = useState('');
 
     useEffect(() => {
         if (!authLoading && (!user || user.role !== 'teacher')) {
             router.push('/login');
+        } else if (user && user.role === 'teacher') {
+            import('@/lib/actions/teacher.actions').then(({ getTeacherStudentsData }) => {
+                getTeacherStudentsData(user.id).then((data) => {
+                    setStudents(data);
+                    setIsLoadingData(false);
+                });
+            });
         }
     }, [user, authLoading, router]);
 
-    if (authLoading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+    if (authLoading || isLoadingData) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
     if (!user || user.role !== 'teacher') return null;
-
-    const students = [
-        { id: 's1', name: 'Arjun Patel', email: 'arjun@student.sarvtralab.in', grade: 'Grade 8', course: 'Robotics Fundamentals', progress: 85, status: 'active' },
-        { id: 's2', name: 'Priya Sharma', email: 'priya@student.sarvtralab.in', grade: 'Grade 9', course: 'Python for Beginners', progress: 62, status: 'active' },
-        { id: 's3', name: 'Rahul Gupta', email: 'rahul@student.sarvtralab.in', grade: 'Grade 10', course: 'Arduino Workshop', progress: 91, status: 'active' },
-        { id: 's4', name: 'Sneha Reddy', email: 'sneha@student.sarvtralab.in', grade: 'Grade 8', course: 'Robotics Fundamentals', progress: 45, status: 'inactive' },
-        { id: 's5', name: 'Vikram Singh', email: 'vikram@student.sarvtralab.in', grade: 'Grade 11', course: 'Advanced Coding Lab', progress: 30, status: 'active' },
-        { id: 's6', name: 'Meera Nair', email: 'meera@student.sarvtralab.in', grade: 'Grade 9', course: 'Python for Beginners', progress: 78, status: 'active' },
-    ];
 
     const filtered = students.filter(s =>
         s.name.toLowerCase().includes(search.toLowerCase()) ||

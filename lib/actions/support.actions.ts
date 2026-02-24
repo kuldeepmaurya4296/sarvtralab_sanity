@@ -74,7 +74,7 @@ export async function getSupportDashboardStats() {
 
 export async function getAllTickets() {
     const session = await getServerSession(authOptions);
-    if (!session || (session.user.role !== 'admin' && session.user.role !== 'superadmin')) {
+    if (!session || (session.user.role !== 'admin' && session.user.role !== 'superadmin' && session.user.role !== 'helpsupport')) {
         throw new Error("Unauthorized");
     }
     try {
@@ -109,7 +109,7 @@ export async function getSupportStaff() {
 
 export async function updateTicketStatus(ticketId: string, status: string) {
     const session = await getServerSession(authOptions);
-    if (!session || (session.user.role !== 'superadmin' && session.user.role !== 'helpsupport')) {
+    if (!session || (session.user.role !== 'admin' && session.user.role !== 'superadmin' && session.user.role !== 'helpsupport')) {
         throw new Error("Unauthorized");
     }
     try {
@@ -140,4 +140,77 @@ function formatTimeAgo(date: string) {
     const hours = Math.floor(minutes / 60);
     if (hours < 24) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
     return new Date(date).toLocaleDateString();
+}
+
+export async function getSupportStudentsData() {
+    const session = await getServerSession(authOptions);
+    if (!session || (session.user.role !== 'helpsupport' && session.user.role !== 'superadmin')) {
+        throw new Error("Unauthorized");
+    }
+    try {
+        const tickets = await sanityClient.fetch(
+            `*[_type == "supportTicket"]{
+                studentId,
+                userRef->{_id, customId, name, email, schoolName, grade, status},
+                createdAt
+            }`
+        );
+
+        const studentMap = new Map();
+
+        tickets.forEach((t: any) => {
+            const s = t.userRef;
+            if (s) {
+                const sId = s.customId || s._id;
+                if (!studentMap.has(sId)) {
+                    studentMap.set(sId, {
+                        id: sId,
+                        name: s.name,
+                        email: s.email,
+                        school: s.schoolName || 'Unknown',
+                        grade: s.grade || 'N/A',
+                        tickets: 0,
+                        lastTicket: t.createdAt,
+                        status: s.status || 'active'
+                    });
+                }
+                const entry = studentMap.get(sId);
+                entry.tickets += 1;
+                if (new Date(t.createdAt) > new Date(entry.lastTicket)) {
+                    entry.lastTicket = t.createdAt;
+                }
+            }
+        });
+
+        return Array.from(studentMap.values());
+    } catch (e) {
+        console.error("Get Support Students Data Error:", e);
+        return [];
+    }
+}
+
+export async function getSupportKnowledgeBaseData() {
+    const session = await getServerSession(authOptions);
+    if (!session || (session.user.role !== 'helpsupport' && session.user.role !== 'superadmin')) {
+        throw new Error("Unauthorized");
+    }
+    try {
+        const categories = await sanityClient.fetch(`
+            *[_type == "supportCategory"] | order(order asc) {
+                title,
+                "icon": iconName,
+                "articles": *[_type == "supportArticle" && categoryId == ^._id] {
+                    title,
+                    views
+                }
+            }
+        `);
+
+        // If no data exists yet, return the default skeleton data for demo purposes,
+        // or just return empty. Let's return the categories if they exist, otherwise empty array.
+        return categories;
+    } catch (e) {
+        console.error("Get Support Knowledge Base Error:", e);
+        return [];
+    }
 }

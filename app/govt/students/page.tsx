@@ -46,9 +46,9 @@ export default function GovtStudentsPage() {
 
     const filteredStudents = myStudents.filter(student => {
         const matchesSearch =
-            student.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            student.parentName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            student.email.toLowerCase().includes(searchQuery.toLowerCase());
+            (student.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+            (student.parentName || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+            (student.email || '').toLowerCase().includes(searchQuery.toLowerCase());
         const matchesGrade = gradeFilter === 'all' || student.grade === gradeFilter;
         const matchesSchool = schoolFilter === 'all' || student.schoolId === schoolFilter;
         return matchesSearch && matchesGrade && matchesSchool;

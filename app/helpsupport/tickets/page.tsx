@@ -30,24 +30,35 @@ export default function HelpSupportTicketsPage() {
     const [isViewOpen, setIsViewOpen] = useState(false);
     const [ticketStatus, setTicketStatus] = useState('');
 
+    const [tickets, setTickets] = useState<any[]>([]);
+    const [isLoadingData, setIsLoadingData] = useState(true);
+
     useEffect(() => {
         if (!authLoading && (!user || user.role !== 'helpsupport')) {
             router.push('/login');
+        } else if (user && user.role === 'helpsupport') {
+            import('@/lib/actions/support.actions').then(({ getAllTickets }) => {
+                getAllTickets().then((data) => {
+                    const mapped = data.map((t: any) => ({
+                        id: t.ticketId || t.customId || t._id,
+                        subject: t.subject,
+                        description: t.description,
+                        student: t.userRef?.name || 'Unknown',
+                        email: t.userRef?.email || '',
+                        priority: t.priority?.toLowerCase() || 'medium',
+                        status: t.status?.toLowerCase().replace(' ', '-') || 'open',
+                        category: t.category || 'general',
+                        created: t.createdAt || new Date().toISOString()
+                    }));
+                    setTickets(mapped);
+                    setIsLoadingData(false);
+                });
+            });
         }
     }, [user, authLoading, router]);
 
-    if (authLoading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+    if (authLoading || isLoadingData) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
     if (!user || user.role !== 'helpsupport') return null;
-
-    const tickets = [
-        { id: 'TKT-001', subject: 'Cannot access course materials', description: 'Student reports that course materials for Robotics Fundamentals are showing a 404 error when trying to download.', student: 'Arjun Patel', email: 'arjun@student.sarvtralab.in', priority: 'high', status: 'open', category: 'technical', created: '2026-02-19' },
-        { id: 'TKT-002', subject: 'Video playback issue in lecture 5', description: 'Videos are buffering constantly on the Python for Beginners course, lecture 5.', student: 'Priya Sharma', email: 'priya@student.sarvtralab.in', priority: 'medium', status: 'in-progress', category: 'technical', created: '2026-02-19' },
-        { id: 'TKT-003', subject: 'Certificate not generated after completion', description: 'Student completed the Arduino Workshop course but certificate was not generated automatically.', student: 'Rahul Gupta', email: 'rahul@student.sarvtralab.in', priority: 'high', status: 'open', category: 'academic', created: '2026-02-18' },
-        { id: 'TKT-004', subject: 'Payment refund request', description: 'Requesting a refund for duplicate payment made for the Advanced Coding Lab course.', student: 'Sneha Reddy', email: 'sneha@student.sarvtralab.in', priority: 'low', status: 'in-progress', category: 'billing', created: '2026-02-18' },
-        { id: 'TKT-005', subject: 'Login issues on mobile browser', description: 'Cannot log in on Safari mobile browser. Getting a white screen after entering credentials.', student: 'Vikram Singh', email: 'vikram@student.sarvtralab.in', priority: 'medium', status: 'open', category: 'technical', created: '2026-02-17' },
-        { id: 'TKT-006', subject: 'Quiz score discrepancy', description: 'Student believes Module 3 quiz score was computed incorrectly. Expected 85% but got 70%.', student: 'Meera Nair', email: 'meera@student.sarvtralab.in', priority: 'medium', status: 'resolved', category: 'academic', created: '2026-02-17' },
-        { id: 'TKT-007', subject: 'Need course enrollment extension', description: 'Requesting 2-week enrollment extension due to medical leave.', student: 'Aditya Rao', email: 'aditya@student.sarvtralab.in', priority: 'low', status: 'resolved', category: 'general', created: '2026-02-16' },
-    ];
 
     const filtered = tickets.filter(t => {
         const matchesSearch = t.subject.toLowerCase().includes(search.toLowerCase()) || t.student.toLowerCase().includes(search.toLowerCase());
@@ -61,9 +72,35 @@ export default function HelpSupportTicketsPage() {
         setIsViewOpen(true);
     };
 
-    const handleUpdate = () => {
-        toast.success(`Ticket ${selectedTicket.id} updated to "${ticketStatus}"`);
-        setIsViewOpen(false);
+    const fetchTickets = async () => {
+        const { getAllTickets } = await import('@/lib/actions/support.actions');
+        const data = await getAllTickets();
+        const mapped = data.map((t: any) => ({
+            id: t.ticketId || t.customId || t._id,
+            subject: t.subject,
+            description: t.description,
+            student: t.userRef?.name || 'Unknown',
+            email: t.userRef?.email || '',
+            priority: t.priority?.toLowerCase() || 'medium',
+            status: t.status?.toLowerCase().replace(' ', '-') || 'open',
+            category: t.category || 'general',
+            created: t.createdAt || new Date().toISOString()
+        }));
+        setTickets(mapped);
+    };
+
+    const handleUpdate = async () => {
+        if (!selectedTicket) return;
+        try {
+            const { updateTicketStatus } = await import('@/lib/actions/support.actions');
+            await updateTicketStatus(selectedTicket.id, ticketStatus);
+            toast.success(`Ticket ${selectedTicket.id} updated to "${ticketStatus}"`);
+            setIsViewOpen(false);
+            fetchTickets();
+        } catch (error) {
+            console.error(error);
+            toast.error("Failed to update ticket status");
+        }
     };
 
     const getPriorityVariant = (p: string) => p === 'high' ? 'destructive' : p === 'medium' ? 'secondary' : 'outline';
