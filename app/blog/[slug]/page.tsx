@@ -13,7 +13,6 @@ export const revalidate = 0;
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
     const resolvedParams = await params;
     const post = await getBlogPostBySlug(resolvedParams.slug);
-    console.log(post);
     if (!post) {
         return { title: 'Post Not Found | Sarvtra Labs' };
     }
