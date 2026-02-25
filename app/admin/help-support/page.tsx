@@ -23,7 +23,7 @@ import {
 } from 'lucide-react';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { useAuth } from '@/context/AuthContext';
-import { getAllTickets, getSupportStaff, updateTicketStatus } from '@/lib/actions/support.actions';
+import { getAllTickets, getSupportStaff, updateTicketStatus, createSupportStaff, updateSupportStaff, deleteSupportStaff } from '@/lib/actions/support.actions';
 import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -95,13 +95,22 @@ export default function AdminHelpSupportPage() {
     const [staffForm, setStaffForm] = useState({
         name: '',
         email: '',
+        password: '',
         role: 'helpsupport',
         department: '',
-        status: 'available'
+        status: 'available',
+        phone: '',
+        city: '',
+        state: ''
     });
 
     // Form Data Ticket
     const [ticketStatus, setTicketStatus] = useState('');
+
+    const reloadStaff = async () => {
+        const staffData = await getSupportStaff();
+        setStaffList(staffData);
+    };
 
     useEffect(() => {
         const fetchData = async () => {
@@ -136,46 +145,51 @@ export default function AdminHelpSupportPage() {
         return staff ? staff.name : 'Unassigned';
     };
 
-    const handleAddStaff = () => {
-        const newStaff: any = {
-            id: `SUP-${Math.random().toString(36).substr(2, 9)}`,
-            ...staffForm,
-            role: 'helpsupport' as const,
-            department: staffForm.department as 'technical' | 'academic' | 'general',
-            ticketsResolved: 0,
-            ticketsPending: 0,
-            assignedStudents: [],
-            password: 'password123',
-            phone: '',
-            createdAt: new Date().toISOString()
-        };
-        // @ts-ignore
-        setStaffList([newStaff, ...staffList]);
-        setIsAddStaffOpen(false);
-        resetStaffForm();
-        toast.success("Support agent added");
-    };
-
-    const handleEditStaff = () => {
-        if (!selectedStaff) return;
-        setStaffList(staffList.map(s =>
-            s.id === selectedStaff.id ? {
-                ...s,
+    const handleAddStaff = async () => {
+        try {
+            await createSupportStaff({
                 ...staffForm,
-                role: 'helpsupport' as const,
-                department: staffForm.department as 'technical' | 'academic' | 'general',
-                status: staffForm.status as 'available' | 'busy' | 'offline'
-            } : s
-        ));
-        setIsEditStaffOpen(false);
-        toast.success("Agent details updated");
+                department: staffForm.department || 'general'
+            });
+            await reloadStaff();
+            setIsAddStaffOpen(false);
+            resetStaffForm();
+            toast.success("Support agent added");
+        } catch (error) {
+            toast.error("Failed to add support agent");
+            console.error(error);
+        }
     };
 
-    const handleDeleteStaff = () => {
+    const handleEditStaff = async () => {
         if (!selectedStaff) return;
-        setStaffList(staffList.filter(s => s.id !== selectedStaff.id));
-        setIsDeleteStaffOpen(false);
-        toast.success("Agent removed");
+        try {
+            await updateSupportStaff(selectedStaff.id, {
+                ...staffForm,
+                role: 'helpsupport',
+                department: staffForm.department || 'general'
+            });
+            await reloadStaff();
+            setIsEditStaffOpen(false);
+            toast.success("Agent details updated");
+        } catch (error) {
+            toast.error("Failed to update agent details");
+            console.error(error);
+        }
+    };
+
+    const handleDeleteStaff = async () => {
+        if (!selectedStaff) return;
+        try {
+            await deleteSupportStaff(selectedStaff.id);
+            await reloadStaff();
+            setIsDeleteStaffOpen(false);
+            toast.success("Agent removed");
+            setSelectedStaff(null);
+        } catch (error) {
+            toast.error("Failed to remove agent");
+            console.error(error);
+        }
     };
 
     const handleUpdateTicket = async () => {
@@ -195,11 +209,15 @@ export default function AdminHelpSupportPage() {
     const openEditStaff = (staff: any) => {
         setSelectedStaff(staff);
         setStaffForm({
-            name: staff.name,
-            email: staff.email,
-            role: staff.role,
-            department: staff.department,
-            status: staff.status
+            name: staff.name || '',
+            email: staff.email || '',
+            password: '',
+            role: staff.role || 'helpsupport',
+            department: staff.department || '',
+            status: staff.status || 'available',
+            phone: staff.phone || '',
+            city: staff.city || '',
+            state: staff.state || ''
         });
         setIsEditStaffOpen(true);
     };
@@ -219,9 +237,13 @@ export default function AdminHelpSupportPage() {
         setStaffForm({
             name: '',
             email: '',
+            password: '',
             role: 'helpsupport',
             department: '',
-            status: 'available'
+            status: 'available',
+            phone: '',
+            city: '',
+            state: ''
         });
     };
 
@@ -348,7 +370,7 @@ export default function AdminHelpSupportPage() {
                                                     Create a new support staff account.
                                                 </SheetDescription>
                                             </SheetHeader>
-                                            <div className="grid gap-4 py-4">
+                                            <div className="grid grid-cols-2 gap-4">
                                                 <div className="space-y-2">
                                                     <Label htmlFor="sName">Full Name</Label>
                                                     <Input id="sName" value={staffForm.name} onChange={(e) => setStaffForm({ ...staffForm, name: e.target.value })} />
@@ -356,6 +378,18 @@ export default function AdminHelpSupportPage() {
                                                 <div className="space-y-2">
                                                     <Label htmlFor="sEmail">Email Address</Label>
                                                     <Input id="sEmail" type="email" value={staffForm.email} onChange={(e) => setStaffForm({ ...staffForm, email: e.target.value })} />
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <Label htmlFor="sPhone">Phone</Label>
+                                                    <Input id="sPhone" value={staffForm.phone} onChange={(e) => setStaffForm({ ...staffForm, phone: e.target.value })} />
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <Label htmlFor="sPassword">Password</Label>
+                                                    <Input id="sPassword" type="text" value={staffForm.password} onChange={(e) => setStaffForm({ ...staffForm, password: e.target.value })} />
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <Label htmlFor="sCity">City</Label>
+                                                    <Input id="sCity" value={staffForm.city} onChange={(e) => setStaffForm({ ...staffForm, city: e.target.value })} />
                                                 </div>
                                                 <div className="space-y-2">
                                                     <Label htmlFor="sDept">Department</Label>
@@ -497,6 +531,19 @@ export default function AdminHelpSupportPage() {
 
                             <Separator />
 
+                            <div className="grid grid-cols-2 gap-4 text-sm mt-4">
+                                <div className="space-y-1">
+                                    <Label className="text-xs uppercase tracking-wider text-muted-foreground block">Phone</Label>
+                                    <span className="font-medium inline-block rounded-md">{selectedStaff.phone || 'N/A'}</span>
+                                </div>
+                                <div className="space-y-1">
+                                    <Label className="text-xs uppercase tracking-wider text-muted-foreground block">City & State</Label>
+                                    <span className="font-medium inline-block rounded-md">{selectedStaff.city || 'N/A'}{selectedStaff.state ? `, ${selectedStaff.state}` : ''}</span>
+                                </div>
+                            </div>
+
+                            <Separator />
+
                             <div className="grid grid-cols-1 gap-6">
                                 {/* Performance Info */}
                                 <div className="space-y-3">
@@ -537,7 +584,7 @@ export default function AdminHelpSupportPage() {
                     <SheetHeader>
                         <SheetTitle>Edit Agent Details</SheetTitle>
                     </SheetHeader>
-                    <div className="grid gap-4 py-4">
+                    <div className="grid grid-cols-2 gap-4 py-4">
                         <div className="space-y-2">
                             <Label htmlFor="edit-sName">Full Name</Label>
                             <Input id="edit-sName" value={staffForm.name} onChange={(e) => setStaffForm({ ...staffForm, name: e.target.value })} />
@@ -545,6 +592,18 @@ export default function AdminHelpSupportPage() {
                         <div className="space-y-2">
                             <Label htmlFor="edit-sEmail">Email Address</Label>
                             <Input id="edit-sEmail" type="email" value={staffForm.email} onChange={(e) => setStaffForm({ ...staffForm, email: e.target.value })} />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="edit-sPhone">Phone</Label>
+                            <Input id="edit-sPhone" value={staffForm.phone} onChange={(e) => setStaffForm({ ...staffForm, phone: e.target.value })} />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="edit-sPassword">New Password (leave blank to keep current)</Label>
+                            <Input id="edit-sPassword" type="text" placeholder="New password..." value={staffForm.password} onChange={(e) => setStaffForm({ ...staffForm, password: e.target.value })} />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="edit-sCity">City</Label>
+                            <Input id="edit-sCity" value={staffForm.city} onChange={(e) => setStaffForm({ ...staffForm, city: e.target.value })} />
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="edit-sDept">Department</Label>

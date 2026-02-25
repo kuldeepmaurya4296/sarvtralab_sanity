@@ -4,6 +4,7 @@ import { sanityClient, sanityWriteClient, cleanSanityDoc } from '@/lib/sanity';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth';
 import { revalidatePath } from 'next/cache';
+import bcrypt from 'bcryptjs';
 
 export async function getSupportDashboardStats() {
     const session = await getServerSession(authOptions);
@@ -243,6 +244,105 @@ export async function getSupportStudentsData() {
     } catch (e) {
         console.error("Get Support Students Data Error:", e);
         return [];
+    }
+}
+
+export async function createSupportStaff(data: any) {
+    const session = await getServerSession(authOptions);
+    if (!session || session.user.role !== 'superadmin') throw new Error("Unauthorized");
+    try {
+        const hashedPassword = await bcrypt.hash(data.password || 'password123', 10);
+        const newStaff = await sanityWriteClient.create({
+            _type: 'user',
+            customId: `SUP-${Math.floor(1000 + Math.random() * 9000)}`,
+            name: data.name,
+            email: data.email,
+            password: hashedPassword,
+            role: 'helpsupport',
+            department: data.department,
+            status: data.status || 'available',
+            ticketsResolved: 0,
+            ticketsPending: 0,
+            phone: data.phone || '',
+            address: data.address || '',
+            city: data.city || '',
+            state: data.state || '',
+            pincode: data.pincode || '',
+        });
+        revalidatePath('/admin/help-support');
+        return cleanSanityDoc(newStaff);
+    } catch (error) {
+        console.error("Create support staff error:", error);
+        throw error;
+    }
+}
+
+export async function updateSupportStaff(id: string, updates: any) {
+    const session = await getServerSession(authOptions);
+    if (!session || session.user.role !== 'superadmin') throw new Error("Unauthorized");
+    try {
+        if (updates.password) {
+            updates.password = await bcrypt.hash(updates.password, 10);
+        } else {
+            delete updates.password;
+        }
+
+        const updated = await sanityWriteClient.patch(id).set(updates).commit();
+        revalidatePath('/admin/help-support');
+        return cleanSanityDoc(updated);
+    } catch (error) {
+        console.error("Update support staff error:", error);
+        throw error;
+    }
+}
+
+export async function deleteSupportStaff(id: string) {
+    const session = await getServerSession(authOptions);
+    if (!session || session.user.role !== 'superadmin') throw new Error("Unauthorized");
+    try {
+        await sanityWriteClient.delete(id);
+        revalidatePath('/admin/help-support');
+        return true;
+    } catch (error) {
+        console.error("Delete support staff error:", error);
+        throw error;
+    }
+}
+
+export async function getSupportProfile() {
+    const session = await getServerSession(authOptions);
+    if (!session || session.user.role !== 'helpsupport') throw new Error("Unauthorized");
+    try {
+        const user = await sanityClient.fetch(`*[_type == "user" && (_id == $id || customId == $id)][0]`, { id: session.user.id });
+        return cleanSanityDoc(user);
+    } catch (error) {
+        console.error("Get support profile error:", error);
+        throw error;
+    }
+}
+
+export async function updateSupportProfile(updates: any) {
+    const session = await getServerSession(authOptions);
+    if (!session || session.user.role !== 'helpsupport') throw new Error("Unauthorized");
+    try {
+        if (updates.newPassword) {
+            const user = await sanityClient.fetch(`*[_type == "user" && (_id == $id || customId == $id)][0]`, { id: session.user.id });
+            if (!updates.currentPassword) throw new Error("Current password required");
+            const isValid = await bcrypt.compare(updates.currentPassword, user.password);
+            if (!isValid) throw new Error("Invalid current password");
+            updates.password = await bcrypt.hash(updates.newPassword, 10);
+            delete updates.newPassword;
+            delete updates.currentPassword;
+        }
+
+        const userDoc = await sanityClient.fetch(`*[_type == "user" && (_id == $id || customId == $id)][0]{_id}`, { id: session.user.id });
+        if (!userDoc) throw new Error("User not found");
+        const updated = await sanityWriteClient.patch(userDoc._id).set(updates).commit();
+        revalidatePath('/helpsupport/settings');
+        return cleanSanityDoc(updated);
+    } catch (error) {
+        console.error("Update support profile error:", error);
+        throw error;
     }
 }
 
