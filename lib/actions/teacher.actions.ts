@@ -199,15 +199,18 @@ export async function getTeacherMaterialsData(teacherId: string) {
     try {
         const materials = await sanityClient.fetch(`
             *[_type == "material" && instructor == $teacherId] | order(_createdAt desc){
-               _id, title, course, type, size, _createdAt
+               _id, title, course, courses, materialType, size, source, url, _createdAt
             }
         `, { teacherId });
 
         return materials.map((m: any) => ({
             id: m._id,
             name: m.title,
-            course: m.course || 'Unknown',
-            type: m.type || 'PDF',
+            course: m.course || 'Multiple',
+            courses: m.courses || [],
+            type: m.materialType || 'pdf',
+            source: m.source || 'device',
+            url: m.url,
             size: m.size || '0 MB',
             uploaded: m._createdAt
         }));
@@ -371,5 +374,106 @@ export async function deleteMaterial(id: string) {
     } catch (e) {
         console.error("Delete Material Error:", e);
         throw e;
+    }
+}
+export async function getTeacherProfile() {
+    const session = await getServerSession(authOptions);
+    if (!session || session.user.role !== 'teacher') throw new Error("Unauthorized");
+    try {
+        const user = await sanityClient.fetch(`*[_type == "user" && (customId == $id || _id == $id)][0]`, { id: session.user.id });
+        return scrubTeacher(user) as Teacher;
+    } catch (error) {
+        console.error("Get teacher profile error:", error);
+        throw error;
+    }
+}
+
+export async function updateTeacherProfile(updates: any) {
+    const session = await getServerSession(authOptions);
+    if (!session || session.user.role !== 'teacher') throw new Error("Unauthorized");
+    try {
+        if (updates.newPassword) {
+            const user = await sanityClient.fetch(`*[_type == "user" && (customId == $id || _id == $id)][0]`, { id: session.user.id });
+            if (!updates.currentPassword) throw new Error("Current password required");
+            const isValid = await bcrypt.compare(updates.currentPassword, user.password);
+            if (!isValid) throw new Error("Invalid current password");
+            updates.password = await bcrypt.hash(updates.newPassword, 10);
+            delete updates.newPassword;
+            delete updates.currentPassword;
+        }
+
+        const userDoc = await sanityClient.fetch(`*[_type == "user" && (customId == $id || _id == $id)][0]{_id}`, { id: session.user.id });
+        if (!userDoc) throw new Error("User not found");
+
+        const updated = await sanityWriteClient.patch(userDoc._id).set(updates).commit();
+        revalidatePath('/teacher/settings');
+        return scrubTeacher(updated) as Teacher;
+    } catch (error) {
+        console.error("Update teacher profile error:", error);
+        throw error;
+    }
+}
+
+export async function getTeacherDashboardOverview() {
+    const session = await getServerSession(authOptions);
+    if (!session || session.user.role !== 'teacher') throw new Error("Unauthorized");
+
+    try {
+        const teacher = await sanityClient.fetch(
+            `*[_type == "user" && role == "teacher" && (customId == $id || _id == $id)][0]`,
+            { id: session.user.id }
+        );
+        if (!teacher) throw new Error("Teacher not found");
+
+        const teacherRef = teacher._id;
+
+        // Fetch stats
+        const stats = await sanityClient.fetch(`{
+            "coursesCount": count(*[_type == "course" && instructor._ref == $teacherRef]),
+            "materialsCount": count(*[_type == "material" && instructor == $teacherId]),
+            "courses": *[_type == "course" && instructor._ref == $teacherRef] | order(_createdAt desc)[0...5],
+            "assignedSchools": *[_type == "school" && (customId in $schools || name in $schools || _id in $schools)]
+        }`, { teacherRef, teacherId: session.user.id, schools: teacher.assignedSchools || [] });
+
+        const courseIds = stats.courses.map((c: any) => c._id);
+        const enrollments = await sanityClient.fetch(
+            `*[_type == "enrollment" && courseRef._ref in $courseIds]`,
+            { courseIds }
+        );
+
+        const totalStudents = new Set(enrollments.map((e: any) => e.student)).size;
+
+        return {
+            stats: {
+                totalCourses: stats.coursesCount,
+                totalStudents,
+                totalMaterials: stats.materialsCount,
+                avgCompletion: enrollments.length > 0
+                    ? Math.round(enrollments.reduce((acc: number, e: any) => acc + (e.progress || 0), 0) / enrollments.length)
+                    : 0,
+            },
+            recentCourses: stats.courses.map((c: any) => ({
+                id: c._id,
+                title: c.title,
+                students: enrollments.filter((e: any) => e.courseRef?._ref === c._id).length,
+                progress: 0,
+                nextClass: c.nextClassDate || new Date().toISOString()
+            })),
+            assignedSchools: stats.assignedSchools.map((s: any) => ({
+                id: s._id,
+                name: s.name,
+                city: s.city,
+                board: s.board,
+                totalStudents: s.totalStudents || 0
+            })),
+            schedule: [
+                { time: '09:00 AM', course: 'Robotics 101', type: 'Live', grade: 'Grade 8' },
+                { time: '11:00 AM', course: 'Advanced Python', type: 'Recording', grade: 'Grade 10' },
+                { time: '02:00 PM', course: 'Electronic Circuits', type: 'Workshop', grade: 'Grade 9' }
+            ]
+        };
+    } catch (error) {
+        console.error("Dashboard overview error:", error);
+        throw error;
     }
 }

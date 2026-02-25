@@ -8,12 +8,15 @@ export default defineType({
     fields: [
         defineField({ name: 'customId', title: 'Custom ID', type: 'string', validation: r => r.required() }),
         defineField({ name: 'title', title: 'Title', type: 'string' }),
-        defineField({ name: 'course', title: 'Course', type: 'string' }),
+        defineField({ name: 'course', title: 'Course (legacy)', type: 'string' }),
+        defineField({ name: 'courses', title: 'Assigned Courses', type: 'array', of: [{ type: 'string' }] }),
         defineField({ name: 'instructor', title: 'Instructor', type: 'string' }),
         defineField({
             name: 'materialType', title: 'Type', type: 'string',
-            options: { list: ['pdf', 'video', 'link', 'zip'] }
+            options: { list: ['pdf', 'video', 'link', 'zip', 'doc', 'ppt'] }
         }),
+        defineField({ name: 'source', title: 'Source', type: 'string', options: { list: ['device', 'link'] }, initialValue: 'device' }),
+        defineField({ name: 'url', title: 'File/Link URL', type: 'string' }),
         defineField({ name: 'size', title: 'Size', type: 'string' }),
         defineField({ name: 'courseId', title: 'Course ID', type: 'string' }),
         defineField({ name: 'moduleId', title: 'Module ID', type: 'string' }),

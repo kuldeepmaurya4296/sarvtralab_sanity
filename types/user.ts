@@ -45,8 +45,16 @@ export interface Teacher extends User {
     customId?: string;
     specialization: string;
     qualifications?: string;
+    degree?: string;
+    institution?: string;
     experience?: number;
     bio?: string;
+    gender?: string;
+    linkedInUrl?: string;
+    twitterUrl?: string;
+    websiteUrl?: string;
+    availability?: string;
+    availabilityStatus?: 'available' | 'busy' | 'offline' | string;
     assignedSchools?: string[];
     assignedCourses?: string[];
     status?: 'active' | 'inactive';

@@ -57,7 +57,15 @@ export default defineType({
         // Teacher fields
         defineField({ name: 'specialization', title: 'Specialization', type: 'string' }),
         defineField({ name: 'qualifications', title: 'Qualifications', type: 'string' }),
+        defineField({ name: 'degree', title: 'Degree', type: 'string' }),
+        defineField({ name: 'institution', title: 'Institution', type: 'string' }),
         defineField({ name: 'experience', title: 'Experience (years)', type: 'number' }),
+        defineField({ name: 'bio', title: 'Bio', type: 'text' }),
+        defineField({ name: 'gender', title: 'Gender', type: 'string', options: { list: ['Male', 'Female', 'Other'] } }),
+        defineField({ name: 'linkedInUrl', title: 'LinkedIn URL', type: 'string' }),
+        defineField({ name: 'twitterUrl', title: 'Twitter URL', type: 'string' }),
+        defineField({ name: 'availability', title: 'Availability', type: 'string', options: { list: ['Full-time', 'Part-time', 'Freelance'] } }),
+        defineField({ name: 'availabilityStatus', title: 'Availability Status', type: 'string', initialValue: 'available', options: { list: ['available', 'busy', 'offline'] } }),
 
         // Helper fields
         defineField({ name: 'assignedStudents', title: 'Assigned Students', type: 'array', of: [{ type: 'string' }] }),
