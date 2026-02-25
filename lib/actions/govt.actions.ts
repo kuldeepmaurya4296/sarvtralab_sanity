@@ -21,20 +21,14 @@ export async function getGovtStudentData() {
 
         const assignedSchoolIds = govtUser.assignedSchools || [];
 
-        // Fetch schools assigned to this official
-        // assignedSchools might be an array of customIds or _ids
+        // Fetch all schools
         const schools = await sanityClient.fetch(
-            `*[_type == "user" && role == "school" && (customId in $ids || _id in $ids)]`,
-            { ids: assignedSchoolIds }
+            `*[_type == "user" && role == "school"]`
         );
 
-        const schoolIds = schools.map((s: any) => s._id);
-        const schoolCustomIds = schools.map((s: any) => s.customId);
-
-        // Fetch students belonging to these schools
+        // Fetch all students
         const students = await sanityClient.fetch(
-            `*[_type == "user" && role == "student" && (schoolRef._ref in $ids || schoolId in $cids)]`,
-            { ids: schoolIds, cids: schoolCustomIds }
+            `*[_type == "user" && role == "student"]`
         );
 
         return {

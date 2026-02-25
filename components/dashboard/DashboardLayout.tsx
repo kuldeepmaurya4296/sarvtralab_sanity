@@ -69,8 +69,8 @@ const roleMenuItems: Record<string, MenuItem[]> = {
     { icon: LayoutDashboard, label: 'Dashboard', href: '/govt/dashboard' },
     { icon: Building, label: 'Schools', href: '/govt/schools' },
     { icon: Users, label: 'Students', href: '/govt/students' },
-    { icon: FileText, label: 'Reports', href: '/govt/reports' },
-    { icon: Settings, label: 'Settings', href: '/govt/settings' }
+    // { icon: FileText, label: 'Reports', href: '/govt/reports' },
+    // { icon: Settings, label: 'Settings', href: '/govt/settings' }
   ],
   admin: [
     { icon: LayoutDashboard, label: 'Dashboard', href: '/admin/dashboard' },

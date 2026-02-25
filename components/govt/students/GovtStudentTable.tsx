@@ -90,7 +90,7 @@ export function GovtStudentTable({ students, onView, onContact }: GovtStudentTab
                                 <TableCell>
                                     {(() => {
                                         // Deterministic score from student ID to avoid hydration mismatch
-                                        const hash = student.id.split('').reduce((a, c) => a + c.charCodeAt(0), 0);
+                                        const hash = String(student.id || student._id || '').split('').reduce((a, c) => a + c.charCodeAt(0), 0);
                                         const score = (hash % 40) + 60;
                                         return (
                                             <div className="flex items-center gap-2">
@@ -115,12 +115,12 @@ export function GovtStudentTable({ students, onView, onContact }: GovtStudentTab
                                         </DropdownMenuTrigger>
                                         <DropdownMenuContent align="end">
                                             <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                            <DropdownMenuItem onClick={() => navigator.clipboard.writeText(student.id)}>
+                                            {/* <DropdownMenuItem onClick={() => navigator.clipboard.writeText(student.id)}>
                                                 Copy Student ID
-                                            </DropdownMenuItem>
+                                            </DropdownMenuItem> */}
                                             <DropdownMenuSeparator />
                                             <DropdownMenuItem onClick={() => onView(student)}>
-                                                <Eye className="mr-2 h-4 w-4" /> View Academic Record
+                                                <Eye className="mr-2 h-4 w-4" /> View
                                             </DropdownMenuItem>
                                             <DropdownMenuItem onClick={() => onContact(student)}>
                                                 <Phone className="mr-2 h-4 w-4" /> Contact Parent
