@@ -116,7 +116,7 @@ const roleMenuItems: Record<string, MenuItem[]> = {
     { icon: LayoutDashboard, label: 'Dashboard', href: '/helpsupport/dashboard' },
     { icon: Headphones, label: 'Tickets', href: '/helpsupport/tickets' },
     { icon: Users, label: 'Students', href: '/helpsupport/students' },
-    { icon: FileText, label: 'Knowledge Base', href: '/helpsupport/knowledge-base' },
+    // { icon: FileText, label: 'Knowledge Base', href: '/helpsupport/knowledge-base' },
     { icon: Settings, label: 'Settings', href: '/helpsupport/settings' }
   ]
 };

@@ -8,6 +8,8 @@ export default defineType({
     fields: [
         defineField({ name: 'customId', title: 'Custom ID', type: 'string', validation: r => r.required() }),
         defineField({ name: 'title', title: 'Title', type: 'string' }),
+        defineField({ name: 'course', title: 'Course', type: 'string' }),
+        defineField({ name: 'instructor', title: 'Instructor', type: 'string' }),
         defineField({
             name: 'materialType', title: 'Type', type: 'string',
             options: { list: ['pdf', 'video', 'link', 'zip'] }

@@ -1,16 +1,27 @@
 
 'use client';
 
+import { useState } from 'react';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { useAuth } from '@/context/AuthContext';
 import { Mail, Phone, Clock, Construction, LifeBuoy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNotifications } from '@/context/NotificationContext';
 import { toast } from 'sonner';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { createSupportTicket } from '@/lib/actions/support.actions';
 
 export default function StudentSupportPage() {
     const { user, isLoading: authLoading } = useAuth();
     const { notifyAdmin, addNotification } = useNotifications();
+
+    const [open, setOpen] = useState(false);
+    const [subject, setSubject] = useState('');
+    const [description, setDescription] = useState('');
+    const [priority, setPriority] = useState('Medium');
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     if (authLoading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
     if (!user) return null;
@@ -19,19 +30,37 @@ export default function StudentSupportPage() {
     const supportPhone = '+91-8085613350';
     const supportHours = 'Mon-Sat, 10am-6pm';
 
-    const handleCreateTicket = () => {
-        toast.success("Support ticket created!");
-        addNotification(
-            'Support Ticket Submitted',
-            'Your ticket #T-102 has been received and is being reviewed.',
-            'success'
-        );
-        notifyAdmin(
-            'New Support Ticket',
-            `${user.name} has submitted a new support ticket.`,
-            'warning',
-            '/admin/help-support'
-        );
+    const handleCreateTicket = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!subject || !description) {
+            toast.error("Please fill in all required fields.");
+            return;
+        }
+        setIsSubmitting(true);
+        try {
+            const newTicket = await createSupportTicket({ subject, description, priority });
+            toast.success("Support ticket created!");
+            addNotification(
+                'Support Ticket Submitted',
+                `Your ticket #${newTicket.ticketId} has been received and is being reviewed.`,
+                'success'
+            );
+            notifyAdmin(
+                'New Support Ticket',
+                `${user?.name} has submitted a new support ticket.`,
+                'warning',
+                '/admin/help-support'
+            );
+            setSubject('');
+            setDescription('');
+            setPriority('Medium');
+            setOpen(false);
+        } catch (error) {
+            console.error("Failed to create ticket", error);
+            toast.error("Failed to create support ticket.");
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     return (
@@ -42,10 +71,40 @@ export default function StudentSupportPage() {
                         <h1 className="text-2xl font-bold text-foreground">Help & Support</h1>
                         <p className="text-muted-foreground">Need assistance? Here's how you can reach us.</p>
                     </div>
-                    <Button onClick={handleCreateTicket} className="gap-2">
-                        <LifeBuoy className="w-4 h-4" />
-                        Create Support Ticket
-                    </Button>
+                    <Dialog open={open} onOpenChange={setOpen}>
+                        <DialogTrigger asChild>
+                            <Button className="gap-2">
+                                <LifeBuoy className="w-4 h-4" />
+                                Create Support Ticket
+                            </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                            <DialogHeader>
+                                <DialogTitle>Create Support Ticket</DialogTitle>
+                            </DialogHeader>
+                            <form onSubmit={handleCreateTicket} className="space-y-4">
+                                <div>
+                                    <label className="text-sm font-medium">Subject</label>
+                                    <Input required value={subject} onChange={e => setSubject(e.target.value)} placeholder="E.g., Cannot access course material" />
+                                </div>
+                                <div>
+                                    <label className="text-sm font-medium">Description</label>
+                                    <Textarea required value={description} onChange={e => setDescription(e.target.value)} placeholder="Describe your issue in detail..." rows={4} />
+                                </div>
+                                <div>
+                                    <label className="text-sm font-medium">Priority</label>
+                                    <select className="w-full mt-1 border rounded p-2" value={priority} onChange={e => setPriority(e.target.value)}>
+                                        <option value="Low">Low</option>
+                                        <option value="Medium">Medium</option>
+                                        <option value="High">High</option>
+                                    </select>
+                                </div>
+                                <Button type="submit" disabled={isSubmitting} className="w-full">
+                                    {isSubmitting ? 'Submitting...' : 'Submit Ticket'}
+                                </Button>
+                            </form>
+                        </DialogContent>
+                    </Dialog>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

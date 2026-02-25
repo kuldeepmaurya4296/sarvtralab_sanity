@@ -72,6 +72,43 @@ export async function getSupportDashboardStats() {
     }
 }
 
+export async function createSupportTicket(data: { subject: string, description: string, priority?: string }) {
+    const session = await getServerSession(authOptions);
+    if (!session || !session.user) {
+        throw new Error("Unauthorized");
+    }
+    try {
+        const userDoc = await sanityClient.fetch(
+            `*[_type == "user" && (customId == $id || _id == $id)][0]{_id}`,
+            { id: session.user.id }
+        );
+
+        if (!userDoc) throw new Error("User not found in database.");
+
+        const ticketId = `TKT-${Math.floor(1000 + Math.random() * 9000)}`;
+        const newTicket = await sanityWriteClient.create({
+            _type: 'supportTicket',
+            ticketId: ticketId,
+            userRef: {
+                _type: 'reference',
+                _ref: userDoc._id
+            },
+            subject: data.subject,
+            description: data.description,
+            priority: data.priority || 'Medium',
+            status: 'Open',
+            createdAt: new Date().toISOString()
+        });
+
+        revalidatePath('/student/support');
+        revalidatePath('/helpsupport/dashboard');
+        return cleanSanityDoc(newTicket);
+    } catch (e) {
+        console.error("Create Support Ticket Error:", e);
+        throw e;
+    }
+}
+
 export async function getAllTickets() {
     const session = await getServerSession(authOptions);
     if (!session || (session.user.role !== 'admin' && session.user.role !== 'superadmin' && session.user.role !== 'helpsupport')) {
@@ -82,7 +119,7 @@ export async function getAllTickets() {
             `*[_type == "supportTicket"] | order(createdAt desc){
                 ...,
                 userRef->{
-                    name, email, schoolName, grade, parentName, parentPhone
+                    _id, customId, name, email, schoolName, grade, status, parentName, parentPhone, parentEmail, dateOfBirth, address, city, state, pincode, phone
                 }
             }`
         );
@@ -148,36 +185,56 @@ export async function getSupportStudentsData() {
         throw new Error("Unauthorized");
     }
     try {
+        const students = await sanityClient.fetch(
+            `*[_type == "user" && role == "student"]{
+                _id, customId, name, email, schoolName, grade, status, parentName, parentPhone, parentEmail, dateOfBirth, address, city, state, pincode, phone
+            }`
+        );
+
         const tickets = await sanityClient.fetch(
             `*[_type == "supportTicket"]{
-                studentId,
-                userRef->{_id, customId, name, email, schoolName, grade, status},
+                userRef->{_id, customId},
                 createdAt
             }`
         );
 
         const studentMap = new Map();
 
+        // Initialize all students
+        students.forEach((s: any) => {
+            const sId = s.customId || s._id;
+            studentMap.set(sId, {
+                id: sId,
+                name: s.name,
+                email: s.email,
+                school: s.schoolName || 'Unknown',
+                grade: s.grade || 'N/A',
+                phone: s.phone || '',
+                parentName: s.parentName || '',
+                parentPhone: s.parentPhone || '',
+                parentEmail: s.parentEmail || '',
+                dateOfBirth: s.dateOfBirth || '',
+                address: s.address || '',
+                city: s.city || '',
+                state: s.state || '',
+                pincode: s.pincode || '',
+                tickets: 0,
+                lastTicket: null,
+                status: s.status || 'active'
+            });
+        });
+
+        // Augment with ticket counts
         tickets.forEach((t: any) => {
             const s = t.userRef;
             if (s) {
                 const sId = s.customId || s._id;
-                if (!studentMap.has(sId)) {
-                    studentMap.set(sId, {
-                        id: sId,
-                        name: s.name,
-                        email: s.email,
-                        school: s.schoolName || 'Unknown',
-                        grade: s.grade || 'N/A',
-                        tickets: 0,
-                        lastTicket: t.createdAt,
-                        status: s.status || 'active'
-                    });
-                }
-                const entry = studentMap.get(sId);
-                entry.tickets += 1;
-                if (new Date(t.createdAt) > new Date(entry.lastTicket)) {
-                    entry.lastTicket = t.createdAt;
+                if (studentMap.has(sId)) {
+                    const entry = studentMap.get(sId);
+                    entry.tickets += 1;
+                    if (!entry.lastTicket || new Date(t.createdAt) > new Date(entry.lastTicket)) {
+                        entry.lastTicket = t.createdAt;
+                    }
                 }
             }
         });

@@ -4,11 +4,12 @@ import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import {
-    Headphones, Search, CheckCircle, Clock, AlertCircle, Eye, MessageSquare, Filter
+    Headphones, Search, CheckCircle, Clock, AlertCircle, Eye, MessageSquare, Filter, Mail, Phone, MapPin, CalendarDays, Contact2
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
@@ -28,7 +29,10 @@ export default function HelpSupportTicketsPage() {
     const [statusFilter, setStatusFilter] = useState('all');
     const [selectedTicket, setSelectedTicket] = useState<any>(null);
     const [isViewOpen, setIsViewOpen] = useState(false);
+    const [isStudentViewOpen, setIsStudentViewOpen] = useState(false);
     const [ticketStatus, setTicketStatus] = useState('');
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 10;
 
     const [tickets, setTickets] = useState<any[]>([]);
     const [isLoadingData, setIsLoadingData] = useState(true);
@@ -44,6 +48,7 @@ export default function HelpSupportTicketsPage() {
                         subject: t.subject,
                         description: t.description,
                         student: t.userRef?.name || 'Unknown',
+                        studentProfile: t.userRef,
                         email: t.userRef?.email || '',
                         priority: t.priority?.toLowerCase() || 'medium',
                         status: t.status?.toLowerCase().replace(' ', '-') || 'open',
@@ -66,6 +71,9 @@ export default function HelpSupportTicketsPage() {
         return matchesSearch && matchesStatus;
     });
 
+    const totalPages = Math.ceil(filtered.length / itemsPerPage);
+    const paginatedTickets = filtered.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
     const openTicket = (ticket: any) => {
         setSelectedTicket(ticket);
         setTicketStatus(ticket.status);
@@ -80,6 +88,7 @@ export default function HelpSupportTicketsPage() {
             subject: t.subject,
             description: t.description,
             student: t.userRef?.name || 'Unknown',
+            studentProfile: t.userRef,
             email: t.userRef?.email || '',
             priority: t.priority?.toLowerCase() || 'medium',
             status: t.status?.toLowerCase().replace(' ', '-') || 'open',
@@ -154,13 +163,24 @@ export default function HelpSupportTicketsPage() {
                                         <TableRow>
                                             <TableCell colSpan={8} className="h-24 text-center text-muted-foreground">No tickets found.</TableCell>
                                         </TableRow>
-                                    ) : filtered.map(t => (
+                                    ) : paginatedTickets.map(t => (
                                         <TableRow key={t.id} className="cursor-pointer hover:bg-muted/50" onClick={() => openTicket(t)}>
                                             <TableCell className="font-mono text-xs">{t.id}</TableCell>
                                             <TableCell>
                                                 <span className="font-medium text-sm truncate max-w-[200px] block">{t.subject}</span>
                                             </TableCell>
-                                            <TableCell className="text-sm">{t.student}</TableCell>
+                                            <TableCell>
+                                                <span
+                                                    className="font-medium text-sm text-primary hover:underline"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setSelectedTicket(t);
+                                                        setIsStudentViewOpen(true);
+                                                    }}
+                                                >
+                                                    {t.student}
+                                                </span>
+                                            </TableCell>
                                             <TableCell><Badge variant="outline" className="capitalize text-xs">{t.category}</Badge></TableCell>
                                             <TableCell><Badge variant={getPriorityVariant(t.priority) as any} className="capitalize text-xs">{t.priority}</Badge></TableCell>
                                             <TableCell>
@@ -177,6 +197,31 @@ export default function HelpSupportTicketsPage() {
                                     ))}
                                 </TableBody>
                             </Table>
+                            {totalPages > 1 && (
+                                <div className="flex items-center justify-between px-4 py-3 border-t">
+                                    <div className="text-sm text-muted-foreground">
+                                        Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, filtered.length)} of {filtered.length} entries
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                                            disabled={currentPage === 1}
+                                        >
+                                            Previous
+                                        </Button>
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                                            disabled={currentPage === totalPages}
+                                        >
+                                            Next
+                                        </Button>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </CardContent>
                 </Card>
@@ -232,6 +277,126 @@ export default function HelpSupportTicketsPage() {
                                     </Select>
                                     <Button onClick={handleUpdate}>Update</Button>
                                 </div>
+                            </div>
+                        </div>
+                    )}
+                </SheetContent>
+            </Sheet>
+            {/* Student Detail Sheet */}
+            <Sheet open={isStudentViewOpen} onOpenChange={setIsStudentViewOpen}>
+                <SheetContent className="overflow-y-auto sm:max-w-xl">
+                    <SheetHeader>
+                        <SheetTitle>Student Details</SheetTitle>
+                        <SheetDescription>ID: {selectedTicket?.studentProfile?.customId || selectedTicket?.studentProfile?._id || 'N/A'}</SheetDescription>
+                    </SheetHeader>
+                    {selectedTicket?.studentProfile && (
+                        <div className="mt-8 space-y-6">
+                            <div className="flex items-center gap-4">
+                                <Avatar className="h-16 w-16">
+                                    <AvatarFallback className="text-xl bg-primary/10 text-primary">
+                                        {selectedTicket.studentProfile.name?.substring(0, 2).toUpperCase() || 'NA'}
+                                    </AvatarFallback>
+                                </Avatar>
+                                <div>
+                                    <h3 className="text-2xl font-bold">{selectedTicket.studentProfile.name}</h3>
+                                    <p className="text-muted-foreground">{selectedTicket.studentProfile.email}</p>
+                                    <Badge variant={selectedTicket.studentProfile.status === 'active' ? 'default' : 'secondary'} className="mt-2 capitalize">
+                                        {selectedTicket.studentProfile.status || 'Active'} Profile
+                                    </Badge>
+                                </div>
+                            </div>
+
+                            <Separator />
+
+                            <div className="grid grid-cols-2 gap-y-6 gap-x-4 text-sm mt-4">
+                                <div className="space-y-1">
+                                    <Label className="text-xs uppercase tracking-wider text-muted-foreground block">School</Label>
+                                    <span className="font-medium inline-block bg-muted/50 px-2 py-1 rounded-md">{selectedTicket.studentProfile.schoolName || 'Unknown'}</span>
+                                </div>
+                                <div className="space-y-1">
+                                    <Label className="text-xs uppercase tracking-wider text-muted-foreground block">Grade</Label>
+                                    <span className="font-medium inline-block bg-muted/50 px-2 py-1 rounded-md border text-center min-w-[3rem]">{selectedTicket.studentProfile.grade || 'N/A'}</span>
+                                </div>
+                                <div className="space-y-1">
+                                    <Label className="text-xs uppercase tracking-wider text-muted-foreground block">Date of Birth</Label>
+                                    <span className="font-medium flex items-center gap-1">
+                                        <CalendarDays className="h-3 w-3 text-muted-foreground" />
+                                        {selectedTicket.studentProfile.dateOfBirth ? new Date(selectedTicket.studentProfile.dateOfBirth).toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' }) : 'N/A'}
+                                    </span>
+                                </div>
+                                <div className="space-y-1"></div>
+                            </div>
+
+                            <Separator />
+
+                            {/* Contact & Location Details */}
+                            <div>
+                                <h4 className="text-sm font-semibold mb-4 flex items-center gap-2">
+                                    <MapPin className="h-4 w-4 text-muted-foreground" /> Contact & Location
+                                </h4>
+                                <div className="grid grid-cols-2 gap-y-4 gap-x-4 text-sm">
+                                    <div className="space-y-1">
+                                        <Label className="text-xs uppercase tracking-wider text-muted-foreground block">Student Phone</Label>
+                                        <span className="font-medium">{selectedTicket.studentProfile.phone || 'N/A'}</span>
+                                    </div>
+                                    <div className="space-y-1">
+                                        <Label className="text-xs uppercase tracking-wider text-muted-foreground block">City & State</Label>
+                                        <span className="font-medium">{selectedTicket.studentProfile.city || 'N/A'}{selectedTicket.studentProfile.state ? `, ${selectedTicket.studentProfile.state}` : ''}</span>
+                                    </div>
+                                    <div className="col-span-2 space-y-1">
+                                        <Label className="text-xs uppercase tracking-wider text-muted-foreground block">Full Address</Label>
+                                        <p className="font-medium text-xs leading-relaxed max-w-[90%]">
+                                            {selectedTicket.studentProfile.address || 'Address not provided'}
+                                            {selectedTicket.studentProfile.pincode && ` - ${selectedTicket.studentProfile.pincode}`}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <Separator />
+
+                            {/* Guardian Details */}
+                            <div className="bg-muted/30 p-4 rounded-xl border">
+                                <h4 className="text-sm font-semibold mb-4 flex items-center gap-2">
+                                    <Contact2 className="h-4 w-4 text-muted-foreground" /> Guardian Details
+                                </h4>
+                                <div className="grid grid-cols-2 gap-y-4 gap-x-4 text-sm">
+                                    <div className="space-y-1 col-span-2">
+                                        <Label className="text-xs uppercase tracking-wider text-muted-foreground block">Parent/Guardian Name</Label>
+                                        <span className="font-medium block">{selectedTicket.studentProfile.parentName || 'N/A'}</span>
+                                    </div>
+                                    <div className="space-y-1">
+                                        <Label className="text-xs uppercase tracking-wider text-muted-foreground block">Parent Phone</Label>
+                                        <span className="font-medium block">{selectedTicket.studentProfile.parentPhone || 'N/A'}</span>
+                                    </div>
+                                    <div className="space-y-1">
+                                        <Label className="text-xs uppercase tracking-wider text-muted-foreground block">Parent Email</Label>
+                                        <span className="font-medium block truncate pr-2">{selectedTicket.studentProfile.parentEmail || 'N/A'}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Communication Buttons */}
+                            <div className="mt-8 flex flex-col sm:flex-row gap-3">
+                                <a href={`mailto:${selectedTicket.studentProfile.email}`} className="flex-1">
+                                    <Button variant="outline" className="w-full gap-2 text-xs h-10">
+                                        <Mail className="h-3.5 w-3.5" /> Student Email
+                                    </Button>
+                                </a>
+                                {selectedTicket.studentProfile.phone && (
+                                    <a href={`tel:${selectedTicket.studentProfile.phone}`} className="flex-1">
+                                        <Button variant="outline" className="w-full gap-2 text-xs h-10">
+                                            <Phone className="h-3.5 w-3.5" /> Student Phone
+                                        </Button>
+                                    </a>
+                                )}
+                                {selectedTicket.studentProfile.parentPhone && (
+                                    <a href={`tel:${selectedTicket.studentProfile.parentPhone}`} className="flex-1">
+                                        <Button variant="secondary" className="w-full gap-2 text-xs h-10 bg-primary/10 hover:bg-primary/20 text-primary">
+                                            <Phone className="h-3.5 w-3.5" /> Guardian Phone
+                                        </Button>
+                                    </a>
+                                )}
                             </div>
                         </div>
                     )}

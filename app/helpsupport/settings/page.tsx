@@ -84,7 +84,7 @@ export default function HelpSupportSettingsPage() {
                     </CardContent>
                 </Card>
 
-                <Card>
+                {/* <Card>
                     <CardHeader>
                         <CardTitle className="text-lg flex items-center gap-2"><Bell className="h-5 w-5" /> Notification Preferences</CardTitle>
                         <CardDescription>Choose how you receive ticket notifications</CardDescription>
@@ -112,7 +112,7 @@ export default function HelpSupportSettingsPage() {
                             <input type="checkbox" className="h-4 w-4 accent-primary" />
                         </div>
                     </CardContent>
-                </Card>
+                </Card> */}
 
                 <Card>
                     <CardHeader>
