@@ -75,6 +75,12 @@ export default function SchoolsClient({ plans, organization, benefits }: Schools
     };
 
     const handleGetStarted = (plan: any) => {
+        const priceStr = plan.price ? plan.price.toString().toLowerCase() : '';
+        if (!priceStr || priceStr === 'custom' || priceStr.includes('contact')) {
+            router.push('/contact');
+            return;
+        }
+
         const planId = plan.customId || plan._id || plan.id;
         if (!user) {
             router.push(`/login?redirect=/checkout/plan/${planId}`);
