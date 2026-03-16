@@ -44,7 +44,7 @@ export default function ContactContent({ organization }: { organization: any }) 
         {
             title: 'Call Us',
             content: organization?.phone || '+91-7898753055',
-            subtext: 'Mon-Sat, 10am-6pm',
+            subtext: 'Mon-Sat, 10:30am-7pm',
             iconName: 'Phone',
             link: `tel:${(organization?.phone || '+91-7898753055').replace(/\s+/g, '')}`
         },
@@ -57,7 +57,7 @@ export default function ContactContent({ organization }: { organization: any }) 
         },
         {
             title: 'Working Hours',
-            content: '10:00 AM - 06:00 PM',
+            content: '10:30 AM - 07:00 PM',
             subtext: 'Monday to Saturday',
             iconName: 'Clock',
             link: '#'
