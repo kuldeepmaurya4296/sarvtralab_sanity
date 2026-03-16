@@ -276,7 +276,7 @@ export default function ContactContent({ organization }: { organization: any }) 
                             {/* Map */}
                             <div className="h-72 rounded-2xl bg-muted overflow-hidden border">
                                 <iframe
-                                    src={organization?.mapEmbedUrl || "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d117307.67914801362!2d77.3060269!3d23.2599333!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x397c428f873ad307%3A0x62661d47157f4935!2sBhopal%2C%20Madhya%20Pradesh!5e0!3m2!1sen!2sin!4v1700000000000!5m2!1sen!2sin"}
+                                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1833.056020583091!2d77.45663733857648!3d23.1936990529815!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x397c435b01797ae1%3A0x487562c2bf8ff950!2sSarvatralabs!5e0!3m2!1sen!2sin!4v1710594000000!5m2!1sen!2sin"
                                     width="100%"
                                     height="100%"
                                     style={{ border: 0 }}
