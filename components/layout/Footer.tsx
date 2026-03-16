@@ -67,7 +67,7 @@ const Footer = ({ footerSections, organization }: FooterProps) => {
   const org = organization || {
     name: 'Sarvtra Labs',
     email: 'connect@pushpako2.com',
-    phone: '+91-8085613350',
+    phone: '+91-7898753055',
     address: 'Bhopal, Madhya Pradesh',
     hours: 'Mon - Sat: 9:00 AM - 6:00 PM',
     socials: []
@@ -124,8 +124,8 @@ const Footer = ({ footerSections, organization }: FooterProps) => {
           <div className="xl:col-span-4 flex flex-col justify-end space-y-6 xl:border-l xl:border-border xl:pl-8 mt-8 xl:mt-0">
             <div className="space-y-2">
               <h5 className="font-bold text-[10px] tracking-widest uppercase text-muted-foreground">Direct Line</h5>
-              <a href={`tel:${(org.phone || '+91-8085613350').replace(/[^0-9+]/g, '')}`} className="text-xl sm:text-2xl lg:text-3xl font-black text-foreground hover:text-primary transition-colors block font-display tracking-tight">
-                {org.phone || '+91-8085613350'}
+              <a href={`tel:${(org.phone || '+91-7898753055').replace(/[^0-9+]/g, '')}`} className="text-xl sm:text-2xl lg:text-3xl font-black text-foreground hover:text-primary transition-colors block font-display tracking-tight">
+                {org.phone || '+91-7898753055'}
               </a>
               <span className="text-[10px] uppercase tracking-wider font-semibold text-primary">{org.hours || 'Mon - Sat: 9:00 AM - 6:00 PM'}</span>
             </div>

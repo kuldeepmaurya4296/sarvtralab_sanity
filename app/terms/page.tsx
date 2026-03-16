@@ -1,6 +1,8 @@
 import PublicLayout from '@/components/layout/PublicLayout';
 import { getLegalDocBySlug } from '@/lib/actions/content.actions';
 
+export const dynamic = 'force-dynamic';
+
 export default async function TermsPage() {
     const doc = await getLegalDocBySlug('terms');
 

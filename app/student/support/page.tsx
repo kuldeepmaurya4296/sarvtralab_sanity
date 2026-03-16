@@ -27,7 +27,7 @@ export default function StudentSupportPage() {
     if (!user) return null;
 
     const supportEmail = 'connect@pushpako2.com';
-    const supportPhone = '+91-8085613350';
+    const supportPhone = '+91-7898753055';
     const supportHours = 'Mon-Sat, 10am-6pm';
 
     const handleCreateTicket = async (e: React.FormEvent) => {

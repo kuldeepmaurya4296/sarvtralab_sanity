@@ -3,6 +3,8 @@ import AboutContent from '@/components/about/AboutContent';
 import { constructMetadata } from '@/lib/seo';
 import { getOrganizationDetails, getTeamMembers } from '@/lib/actions/content.actions';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata = constructMetadata({
     title: 'About Us | Sarvtra Labs',
     description: 'Discover Sarvtra Labs (Sarwatra Labs), India\'s leading robotics education platform. We are committed to empowering students with next-gen STEM skills through hands-on learning.',

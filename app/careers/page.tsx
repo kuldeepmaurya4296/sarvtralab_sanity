@@ -4,6 +4,8 @@ import CareersContent from './CareersContent';
 import { constructMetadata } from '@/lib/seo';
 import { getJobs } from '@/lib/actions/content.actions';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata = constructMetadata({
     title: 'Careers | Join Our Team | Sarvtra Labs',
     description: 'Join Sarvtra Labs (Sarwatra Labs) and help revolutionize robotics education in India. Explore our current job openings and career opportunities.',

@@ -105,7 +105,7 @@ const defaultOrg = {
     tagline: 'Empowering Next-Gen Innovators',
     description: "Sarvtra Labs is India's premier robotics education platform, dedicated to making STEM education accessible, engaging, and aligned with global standards.",
     email: 'connect@pushpako2.com',
-    phone: '+91-8085613350',
+    phone: '+91-7898753055',
     address: 'Bhopal, Madhya Pradesh',
     hours: 'Mon - Sat: 9:00 AM - 6:00 PM',
     mission: "To democratize robotics and coding education in India by providing affordable, high-quality, and curriculum-aligned learning experiences that prepare students for the future of technology.",

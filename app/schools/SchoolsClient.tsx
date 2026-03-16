@@ -39,7 +39,7 @@ interface SchoolsClientProps {
 const MAX_VISIBLE_FEATURES = 6;
 
 export default function SchoolsClient({ plans, organization, benefits }: SchoolsClientProps) {
-    const phone = organization?.phone || '+91-8085613350';
+    const phone = organization?.phone || '+91-7898753055';
     const partnerStudentsStat = organization?.stats?.find((s: any) => s.label.includes('Partner'))?.value || '120+';
 
     const { user } = useAuth();

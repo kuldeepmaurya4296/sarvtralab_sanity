@@ -2,6 +2,8 @@ import PublicLayout from '@/components/layout/PublicLayout';
 import { getLegalDocBySlug } from '@/lib/actions/content.actions';
 import { notFound } from 'next/navigation';
 
+export const dynamic = 'force-dynamic';
+
 export default async function PrivacyPage() {
     const doc = await getLegalDocBySlug('privacy');
 

@@ -6,7 +6,7 @@ import { ArrowRight, Phone } from 'lucide-react';
 import Image from 'next/image';
 
 const CTASection = ({ organization }: { organization?: any }) => {
-  const phone = organization?.phone || '+91-8085613350';
+  const phone = organization?.phone || '+91-7898753055';
   return (
     <section className="py-20 md:py-28 relative overflow-hidden">
       {/* Background */}

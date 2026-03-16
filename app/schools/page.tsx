@@ -5,6 +5,8 @@ import { getOrganizationDetails, getFeatures } from '@/lib/actions/content.actio
 import SchoolsClient from './SchoolsClient';
 import { constructMetadata } from '@/lib/seo';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata = constructMetadata({
     title: 'For Schools | Sarvtra Labs',
     description: 'Transform your school\'s STEM program with Sarvtra Labs (Sarwatra Labs). Comprehensive robotics curriculum, teacher training, and lab setup for schools.',

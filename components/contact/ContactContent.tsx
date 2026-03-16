@@ -43,10 +43,10 @@ export default function ContactContent({ organization }: { organization: any }) 
         },
         {
             title: 'Call Us',
-            content: organization?.phone || '+91-8085613350',
+            content: organization?.phone || '+91-7898753055',
             subtext: 'Mon-Sat, 10am-6pm',
             iconName: 'Phone',
-            link: `tel:${(organization?.phone || '+91-8085613350').replace(/\s+/g, '')}`
+            link: `tel:${(organization?.phone || '+91-7898753055').replace(/\s+/g, '')}`
         },
         {
             title: 'Office Address',

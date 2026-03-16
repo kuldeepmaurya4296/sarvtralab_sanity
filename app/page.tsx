@@ -11,6 +11,8 @@ import { constructMetadata } from '@/lib/seo';
 import { getHomePageData } from '@/lib/actions/content.actions';
 import { getAllCourses } from '@/lib/actions/course.actions';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata = constructMetadata({
   title: 'Sarvtra Labs - Empowering Next-Gen Innovators',
   description: 'Sarvtra Labs (Sarwatra Labs) is an innovative EduTech platform offering specialized robotics, AI, and STEM education for students, schools, and government initiatives.',

@@ -3,6 +3,8 @@ import ContactContent from '@/components/contact/ContactContent';
 import { constructMetadata } from '@/lib/seo';
 import { getOrganizationDetails } from '@/lib/actions/content.actions';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata = constructMetadata({
     title: 'Contact Us | Sarvtra Labs',
     description: 'Get in touch with Sarvtra Labs (Sarwatra Labs). Have questions about our robotics courses, school partnerships, or AI education? We\'re here to help.',
