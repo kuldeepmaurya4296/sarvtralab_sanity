@@ -96,6 +96,17 @@ export default function CheckoutPage() {
             return;
         }
 
+        // Role-based restrictions
+        if (type === 'course' && user.role !== 'student') {
+            toast.error("Only students can purchase courses. Please login with a student account.");
+            return;
+        }
+
+        if (type === 'plan' && user.role !== 'school') {
+            toast.error("Only schools can purchase partnership plans. Please login with a school account.");
+            return;
+        }
+
         if (!acceptedTerms) {
             toast.error("Please accept the terms and conditions");
             return;

@@ -7,7 +7,7 @@ import { authOptions } from '../auth';
 
 export async function getAllPlans() {
     try {
-        const plans = await sanityClient.fetch(`*[_type == "plan" && status == "active"] | order(createdAt asc)`);
+        const plans = await sanityClient.fetch(`*[_type == "plan" && status == "active"] | order(_createdAt asc)`);
         return cleanSanityDoc(plans);
     } catch (e) {
         console.error("Get All Plans Error:", e);

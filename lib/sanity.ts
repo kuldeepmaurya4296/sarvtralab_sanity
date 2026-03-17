@@ -27,25 +27,31 @@ export const sanityWriteClient = createClient({
  */
 export function cleanSanityDoc(doc: any): any {
     if (!doc) return doc;
+    
+    // Handle arrays
     if (Array.isArray(doc)) return doc.map(cleanSanityDoc);
+    
+    // Only process objects
+    if (typeof doc !== 'object' || doc === null) return doc;
 
     const cleaned: any = {};
 
-    // First pass: extract standard fields
+    // Extracts and cleans standard fields recursively
     for (const [key, value] of Object.entries(doc)) {
         if (key === '_id') {
             cleaned._id = value;
-            cleaned.id = value; // Default id to _id
+            cleaned.id = value;
         } else if (key === '_createdAt') {
             cleaned.createdAt = value;
         } else if (key === '_updatedAt') {
             cleaned.updatedAt = value;
         } else if (!key.startsWith('_')) {
-            cleaned[key] = value;
+            // Recursively clean nested objects or arrays
+            cleaned[key] = cleanSanityDoc(value);
         }
     }
 
-    // Second pass: Ensure _id takes precedence over any field named 'id' in the doc
+    // Ensure id takes precedence from _id
     if (doc._id) {
         cleaned.id = doc._id;
     }

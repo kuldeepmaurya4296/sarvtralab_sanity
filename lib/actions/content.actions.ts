@@ -8,7 +8,7 @@ import { sanityClient, cleanSanityDoc } from '@/lib/sanity';
 
 export async function getOrganizationDetails() {
     try {
-        const org = await sanityClient.fetch(`*[_type == "organization"][0]`);
+        const org = await sanityClient.fetch(`*[_type == "organization"] | order(_updatedAt desc)[0]`);
         return cleanSanityDoc(org);
     } catch (e) {
         console.error("Get Organization Details Error:", e);
@@ -250,7 +250,7 @@ export async function getHomePageData() {
         const [org, features, stats, testimonials, videos, faqs] = await Promise.all([
             getOrganizationDetails(),
             getFeatures(),
-            sanityClient.fetch(`*[_type == "organization"][0].stats`),
+            sanityClient.fetch(`*[_type == "organization"] | order(_updatedAt desc)[0].stats`),
             getTestimonials(),
             getShowcaseVideos(),
             getFAQs()

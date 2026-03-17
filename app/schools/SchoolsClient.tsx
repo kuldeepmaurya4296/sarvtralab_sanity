@@ -23,9 +23,14 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import * as Icons from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { getUserActivePlan } from '@/lib/actions/plan.actions';
+import { toast } from 'sonner';
 
 const IconComponent = ({ name, className }: { name: string; className?: string }) => {
-    const Icon = (Icons as any)[name];
+    if (!name) return null;
+    // Try to normalize icon name (e.g. "graduation-cap" -> "GraduationCap")
+    const normalizedName = name.split('-').map(s => s.charAt(0).toUpperCase() + s.slice(1)).join('');
+    const Icon = (Icons as any)[normalizedName] || (Icons as any)[name];
+    
     if (!Icon) return null;
     return <Icon className={className} />;
 };
@@ -40,7 +45,12 @@ const MAX_VISIBLE_FEATURES = 6;
 
 export default function SchoolsClient({ plans, organization, benefits }: SchoolsClientProps) {
     const phone = organization?.phone || '+91-7898753055';
-    const partnerStudentsStat = organization?.stats?.find((s: any) => s.label.includes('Partner'))?.value || '120+';
+    // More robust stat finding
+    const partnerStat = organization?.stats?.find((s: any) => 
+        s.label?.toLowerCase().includes('partner') || 
+        s.label?.toLowerCase().includes('school')
+    );
+    const partnerStudentsStat = partnerStat?.value || '120+';
 
     const { user } = useAuth();
     const router = useRouter();
@@ -86,6 +96,12 @@ export default function SchoolsClient({ plans, organization, benefits }: Schools
             router.push(`/login?redirect=/checkout/plan/${planId}`);
             return;
         }
+
+        if (user.role !== 'school') {
+            toast.error("Only school accounts can purchase partnership plans. Please log in with a school account.");
+            return;
+        }
+
         router.push(`/checkout/plan/${planId}`);
     };
 

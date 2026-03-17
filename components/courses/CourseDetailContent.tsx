@@ -219,11 +219,30 @@ export default function CourseDetailContent({ course }: CourseDetailContentProps
                                         className="w-full h-12 text-lg font-bold"
                                         disabled={isChecking}
                                         onClick={() => {
-                                            if (user && user.role === 'student' && !(user as any).profileCompleted) {
+                                            if (!user) {
+                                                router.push(`/login?redirect=/checkout/course/${course.id || (course as any).customId || (course as any)._id}`);
+                                                return;
+                                            }
+
+                                            // Only students can enroll in individual courses
+                                            if (user.role !== 'student') {
+                                                toast.error("Only students can purchase individual courses. Please log in with a student account.");
+                                                return;
+                                            }
+
+                                            // Users who are students MUST be linked to a school
+                                            if (!(user as any).schoolId) {
+                                                toast.error("Please specify your school in your profile before enrolling.");
+                                                router.push('/student/dashboard'); // Or direct to profile edit
+                                                return;
+                                            }
+
+                                            if (!user.profileCompleted) {
                                                 toast.error("Please complete your profile first!");
                                                 router.push('/student/dashboard');
                                                 return;
                                             }
+
                                             router.push(`/checkout/course/${course.id || (course as any).customId || (course as any)._id}`);
                                         }}
                                     >
