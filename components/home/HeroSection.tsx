@@ -41,7 +41,7 @@ const HeroSection = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight text-background leading-tight mb-6"
+            className="text-4xl md:text-6xl lg:text-7xl font-extrabold tracking-tight text-background leading-tight mb-6"
           >
             Future-Ready
             <span className="block text-transparent bg-clip-text bg-gradient-to-r from-primary via-accent to-secondary">

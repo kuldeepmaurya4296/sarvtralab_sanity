@@ -71,12 +71,12 @@ export default function AdminCoursesPage() {
                 ...formData,
                 category: formData.category as 'foundation' | 'intermediate' | 'advanced',
                 level: formData.level as 'Beginner' | 'Intermediate' | 'Advanced',
-                totalHours: formData.sessions * 1.5,
+                totalHours: formData.totalHours || (formData.sessions * 1.5),
                 originalPrice: formData.price * 1.5,
                 emiAvailable: true,
                 tags: ['New', 'Featured'],
                 features: ['Live Sessions', 'Projects'],
-                curriculum: [],
+                curriculum: formData.curriculum || [],
                 rating: 0,
                 studentsEnrolled: 0,
                 instructor: 'TBD'
@@ -155,7 +155,7 @@ export default function AdminCoursesPage() {
                     </Button>
                 </div>
 
-                <div className="flex items-center gap-4 bg-card p-4 rounded-lg border shadow-sm">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-4 bg-card p-4 rounded-lg border shadow-sm">
                     <div className="relative w-full max-w-sm">
                         <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                         <Input

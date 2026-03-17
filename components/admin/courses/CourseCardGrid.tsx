@@ -2,9 +2,10 @@
 
 import {
     Clock,
-    FileText,
+    BookOpen,
     Users,
-    Tag,
+    IndianRupee,
+    Calendar,
     MoreVertical,
     Edit,
     Eye,
@@ -57,7 +58,15 @@ export function CourseCardGrid({ courses, onView, onEdit, onDelete }: CourseCard
                         onView(course);
                     }}
                 >
-                    <CardHeader className="relative">
+                    <CardHeader className="relative p-0 overflow-hidden rounded-t-xl">
+                        <div className="aspect-video relative w-full bg-muted">
+                            <img
+                                src={course.image || "/robotics-illustration.jpg"}
+                                alt={course.title}
+                                className="object-cover w-full h-full"
+                            />
+                        </div>
+                        <div className="p-6 pb-0">
                         <div className="absolute top-4 right-4 z-10">
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
@@ -87,28 +96,38 @@ export function CourseCardGrid({ courses, onView, onEdit, onDelete }: CourseCard
                             </Badge>
                         </div>
                         <CardTitle className="line-clamp-1 group-hover:text-primary transition-colors">{course.title}</CardTitle>
-                        <CardDescription>{course.grade} • {course.level}</CardDescription>
+                        <CardDescription>{course.grade} • {course.level} {course.ageGroup && course.ageGroup.replace(/[–—-]/g, '-') !== course.grade.replace(/[–—-]/g, '-') ? `• ${course.ageGroup}` : ''}</CardDescription>
+                        </div>
                     </CardHeader>
                     <CardContent className="flex-1 space-y-4">
                         <p className="text-sm text-muted-foreground line-clamp-2">
                             {course.description}
                         </p>
-                        <div className="grid grid-cols-2 gap-2 text-sm text-muted-foreground">
+                        {course.skillFocus && course.skillFocus.length > 0 && (
+                            <div className="flex flex-wrap gap-1">
+                                {course.skillFocus.slice(0, 3).map((skill: string) => (
+                                    <span key={skill} className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-primary/5 text-primary border border-primary/10">
+                                        {skill}
+                                    </span>
+                                ))}
+                            </div>
+                        )}
+                        <div className="grid grid-cols-2 gap-2 text-[11px] text-muted-foreground">
                             <div className="flex items-center gap-1">
-                                <Clock className="h-3 w-3" />
-                                {course.duration}
+                                <Clock className="h-3 w-3 text-primary" />
+                                {course.totalHours || 0} hrs
                             </div>
                             <div className="flex items-center gap-1">
-                                <FileText className="h-3 w-3" />
-                                {course.sessions} Sessions
+                                <BookOpen className="h-3 w-3 text-primary" />
+                                {course.sessions || 1} Sessions
                             </div>
                             <div className="flex items-center gap-1">
-                                <Users className="h-3 w-3" />
-                                {course.studentsEnrolled} Enrolled
+                                <Users className="h-3 w-3 text-primary" />
+                                {course.studentsEnrolled || 0} students
                             </div>
-                            <div className="flex items-center gap-1">
-                                <Tag className="h-3 w-3" />
-                                ₹{course.price.toLocaleString()}
+                            <div className="flex items-center gap-1 font-bold text-foreground">
+                                <IndianRupee className="h-3 w-3 text-primary" />
+                                ₹{(course.price || 0).toLocaleString()}
                             </div>
                         </div>
                         <div className="flex flex-wrap gap-1 mt-2">

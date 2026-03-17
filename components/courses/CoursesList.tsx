@@ -4,7 +4,7 @@ import { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { Clock, Users, Star, ArrowRight, IndianRupee, Search } from 'lucide-react';
+import { Clock, Users, Star, ArrowRight, IndianRupee, Search, BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import Image from 'next/image';
@@ -81,7 +81,7 @@ const CoursesContent = ({ initialCourses }: CoursesContentProps) => {
             {/* Courses Section */}
             <section className="py-16">
                 <div className="container mx-auto px-4">
-                    <nav className="flex flex-wrap justify-center gap-4 mb-12" aria-label="Course categories">
+                    <nav className="flex overflow-x-auto no-scrollbar whitespace-nowrap lg:justify-center gap-4 mb-12 pb-2" aria-label="Course categories">
                         <Link
                             href="/courses"
                             aria-current={activeCategory === 'all' ? 'page' : undefined}
@@ -127,7 +127,7 @@ const CoursesContent = ({ initialCourses }: CoursesContentProps) => {
                             >
                                 <div className="relative h-48 bg-muted overflow-hidden">
                                     <Image
-                                        src="/robotics-illustration.jpg" // Keeping static image for now as DB might not have real URLs
+                                        src={course.image || "/robotics-illustration.jpg"}
                                         alt={`Cover image for ${course.title}`}
                                         fill
                                         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
@@ -157,24 +157,38 @@ const CoursesContent = ({ initialCourses }: CoursesContentProps) => {
                                     <h3 className="text-lg font-semibold text-foreground mb-2 line-clamp-2">
                                         {course.title}
                                     </h3>
-                                    <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+                                    {course.ageGroup && course.ageGroup.replace(/[–—-]/g, '-') !== course.grade.replace(/[–—-]/g, '-') && (
+                                        <span className="inline-block px-2 py-0.5 rounded-full text-[10px] font-semibold bg-violet-100 text-violet-700 mb-2">
+                                            {course.ageGroup}
+                                        </span>
+                                    )}
+                                    <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
                                         {course.description}
                                     </p>
+                                    {course.skillFocus && course.skillFocus.length > 0 && (
+                                        <div className="flex flex-wrap gap-1 mb-3">
+                                            {course.skillFocus.slice(0, 3).map((skill: string) => (
+                                                <span key={skill} className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-primary/5 text-primary border border-primary/10">
+                                                    {skill}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    )}
 
-                                    <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
-                                        <div className="flex items-center gap-1">
-                                            <Clock className="w-4 h-4" />
-                                            <span>{course.totalHours || 0} hrs</span>
-                                        </div>
-                                        <div className="flex items-center gap-1">
-                                            <Users className="w-4 h-4" />
-                                            <span>{(course.studentsEnrolled || 0).toLocaleString()}</span>
-                                        </div>
-                                        <div className="flex items-center gap-1">
-                                            <Star className="w-4 h-4 fill-orange-400 text-orange-400" />
-                                            <span>{course.rating || 'N/A'}</span>
-                                        </div>
-                                    </div>
+                                     <div className="flex items-center justify-between text-sm text-muted-foreground mb-4">
+                                         <div className="flex items-center gap-1">
+                                             <Clock className="w-4 h-4 text-primary" />
+                                             <span>{course.totalHours || 0} hrs</span>
+                                         </div>
+                                         <div className="flex items-center gap-1">
+                                             <BookOpen className="w-4 h-4 text-primary" />
+                                             <span>{course.sessions || 1} Sessions</span>
+                                         </div>
+                                         <div className="flex items-center gap-1">
+                                             <Users className="w-4 h-4 text-primary" />
+                                             <span>{(course.studentsEnrolled || 0).toLocaleString()}</span>
+                                         </div>
+                                     </div>
 
                                     <div className="flex items-center justify-between pt-4 border-t">
                                         <div>

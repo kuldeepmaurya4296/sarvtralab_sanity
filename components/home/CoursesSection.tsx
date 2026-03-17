@@ -1,7 +1,7 @@
 'use client';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Clock, Users, Star, ArrowRight, IndianRupee } from 'lucide-react';
+import { Clock, Users, Star, ArrowRight, IndianRupee, BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
 import { getAllCourses } from '@/lib/actions/course.actions';
@@ -25,8 +25,12 @@ interface CourseData {
   emiAvailable: boolean;
   emiAmount?: number;
   totalHours: number;
+  sessions?: number;
   studentsEnrolled: number;
   rating: number;
+  ageGroup?: string;
+  skillFocus?: string[];
+  image?: string;
 }
 
 interface CoursesSectionProps {
@@ -108,7 +112,7 @@ const CoursesSection = ({ courses }: CoursesSectionProps) => {
               {/* Image */}
               <div className="relative w-full aspect-video overflow-hidden rounded-t-2xl">
                 <Image
-                  src="/robotics-illustration.jpg"
+                  src={course.image || "/robotics-illustration.jpg"}
                   alt={course.title}
                   fill
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
@@ -134,38 +138,52 @@ const CoursesSection = ({ courses }: CoursesSectionProps) => {
               </div>
 
               {/* Content */}
-              <div className="p-8">
+              <div className="p-5 md:p-8">
                 <h3 className="text-xl font-bold text-foreground mb-3 line-clamp-2">
                   {course.title}
                 </h3>
-                <p className="text-base text-muted-foreground mb-6 line-clamp-2 leading-relaxed">
+                {course.ageGroup && course.ageGroup.replace(/[–—-]/g, '-') !== course.grade.replace(/[–—-]/g, '-') && (
+                  <span className="inline-block px-2 py-0.5 rounded-full text-[10px] font-semibold bg-violet-100 text-violet-700 mb-2">
+                    {course.ageGroup}
+                  </span>
+                )}
+                <p className="text-base text-muted-foreground mb-4 line-clamp-2 leading-relaxed">
                   {course.description}
                 </p>
+                {course.skillFocus && course.skillFocus.length > 0 && (
+                  <div className="flex flex-wrap gap-1 mb-4">
+                    {course.skillFocus.slice(0, 3).map((skill: string) => (
+                      <span key={skill} className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-primary/5 text-primary border border-primary/10">
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
+                )}
 
                 {/* Meta */}
-                <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
-                  <div className="flex items-center gap-1">
-                    <Clock className="w-4 h-4" />
-                    <span>{course.totalHours} hrs</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Users className="w-4 h-4" />
-                    <span>{course.studentsEnrolled.toLocaleString()}</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Star className="w-4 h-4 fill-secondary text-secondary" />
-                    <span>{course.rating}</span>
-                  </div>
-                </div>
+                 <div className="flex items-center justify-between text-sm text-muted-foreground mb-4">
+                   <div className="flex items-center gap-1">
+                     <Clock className="w-4 h-4 text-primary" />
+                     <span>{course.totalHours || 0}h</span>
+                   </div>
+                   <div className="flex items-center gap-1">
+                     <BookOpen className="w-4 h-4 text-primary" />
+                     <span>{course.sessions || 1} Sessions</span>
+                   </div>
+                   <div className="flex items-center gap-1">
+                     <Users className="w-4 h-4 text-primary" />
+                     <span>{(course.studentsEnrolled || 0).toLocaleString()}</span>
+                   </div>
+                 </div>
 
                 {/* Price */}
                 <div className="flex items-center justify-between pt-4 border-t">
                   <div>
                     <span className="text-2xl font-bold text-foreground">
-                      ₹{course.price.toLocaleString()}
+                      ₹{(course.price || 0).toLocaleString()}
                     </span>
                     <span className="text-sm text-muted-foreground line-through ml-2">
-                      ₹{course.originalPrice.toLocaleString()}
+                      ₹{(course.originalPrice || 0).toLocaleString()}
                     </span>
                   </div>
                   <Link href={`/courses/${course.id || course.customId || course._id}`}>
@@ -193,7 +211,7 @@ const CoursesSection = ({ courses }: CoursesSectionProps) => {
           className="text-center mt-12"
         >
           <Link href="/courses">
-            <Button size="lg" className="btn-hero-secondary hover:scale-105 hover:shadow-lg transition-all text-lg px-8 py-6 rounded-xl">
+            <Button size="lg" className="btn-hero-secondary hover:scale-105 hover:shadow-lg transition-all text-base md:text-lg px-6 md:px-8 py-4 md:py-6 rounded-xl">
               View All Courses
               <ArrowRight className="w-5 h-5 ml-2 transition-transform group-hover:translate-x-1" />
             </Button>
