@@ -87,7 +87,6 @@ export function CourseFormSheet({ open, onOpenChange, initialData, mode, onSubmi
         category: 'foundation',
         level: 'Beginner',
         image: '/placeholder.svg',
-        ageGroup: '',
         skillFocus: [] as string[],
         safetyRules: [] as string[],
         learningOutcomes: [] as string[],
@@ -122,7 +121,6 @@ export function CourseFormSheet({ open, onOpenChange, initialData, mode, onSubmi
                     category: initialData.category || 'foundation',
                     level: initialData.level || 'Beginner',
                     image: initialData.image || '/placeholder.svg',
-                    ageGroup: initialData.ageGroup || '',
                     skillFocus: initialData.skillFocus || [],
                     safetyRules: initialData.safetyRules || [],
                     learningOutcomes: initialData.learningOutcomes || [],
@@ -415,10 +413,6 @@ export function CourseFormSheet({ open, onOpenChange, initialData, mode, onSubmi
                                         <div className="space-y-2">
                                             <Label htmlFor="grade">Target Grade</Label>
                                             <Input id="grade" value={formData.grade} onChange={(e) => setFormData({ ...formData, grade: e.target.value })} placeholder="e.g. Class 4-6" />
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label htmlFor="ageGroup">Age Group</Label>
-                                            <Input id="ageGroup" value={formData.ageGroup} onChange={(e) => setFormData({ ...formData, ageGroup: e.target.value })} placeholder="e.g. Class 4–6" />
                                         </div>
                                     </div>
                                     <div className="grid grid-cols-2 gap-4">

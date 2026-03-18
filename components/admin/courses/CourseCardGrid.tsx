@@ -96,7 +96,7 @@ export function CourseCardGrid({ courses, onView, onEdit, onDelete }: CourseCard
                             </Badge>
                         </div>
                         <CardTitle className="line-clamp-1 group-hover:text-primary transition-colors">{course.title}</CardTitle>
-                        <CardDescription>{course.grade} • {course.level} {course.ageGroup && course.ageGroup.replace(/[–—-]/g, '-') !== course.grade.replace(/[–—-]/g, '-') ? `• ${course.ageGroup}` : ''}</CardDescription>
+                        <CardDescription>{course.grade} • {course.level}</CardDescription>
                         </div>
                     </CardHeader>
                     <CardContent className="flex-1 space-y-4">

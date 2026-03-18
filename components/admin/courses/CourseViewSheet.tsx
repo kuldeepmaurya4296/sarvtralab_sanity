@@ -69,11 +69,6 @@ export function CourseViewSheet({ course, open, onOpenChange, onEdit, onDelete }
                                 <Badge variant={course.level === 'Advanced' ? 'destructive' : course.level === 'Intermediate' ? 'default' : 'secondary'}>
                                     {course.level}
                                 </Badge>
-                                {course.ageGroup && course.ageGroup.replace(/[–—-]/g, '-') !== (course.grade || '').replace(/[–—-]/g, '-') && (
-                                    <Badge variant="outline" className="bg-violet-50 text-violet-700 border-violet-200">
-                                        {course.ageGroup}
-                                    </Badge>
-                                )}
                             </div>
                             <h2 className="text-2xl font-bold mb-2">{course.title}</h2>
                             <p className="text-muted-foreground text-sm leading-relaxed">

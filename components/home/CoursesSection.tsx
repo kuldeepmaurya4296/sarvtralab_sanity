@@ -28,7 +28,6 @@ interface CourseData {
   sessions?: number;
   studentsEnrolled: number;
   rating: number;
-  ageGroup?: string;
   skillFocus?: string[];
   image?: string;
 }
@@ -107,7 +106,7 @@ const CoursesSection = ({ courses }: CoursesSectionProps) => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
-              className="course-card group hover:-translate-y-2 hover:shadow-2xl transition-all duration-300"
+              className="course-card group hover:-translate-y-2 hover:shadow-2xl transition-all duration-300 flex flex-col h-full"
             >
               {/* Image */}
               <div className="relative w-full aspect-video overflow-hidden rounded-t-2xl">
@@ -138,66 +137,65 @@ const CoursesSection = ({ courses }: CoursesSectionProps) => {
               </div>
 
               {/* Content */}
-              <div className="p-5 md:p-8">
-                <h3 className="text-xl font-bold text-foreground mb-3 line-clamp-2">
-                  {course.title}
-                </h3>
-                {course.ageGroup && course.ageGroup.replace(/[–—-]/g, '-') !== course.grade.replace(/[–—-]/g, '-') && (
-                  <span className="inline-block px-2 py-0.5 rounded-full text-[10px] font-semibold bg-violet-100 text-violet-700 mb-2">
-                    {course.ageGroup}
-                  </span>
-                )}
-                <p className="text-base text-muted-foreground mb-4 line-clamp-2 leading-relaxed">
-                  {course.description}
-                </p>
-                {course.skillFocus && course.skillFocus.length > 0 && (
-                  <div className="flex flex-wrap gap-1 mb-4">
-                    {course.skillFocus.slice(0, 3).map((skill: string) => (
-                      <span key={skill} className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-primary/5 text-primary border border-primary/10">
-                        {skill}
-                      </span>
-                    ))}
-                  </div>
-                )}
+              <div className="p-5 md:p-8 flex-1 flex flex-col">
+                <div className="flex-1">
+                  <h3 className="text-xl font-bold text-foreground mb-3 line-clamp-2">
+                    {course.title}
+                  </h3>
+                  <p className="text-base text-muted-foreground mb-4 line-clamp-2 leading-relaxed">
+                    {course.description}
+                  </p>
+                  {course.skillFocus && course.skillFocus.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mb-4">
+                      {course.skillFocus.slice(0, 3).map((skill: string) => (
+                        <span key={skill} className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-primary/5 text-primary border border-primary/10">
+                          {skill}
+                        </span>
+                      ))}
+                    </div>
+                  )}
 
-                {/* Meta */}
-                 <div className="flex items-center justify-between text-sm text-muted-foreground mb-4">
-                   <div className="flex items-center gap-1">
-                     <Clock className="w-4 h-4 text-primary" />
-                     <span>{course.totalHours || 0}h</span>
-                   </div>
-                   <div className="flex items-center gap-1">
-                     <BookOpen className="w-4 h-4 text-primary" />
-                     <span>{course.sessions || 1} Sessions</span>
-                   </div>
-                   <div className="flex items-center gap-1">
-                     <Users className="w-4 h-4 text-primary" />
-                     <span>{(course.studentsEnrolled || 0).toLocaleString()}</span>
-                   </div>
-                 </div>
-
-                {/* Price */}
-                <div className="flex items-center justify-between pt-4 border-t">
-                  <div>
-                    <span className="text-2xl font-bold text-foreground">
-                      ₹{(course.price || 0).toLocaleString()}
-                    </span>
-                    <span className="text-sm text-muted-foreground line-through ml-2">
-                      ₹{(course.originalPrice || 0).toLocaleString()}
-                    </span>
+                  {/* Meta */}
+                  <div className="flex items-center justify-between text-sm text-muted-foreground mb-4">
+                    <div className="flex items-center gap-1">
+                      <Clock className="w-4 h-4 text-primary" />
+                      <span>{course.totalHours || 0}h</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <BookOpen className="w-4 h-4 text-primary" />
+                      <span>{course.sessions || 1} Sessions</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Users className="w-4 h-4 text-primary" />
+                      <span>{(course.studentsEnrolled || 0).toLocaleString()}</span>
+                    </div>
                   </div>
-                  <Link href={`/courses/${course.id || course.customId || course._id}`}>
-                    <Button size="sm" variant="outline" className="gap-1 hover:scale-105 transition-all">
-                      View <ArrowRight className="w-4 h-4" />
-                    </Button>
-                  </Link>
                 </div>
 
-                {course.emiAvailable && (
-                  <p className="text-xs text-success mt-2">
-                    EMI from ₹{course.emiAmount?.toLocaleString()}/month
-                  </p>
-                )}
+                {/* Price & Action */}
+                <div className="mt-6">
+                  <div className="flex items-center justify-between pt-4 border-t">
+                    <div>
+                      <span className="text-2xl font-bold text-foreground">
+                        ₹{(course.price || 0).toLocaleString()}
+                      </span>
+                      <span className="text-sm text-muted-foreground line-through ml-2">
+                        ₹{(course.originalPrice || 0).toLocaleString()}
+                      </span>
+                    </div>
+                    <Link href={`/courses/${course.id || course.customId || course._id}`}>
+                      <Button size="sm" variant="outline" className="gap-1 hover:scale-105 transition-all">
+                        View <ArrowRight className="w-4 h-4" />
+                      </Button>
+                    </Link>
+                  </div>
+
+                  {course.emiAvailable && (
+                    <p className="text-xs text-success mt-2">
+                      EMI from ₹{course.emiAmount?.toLocaleString()}/month
+                    </p>
+                  )}
+                </div>
               </div>
             </motion.div>
           ))}

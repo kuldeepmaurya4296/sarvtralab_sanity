@@ -95,11 +95,6 @@ export default function CourseDetailContent({ course }: CourseDetailContentProps
                                     }`}>
                                     {course.grade} • {course.level}
                                 </span>
-                                {course.ageGroup && course.ageGroup.replace(/[–—-]/g, '-') !== course.grade.replace(/[–—-]/g, '-') && (
-                                    <span className="px-4 py-2 rounded-full text-sm font-semibold bg-violet-100 text-violet-700">
-                                        {course.ageGroup}
-                                    </span>
-                                )}
                             </div>
 
                             <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-4">

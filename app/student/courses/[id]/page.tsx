@@ -120,14 +120,15 @@ export default function CoursePlayerPage() {
     };
 
     const handleMarkComplete = async () => {
-        if (!enrollmentId || !activeLesson || isMarkingComplete) return;
+        if (!enrollmentId || !activeLesson || !activeLesson.id || isMarkingComplete) return;
 
         setIsMarkingComplete(true);
         try {
-            const res = await markLessonComplete(enrollmentId, activeLesson.id);
+            const lessonId = activeLesson.id || activeLesson.lessonId || '';
+            const res = await markLessonComplete(enrollmentId, lessonId);
             if (res.success) {
-                if (!completedLessonIds.includes(activeLesson.id)) {
-                    setCompletedLessonIds(prev => [...prev, activeLesson.id]);
+                if (!completedLessonIds.includes(lessonId)) {
+                    setCompletedLessonIds(prev => [...prev, lessonId]);
                 }
                 toast.success("Lesson marked as complete!");
                 nextLesson();
@@ -161,8 +162,8 @@ export default function CoursePlayerPage() {
         return (
             <div className="p-4 space-y-4 pb-20">
                 <Accordion type="single" collapsible defaultValue={course.curriculum[0]?.id} className="w-full">
-                    {course.curriculum.map((module) => (
-                        <AccordionItem key={module.id} value={module.id} className="border-b-0 mb-2">
+                    {course.curriculum.map((module, mIdx) => (
+                        <AccordionItem key={module.id || module.moduleId || mIdx} value={module.id || module.moduleId || String(mIdx)} className="border-b-0 mb-2">
                             <AccordionTrigger className="hover:no-underline py-2 px-3 rounded-lg hover:bg-muted/50 data-[state=open]:bg-muted/50">
                                 <div className="text-left text-sm">
                                     <div className="font-semibold">{module.title}</div>
@@ -171,18 +172,18 @@ export default function CoursePlayerPage() {
                             </AccordionTrigger>
                             <AccordionContent className="pt-1 pb-2">
                                 <div className="space-y-1 mt-1 pl-2">
-                                    {module.lessons.map((lesson) => (
+                                    {module.lessons.map((lesson, lIdx) => (
                                         <button
-                                            key={lesson.id}
+                                            key={lesson.id || lesson.lessonId || lIdx}
                                             onClick={() => handleLessonSelect(lesson)}
                                             className={`w-full flex items-center gap-3 p-2 rounded-lg text-sm transition-colors text-left
                                             ${activeLesson?.id === lesson.id ? 'bg-primary/10 text-primary font-medium' : 'hover:bg-muted text-muted-foreground'}
                                         `}
                                         >
-                                            {completedLessonIds.includes(lesson.id) ? (
+                                            {completedLessonIds.includes(lesson.id || lesson.lessonId || '') ? (
                                                 <CheckCircle className="w-4 h-4 text-green-500 shrink-0 fill-green-500/10" />
                                             ) : (
-                                                lesson.type === 'video' ? <Play className="w-4 h-4 shrink-0" /> : <FileText className="w-4 h-4 shrink-0" />
+                                                lesson.lessonType === 'video' ? <Play className="w-4 h-4 shrink-0" /> : <FileText className="w-4 h-4 shrink-0" />
                                             )}
                                             <span className="line-clamp-1">{lesson.title}</span>
                                             <span className="ml-auto text-xs opacity-70 whitespace-nowrap">{lesson.duration}</span>
@@ -276,7 +277,7 @@ export default function CoursePlayerPage() {
                         className={`flex-1 flex flex-col bg-card border rounded-xl overflow-hidden shadow-sm transition-all duration-300 ${isFullscreen ? 'fixed inset-0 z-[100] rounded-none border-none' : 'relative'}`}
                     >
                         <div className="relative flex-1 bg-black flex items-center justify-center">
-                            {activeLesson?.type === 'video' && activeLesson.videoUrl ? (
+                            {activeLesson?.lessonType === 'video' && activeLesson.videoUrl ? (
                                 <iframe
                                     src={activeLesson.videoUrl}
                                     title={activeLesson.title}
@@ -289,8 +290,8 @@ export default function CoursePlayerPage() {
                                     <FileText className="w-16 h-16 mx-auto mb-4 opacity-50" />
                                     <h3 className="text-lg sm:text-xl font-semibold mb-2">{activeLesson?.title}</h3>
                                     <p className="text-sm text-gray-400 max-w-md mx-auto">
-                                        This is a {activeLesson?.type} lesson.
-                                        {activeLesson?.type === 'project' && " Follow the instructions in the description below."}
+                                        This is a {activeLesson?.lessonType} lesson.
+                                        {activeLesson?.lessonType === 'project' && " Follow the instructions in the description below."}
                                     </p>
                                 </div>
                             )}

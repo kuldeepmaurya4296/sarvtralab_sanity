@@ -68,7 +68,6 @@ export interface Course {
     features?: string[];
 
     // New structured course content fields
-    ageGroup?: string;
     skillFocus?: string[];
     materialsRequired?: MaterialCategory[];
     safetyRules?: string[];

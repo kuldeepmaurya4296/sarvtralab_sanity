@@ -10,7 +10,6 @@ export default defineType({
         defineField({ name: 'title', title: 'Title', type: 'string', validation: r => r.required() }),
         defineField({ name: 'description', title: 'Description', type: 'text' }),
         defineField({ name: 'grade', title: 'Grade', type: 'string' }),
-        defineField({ name: 'ageGroup', title: 'Age Group', type: 'string', description: 'e.g. Class 4–6' }),
         defineField({ name: 'skillFocus', title: 'Skill Focus', type: 'array', of: [{ type: 'string' }], description: 'e.g. Creativity, basic circuits, logical thinking' }),
         defineField({ name: 'duration', title: 'Duration', type: 'string' }),
         defineField({ name: 'sessions', title: 'Sessions', type: 'number' }),
