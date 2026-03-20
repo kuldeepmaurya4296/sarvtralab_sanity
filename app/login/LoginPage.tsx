@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
@@ -15,8 +15,18 @@ export default function LoginPage() {
     const [showPassword, setShowPassword] = useState(false);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [error, setError] = useState('');
+    const [error, setError] = useState(searchParams.get('error') === 'SessionRequired' ? 'Session expired. Please sign in again.' : '');
     const [isLoading, setIsLoading] = useState(false);
+
+    // Handle standard NextAuth error codes
+    const authError = searchParams.get('error');
+    useEffect(() => {
+        if (authError === 'SessionRequired') {
+            setError('Your session has expired. Please sign in again.');
+        } else if (authError === 'Default' || authError === 'Configuration') {
+            setError('An authentication error occurred. Please try clearing your browser cookies.');
+        }
+    }, [authError]);
 
     const { login } = useAuth();
 

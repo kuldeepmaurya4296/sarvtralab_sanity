@@ -10,10 +10,19 @@ import { NotificationProvider } from '@/context/NotificationContext';
 import { SessionProvider } from 'next-auth/react';
 
 export default function Providers({ children }: { children: React.ReactNode }) {
-    const [queryClient] = useState(() => new QueryClient());
+    const [queryClient] = useState(() => new QueryClient({
+        defaultOptions: {
+            queries: {
+                staleTime: 1000 * 60 * 5, // 5 minutes
+                gcTime: 1000 * 60 * 30, // 30 minutes
+                refetchOnWindowFocus: false, // Prevents loading every time user switches window back
+                retry: 1,
+            },
+        },
+    }));
 
     return (
-        <SessionProvider>
+        <SessionProvider refetchOnWindowFocus={false}>
             <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
                 <QueryClientProvider client={queryClient}>
                     <AuthProvider>
